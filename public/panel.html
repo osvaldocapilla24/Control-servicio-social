@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Prestador | Servicio Social</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <main class="page">
+        <section class="card wide">
+            <div class="header">
+                <div class="logo">BUAP</div>
+                <h1>Panel del Prestador</h1>
+                <p>Consulta tus horas, registra entradas, salidas y agrega horas manualmente.</p>
+            </div>
+
+            <div class="actions-top">
+                <a href="registro.html" class="link small-link">Registrarme</a>
+                <a href="profesor.html" class="link small-link">Ingeniero</a>
+            </div>
+
+            <div class="form">
+                <label for="prestadorSelect">Prestador</label>
+                <select id="prestadorSelect">
+                    <option value="">Selecciona tu nombre</option>
+                </select>
+
+                <label for="actividad">Actividad realizada</label>
+                <input type="text" id="actividad" placeholder="Ejemplo: Revisión de equipos">
+
+                <div class="buttons">
+                    <button id="btnEntrada">Registrar entrada</button>
+                    <button id="btnSalida" class="danger">Registrar salida</button>
+                </div>
+            </div>
+            <hr>
+
+            <h2>Agregar registro manual</h2>
+            <p>Usa esta opción para capturar días anteriores o corregir horarios.</p>
+
+            <div class="form">
+                <label for="fechaManual">Fecha</label>
+                <input type="date" id="fechaManual">
+
+                <label for="entradaManual">Hora entrada</label>
+                <input type="time" id="entradaManual">
+
+                <label for="salidaManual">Hora salida</label>
+                <input type="time" id="salidaManual">
+
+                <label for="actividadManual">Actividad realizada</label>
+                <input type="text" id="actividadManual" placeholder="Ejemplo: Mantenimiento preventivo">
+
+                <button id="btnRegistroManual" class="secondary-btn">Guardar registro manual</button>
+            </div>
+
+            <p id="mensaje" class="mensaje"></p>
+
+            <section id="resumen" class="summary hidden">
+                <h2>Resumen personal</h2>
+
+                <div class="stats">
+                    <div>
+                        <span>Horas acumuladas</span>
+                        <strong id="horasAcumuladas">0</strong>
+                    </div>
+
+                    <div>
+                        <span>Horas faltantes</span>
+                        <strong id="horasFaltantes">0</strong>
+                    </div>
+
+                    <div>
+                        <span>Horario</span>
+                        <strong id="horarioTexto">---</strong>
+                    </div>
+                </div>
+
+                <h3>Últimos registros</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Entrada</th>
+                            <th>Salida</th>
+                            <th>Horas</th>
+                            <th>Actividad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaRegistros"></tbody>
+                </table>
+            </section>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

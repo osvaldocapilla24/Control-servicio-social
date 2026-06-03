@@ -1,103 +1,40 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Horas | Servicio Social</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio | Control de Servicio Social</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-    <main class="page">
-        <section class="card wide">
-            <div class="header">
-                <div class="logo">BUAP</div>
-                <h1>Control de Horas de Servicio Social</h1>
-                <p>Selecciona tu nombre y registra tu entrada o salida.</p>
-            </div>
+  <main class="page">
+    <section class="card">
+      <div class="header">
+        <div class="logo">BUAP</div>
+        <h1>Control de Horas de Servicio Social</h1>
+        <p>Ingresa con tu nombre o matrícula para consultar y registrar tus horas.</p>
+      </div>
 
-            <div class="actions-top">
-                <a href="registro.html" class="link small-link">Registrarme</a>
-                <a href="profesor.html" class="link small-link">Ingeniero</a>
-            </div>
+      <form id="formAcceso" class="form">
+        <label for="busquedaPrestador">Nombre o matrícula</label>
+        <input 
+          type="text" 
+          id="busquedaPrestador" 
+          required
+        >
 
-            <div class="form">
-                <label for="prestadorSelect">Prestador</label>
-                <select id="prestadorSelect">
-                    <option value="">Selecciona tu nombre</option>
-                </select>
+        <button type="submit">INGRESAR</button>
+      </form>
 
-                <label for="actividad">Actividad realizada</label>
-                <input type="text" id="actividad" placeholder="Ejemplo: Revisión de equipos">
+      <p id="mensajeAcceso" class="mensaje"></p>
 
-                <div class="buttons">
-                    <button id="btnEntrada">Registrar entrada</button>
-                    <button id="btnSalida" class="danger">Registrar salida</button>
-                </div>
-            </div>
-            <hr>
+      <div class="actions-top menu-inicio">
+        <a href="registro.html" class="link small-link">Registrarme</a>
+        <a href="profesor.html" class="link small-link">Acceso responsable</a>
+      </div>
+    </section>
+  </main>
 
-            <h2>Agregar registro manual</h2>
-            <p>Usa esta opción para capturar días anteriores o corregir horarios.</p>
-
-            <div class="form">
-                <label for="fechaManual">Fecha</label>
-                <input type="date" id="fechaManual">
-
-                <label for="entradaManual">Hora entrada</label>
-                <input type="time" id="entradaManual">
-
-                <label for="salidaManual">Hora salida</label>
-                <input type="time" id="salidaManual">
-
-                <label for="actividadManual">Actividad realizada</label>
-                <input type="text" id="actividadManual" placeholder="Ejemplo: Mantenimiento preventivo">
-
-                <button id="btnRegistroManual" class="secondary-btn">Guardar registro manual</button>
-            </div>
-
-            <p id="mensaje" class="mensaje"></p>
-
-            <section id="resumen" class="summary hidden">
-                <h2>Resumen personal</h2>
-
-                <div class="stats">
-                    <div>
-                        <span>Horas acumuladas</span>
-                        <strong id="horasAcumuladas">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Horas faltantes</span>
-                        <strong id="horasFaltantes">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Horario</span>
-                        <strong id="horarioTexto">---</strong>
-                    </div>
-                </div>
-
-                <h3>Últimos registros</h3>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Entrada</th>
-                            <th>Salida</th>
-                            <th>Horas</th>
-                            <th>Actividad</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaRegistros"></tbody>
-                </table>
-            </section>
-        </section>
-    </main>
-
-    <script src="app.js"></script>
+  <script src="inicio.js"></script>
 </body>
-
 </html>
