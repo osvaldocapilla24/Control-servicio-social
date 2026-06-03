@@ -254,6 +254,45 @@ app.post("/api/salida", (req, res) => {
   );
 });
 
+app.post("/api/registro-manual", (req, res) => {
+  const { prestador_id, fecha, hora_entrada, hora_salida, actividad } = req.body;
+
+  if (!prestador_id || !fecha || !hora_entrada || !hora_salida) {
+    return res.status(400).json({
+      mensaje: "Prestador, fecha, hora de entrada y hora de salida son obligatorios."
+    });
+  }
+
+  const horas = calcularHoras(hora_entrada, hora_salida);
+
+  if (horas <= 0) {
+    return res.status(400).json({
+      mensaje: "La hora de salida debe ser mayor que la hora de entrada."
+    });
+  }
+
+  db.run(
+    `
+    INSERT INTO registros
+    (prestador_id, fecha, hora_entrada, hora_salida, horas, actividad)
+    VALUES (?, ?, ?, ?, ?, ?)
+    `,
+    [prestador_id, fecha, hora_entrada, hora_salida, horas, actividad || ""],
+    function (error) {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al guardar el registro manual."
+        });
+      }
+
+      res.json({
+        mensaje: "Registro manual guardado correctamente.",
+        horas
+      });
+    }
+  );
+});
+
 app.get("/api/resumen/:id", (req, res) => {
   const prestadorId = req.params.id;
 
@@ -312,6 +351,7 @@ app.get("/api/resumen/:id", (req, res) => {
     }
   );
 });
+
 
 app.get("/api/prueba", (req, res) => {
   res.json({

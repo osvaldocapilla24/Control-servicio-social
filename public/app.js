@@ -10,6 +10,59 @@ const horasFaltantes = document.getElementById("horasFaltantes");
 const horarioTexto = document.getElementById("horarioTexto");
 const tablaRegistros = document.getElementById("tablaRegistros");
 
+const fechaManual = document.getElementById("fechaManual");
+const entradaManual = document.getElementById("entradaManual");
+const salidaManual = document.getElementById("salidaManual");
+const actividadManual = document.getElementById("actividadManual");
+const btnRegistroManual = document.getElementById("btnRegistroManual");
+
+async function guardarRegistroManual() {
+  const prestador_id = prestadorSelect.value;
+
+  if (!prestador_id) {
+    mostrarMensaje("Selecciona tu nombre antes de guardar un registro manual.", "error");
+    return;
+  }
+
+  if (!fechaManual.value || !entradaManual.value || !salidaManual.value) {
+    mostrarMensaje("Completa fecha, hora de entrada y hora de salida.", "error");
+    return;
+  }
+
+  const respuesta = await fetch("/api/registro-manual", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      prestador_id,
+      fecha: fechaManual.value,
+      hora_entrada: entradaManual.value,
+      hora_salida: salidaManual.value,
+      actividad: actividadManual.value.trim()
+    })
+  });
+
+  const resultado = await respuesta.json();
+
+  if (!respuesta.ok) {
+    mostrarMensaje(resultado.mensaje, "error");
+    return;
+  }
+
+  mostrarMensaje(
+    `${resultado.mensaje} Horas agregadas: ${Number(resultado.horas).toFixed(2)}`,
+    "success"
+  );
+
+  fechaManual.value = "";
+  entradaManual.value = "";
+  salidaManual.value = "";
+  actividadManual.value = "";
+
+  cargarResumen();
+}
+
 async function cargarPrestadores() {
   const respuesta = await fetch("/api/prestadores");
   const prestadores = await respuesta.json();
@@ -131,5 +184,6 @@ function mostrarMensaje(texto, tipo) {
 prestadorSelect.addEventListener("change", cargarResumen);
 btnEntrada.addEventListener("click", registrarEntrada);
 btnSalida.addEventListener("click", registrarSalida);
+btnRegistroManual.addEventListener("click", guardarRegistroManual);
 
 cargarPrestadores();
