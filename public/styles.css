@@ -119,3 +119,106 @@ button:hover,
 .error {
   color: #b00020;
 }
+
+.card.wide {
+  max-width: 1100px;
+}
+
+.actions-top {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.small-link {
+  width: auto;
+  margin-top: 0;
+  background: #c9a227;
+  color: #1e1e1e;
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.danger {
+  background: #9b1c31;
+}
+
+.summary {
+  margin-top: 25px;
+}
+
+.hidden {
+  display: none;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.stats div {
+  background: #f3f6fa;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+}
+
+.stats span {
+  display: block;
+  font-size: 14px;
+  color: #555;
+}
+
+.stats strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px;
+  color: #003b71;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: white;
+}
+
+th {
+  background: #003b71;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+td {
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+}
+
+tr:hover {
+  background: #f3f6fa;
+}
+
+@media (max-width: 768px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}

@@ -95,6 +95,224 @@ app.post("/api/prestadores", (req, res) => {
   );
 });
 
+function obtenerHoraActual() {
+  return new Date().toTimeString().split(" ")[0].substring(0, 5);
+}
+
+function calcularHoras(horaEntrada, horaSalida) {
+  const [h1, m1] = horaEntrada.split(":").map(Number);
+  const [h2, m2] = horaSalida.split(":").map(Number);
+
+  const entrada = h1 * 60 + m1;
+  const salida = h2 * 60 + m2;
+
+  const diferenciaMinutos = salida - entrada;
+
+  if (diferenciaMinutos <= 0) {
+    return 0;
+  }
+
+  return diferenciaMinutos / 60;
+}
+
+app.get("/api/prestadores", (req, res) => {
+  db.all(
+    `
+    SELECT id, nombre, matricula, carrera, horario, horas_requeridas
+    FROM prestadores
+    ORDER BY nombre ASC
+    `,
+    [],
+    (error, rows) => {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al obtener prestadores."
+        });
+      }
+
+      res.json(rows);
+    }
+  );
+});
+
+app.post("/api/entrada", (req, res) => {
+  const { prestador_id, actividad } = req.body;
+
+  if (!prestador_id) {
+    return res.status(400).json({
+      mensaje: "Debes seleccionar un prestador."
+    });
+  }
+
+  const fecha = obtenerFechaActual();
+  const horaEntrada = obtenerHoraActual();
+
+  db.get(
+    `
+    SELECT * FROM registros
+    WHERE prestador_id = ?
+    AND fecha = ?
+    AND hora_salida IS NULL
+    `,
+    [prestador_id, fecha],
+    (error, registroAbierto) => {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al verificar registro."
+        });
+      }
+
+      if (registroAbierto) {
+        return res.status(409).json({
+          mensaje: "Ya tienes una entrada registrada sin salida."
+        });
+      }
+
+      db.run(
+        `
+        INSERT INTO registros 
+        (prestador_id, fecha, hora_entrada, actividad)
+        VALUES (?, ?, ?, ?)
+        `,
+        [prestador_id, fecha, horaEntrada, actividad || ""],
+        function (error) {
+          if (error) {
+            return res.status(500).json({
+              mensaje: "Error al registrar entrada."
+            });
+          }
+
+          res.json({
+            mensaje: "Entrada registrada correctamente.",
+            hora_entrada: horaEntrada
+          });
+        }
+      );
+    }
+  );
+});
+
+app.post("/api/salida", (req, res) => {
+  const { prestador_id } = req.body;
+
+  if (!prestador_id) {
+    return res.status(400).json({
+      mensaje: "Debes seleccionar un prestador."
+    });
+  }
+
+  const fecha = obtenerFechaActual();
+  const horaSalida = obtenerHoraActual();
+
+  db.get(
+    `
+    SELECT * FROM registros
+    WHERE prestador_id = ?
+    AND fecha = ?
+    AND hora_salida IS NULL
+    ORDER BY id DESC
+    LIMIT 1
+    `,
+    [prestador_id, fecha],
+    (error, registro) => {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al buscar entrada."
+        });
+      }
+
+      if (!registro) {
+        return res.status(404).json({
+          mensaje: "No tienes una entrada abierta para registrar salida."
+        });
+      }
+
+      const horas = calcularHoras(registro.hora_entrada, horaSalida);
+
+      db.run(
+        `
+        UPDATE registros
+        SET hora_salida = ?, horas = ?
+        WHERE id = ?
+        `,
+        [horaSalida, horas, registro.id],
+        function (error) {
+          if (error) {
+            return res.status(500).json({
+              mensaje: "Error al registrar salida."
+            });
+          }
+
+          res.json({
+            mensaje: "Salida registrada correctamente.",
+            hora_salida: horaSalida,
+            horas
+          });
+        }
+      );
+    }
+  );
+});
+
+app.get("/api/resumen/:id", (req, res) => {
+  const prestadorId = req.params.id;
+
+  db.get(
+    `
+    SELECT 
+      p.id,
+      p.nombre,
+      p.matricula,
+      p.carrera,
+      p.horario,
+      p.horas_requeridas,
+      IFNULL(SUM(r.horas), 0) AS horas_acumuladas,
+      p.horas_requeridas - IFNULL(SUM(r.horas), 0) AS horas_faltantes
+    FROM prestadores p
+    LEFT JOIN registros r ON p.id = r.prestador_id
+    WHERE p.id = ?
+    GROUP BY p.id
+    `,
+    [prestadorId],
+    (error, resumen) => {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al obtener resumen."
+        });
+      }
+
+      if (!resumen) {
+        return res.status(404).json({
+          mensaje: "Prestador no encontrado."
+        });
+      }
+
+      db.all(
+        `
+        SELECT fecha, hora_entrada, hora_salida, horas, actividad
+        FROM registros
+        WHERE prestador_id = ?
+        ORDER BY fecha DESC, id DESC
+        LIMIT 10
+        `,
+        [prestadorId],
+        (error, registros) => {
+          if (error) {
+            return res.status(500).json({
+              mensaje: "Error al obtener registros."
+            });
+          }
+
+          res.json({
+            resumen,
+            registros
+          });
+        }
+      );
+    }
+  );
+});
+
 app.get("/api/prueba", (req, res) => {
   res.json({
     mensaje: "Servidor funcionando correctamente"
