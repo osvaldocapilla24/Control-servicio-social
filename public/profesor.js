@@ -1,7 +1,40 @@
+const PIN_RESPONSABLE = "1234";
+
+const pinSection = document.getElementById("pinSection");
+const panelResponsable = document.getElementById("panelResponsable");
+const formPin = document.getElementById("formPin");
+const pinResponsable = document.getElementById("pinResponsable");
+const mensajePin = document.getElementById("mensajePin");
+const btnCerrarResponsable = document.getElementById("btnCerrarResponsable");
+
 const tablaProfesor = document.getElementById("tablaProfesor");
 const detallePrestador = document.getElementById("detallePrestador");
 const nombreDetalle = document.getElementById("nombreDetalle");
 const tablaHistorial = document.getElementById("tablaHistorial");
+
+function mostrarPanelResponsable() {
+  pinSection.classList.add("hidden");
+  panelResponsable.classList.remove("hidden");
+  cargarResumenProfesor();
+}
+
+formPin.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  if (pinResponsable.value === PIN_RESPONSABLE) {
+    sessionStorage.setItem("responsable_autorizado", "true");
+    mensajePin.textContent = "";
+    mostrarPanelResponsable();
+  } else {
+    mensajePin.textContent = "PIN incorrecto. Inténtalo nuevamente.";
+    mensajePin.className = "mensaje error";
+  }
+});
+
+btnCerrarResponsable.addEventListener("click", () => {
+  sessionStorage.removeItem("responsable_autorizado");
+  window.location.href = "index.html";
+});
 
 async function cargarResumenProfesor() {
   try {
@@ -92,4 +125,6 @@ async function verHistorial(id, nombre) {
   }
 }
 
-cargarResumenProfesor();
+if (sessionStorage.getItem("responsable_autorizado") === "true") {
+  mostrarPanelResponsable();
+}

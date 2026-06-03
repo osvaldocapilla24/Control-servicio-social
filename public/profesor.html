@@ -9,55 +9,82 @@
 </head>
 
 <body>
-    <main class="page">
-        <section class="card wide">
-            <div class="header">
-                <div class="logo">BUAP</div>
-                <h1>Panel del Responsable</h1>
-                <p>Consulta el avance de horas de todos los prestadores.</p>
-            </div>
+  <main class="page">
+    <section id="pinSection" class="card">
+      <div class="header">
+        <div class="logo">BUAP</div>
+        <h1>Acceso del Responsable</h1>
+        <p>Ingresa el PIN para consultar el avance de los prestadores.</p>
+      </div>
 
-            <div class="actions-top">
-                <a href="registro.html" class="link small-link">Registrar prestador</a>
-            </div>
+      <form id="formPin" class="form">
+        <label for="pinResponsable">PIN del responsable</label>
+        <input 
+          type="password" 
+          id="pinResponsable" 
+          placeholder="Ingresa el PIN"
+          required
+        >
 
-            <section id="detallePrestador" class="summary hidden">
-                <h2>Historial del prestador</h2>
-                <p id="nombreDetalle"></p>
+        <button type="submit">INGRESAR</button>
+      </form>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Entrada</th>
-                            <th>Salida</th>
-                            <th>Horas</th>
-                            <th>Actividad</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaHistorial"></tbody>
-                </table>
-            </section>
+      <p id="mensajePin" class="mensaje"></p>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Matrícula</th>
-                        <th>Carrera</th>
-                        <th>Horario</th>
-                        <th>Horas acumuladas</th>
-                        <th>Horas faltantes</th>
-                        <th>Estado hoy</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaProfesor"></tbody>
-            </table>
-        </section>
-    </main>
+      <div class="actions-top menu-inicio">
+        <a href="index.html" class="link small-link">Volver al inicio</a>
+      </div>
+    </section>
 
-    <script src="profesor.js"></script>
+    <section id="panelResponsable" class="card wide hidden">
+      <div class="header">
+        <div class="logo">BUAP</div>
+        <h1>Panel del Responsable</h1>
+        <p>Consulta el avance de horas de todos los prestadores.</p>
+      </div>
+
+      <div class="actions-top">
+        <a href="registro.html" class="link small-link">Registrar prestador</a>
+        <button id="btnCerrarResponsable" class="danger">Cerrar sesión</button>
+      </div>
+
+      <section id="detallePrestador" class="summary hidden">
+        <h2>Historial del prestador</h2>
+        <p id="nombreDetalle"></p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Entrada</th>
+              <th>Salida</th>
+              <th>Horas</th>
+              <th>Actividad</th>
+            </tr>
+          </thead>
+          <tbody id="tablaHistorial"></tbody>
+        </table>
+      </section>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Matrícula</th>
+            <th>Carrera</th>
+            <th>Horario</th>
+            <th>Horas acumuladas</th>
+            <th>Horas faltantes</th>
+            <th>Estado hoy</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaProfesor"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="profesor.js"></script>
 </body>
 
 </html>
