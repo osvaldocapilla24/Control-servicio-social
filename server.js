@@ -352,6 +352,55 @@ app.get("/api/resumen/:id", (req, res) => {
   );
 });
 
+app.get("/api/profesor/resumen", (req, res) => {
+  const fecha = obtenerFechaActual();
+
+  db.all(
+    `
+    SELECT 
+      p.id,
+      p.nombre,
+      p.matricula,
+      p.carrera,
+      p.horario,
+      p.horas_requeridas,
+      IFNULL(SUM(r.horas), 0) AS horas_acumuladas,
+      p.horas_requeridas - IFNULL(SUM(r.horas), 0) AS horas_faltantes,
+      (
+        SELECT 
+          CASE 
+            WHEN r2.hora_entrada IS NOT NULL AND r2.hora_salida IS NULL THEN 'Entrada registrada'
+            WHEN r2.hora_entrada IS NOT NULL AND r2.hora_salida IS NOT NULL THEN 'Salida registrada'
+            ELSE 'Sin registro hoy'
+          END
+        FROM registros r2
+        WHERE r2.prestador_id = p.id 
+        AND r2.fecha = ?
+        ORDER BY r2.id DESC
+        LIMIT 1
+      ) AS estado_hoy
+    FROM prestadores p
+    LEFT JOIN registros r ON p.id = r.prestador_id
+    GROUP BY p.id
+    ORDER BY p.nombre ASC
+    `,
+    [fecha],
+    (error, rows) => {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al obtener resumen del profesor."
+        });
+      }
+
+      const resultado = rows.map((item) => ({
+        ...item,
+        estado_hoy: item.estado_hoy || "Sin registro hoy"
+      }));
+
+      res.json(resultado);
+    }
+  );
+});
 
 app.get("/api/prueba", (req, res) => {
   res.json({

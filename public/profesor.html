@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vista Profesor | Servicio Social</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page">
+    <section class="card wide">
+      <div class="header">
+        <div class="logo">BUAP</div>
+        <h1>Panel del Responsable</h1>
+        <p>Consulta el avance de horas de todos los prestadores.</p>
+      </div>
+
+      <div class="actions-top">
+        <a href="index.html" class="link small-link">Vista alumnos</a>
+        <a href="registro.html" class="link small-link">Registrar prestador</a>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Matrícula</th>
+            <th>Carrera</th>
+            <th>Horario</th>
+            <th>Horas acumuladas</th>
+            <th>Horas faltantes</th>
+            <th>Estado hoy</th>
+          </tr>
+        </thead>
+        <tbody id="tablaProfesor"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="profesor.js"></script>
+</body>
+</html>
