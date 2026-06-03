@@ -222,3 +222,8 @@ tr:hover {
     padding: 20px;
   }
 }
+.small-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}

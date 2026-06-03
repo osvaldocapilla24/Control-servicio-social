@@ -402,6 +402,34 @@ app.get("/api/profesor/resumen", (req, res) => {
   );
 });
 
+app.get("/api/profesor/prestador/:id/registros", (req, res) => {
+  const prestadorId = req.params.id;
+
+  db.all(
+    `
+    SELECT 
+      fecha,
+      hora_entrada,
+      hora_salida,
+      horas,
+      actividad
+    FROM registros
+    WHERE prestador_id = ?
+    ORDER BY fecha DESC, id DESC
+    `,
+    [prestadorId],
+    (error, rows) => {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al obtener historial del prestador."
+        });
+      }
+
+      res.json(rows);
+    }
+  );
+});
+
 app.get("/api/prueba", (req, res) => {
   res.json({
     mensaje: "Servidor funcionando correctamente"
