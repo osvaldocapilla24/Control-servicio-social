@@ -367,7 +367,7 @@ app.get("/api/resumen/:id", (req, res) => {
 
       db.all(
         `
-        SELECT fecha, hora_entrada, hora_salida, horas, actividad
+        SELECT id, fecha, hora_entrada, hora_salida, horas, actividad
         FROM registros
         WHERE prestador_id = ?
         ORDER BY fecha DESC, id DESC
@@ -446,7 +446,8 @@ app.get("/api/profesor/prestador/:id/registros", (req, res) => {
 
   db.all(
     `
-    SELECT 
+    SELECT
+      id,
       fecha,
       hora_entrada,
       hora_salida,
@@ -465,6 +466,81 @@ app.get("/api/profesor/prestador/:id/registros", (req, res) => {
       }
 
       res.json(rows);
+    }
+  );
+});
+
+app.put("/api/registros/:id", (req, res) => {
+  const registroId = req.params.id;
+  const { fecha, hora_entrada, hora_salida, actividad } = req.body;
+
+  if (!fecha || !hora_entrada || !hora_salida) {
+    return res.status(400).json({
+      mensaje: "Fecha, hora de entrada y hora de salida son obligatorias."
+    });
+  }
+
+  const horas = calcularHoras(hora_entrada, hora_salida);
+
+  if (horas <= 0) {
+    return res.status(400).json({
+      mensaje: "La hora de salida debe ser mayor que la hora de entrada."
+    });
+  }
+
+  db.run(
+    `
+    UPDATE registros
+    SET fecha = ?, hora_entrada = ?, hora_salida = ?, horas = ?, actividad = ?
+    WHERE id = ?
+    `,
+    [fecha, hora_entrada, hora_salida, horas, actividad || "", registroId],
+    function (error) {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al actualizar el registro."
+        });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({
+          mensaje: "Registro no encontrado."
+        });
+      }
+
+      res.json({
+        mensaje: "Registro actualizado correctamente.",
+        horas
+      });
+    }
+  );
+});
+
+app.delete("/api/registros/:id", (req, res) => {
+  const registroId = req.params.id;
+
+  db.run(
+    `
+    DELETE FROM registros
+    WHERE id = ?
+    `,
+    [registroId],
+    function (error) {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al eliminar el registro."
+        });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({
+          mensaje: "Registro no encontrado."
+        });
+      }
+
+      res.json({
+        mensaje: "Registro eliminado correctamente."
+      });
     }
   );
 });

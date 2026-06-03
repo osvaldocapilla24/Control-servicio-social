@@ -245,3 +245,20 @@ tr:hover {
   margin: 6px 0 0;
   color: #003b71;
 }
+
+.small-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin: 2px;
+}
+
+.btn-editar-registro {
+  background: #c9a227;
+  color: #1e1e1e;
+}
+
+.btn-eliminar-registro {
+  background: #9b1c31;
+  color: white;
+}

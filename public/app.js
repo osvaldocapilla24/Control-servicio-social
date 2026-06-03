@@ -16,6 +16,15 @@ const salidaManual = document.getElementById("salidaManual");
 const actividadManual = document.getElementById("actividadManual");
 const btnRegistroManual = document.getElementById("btnRegistroManual");
 
+const formEditarRegistro = document.getElementById("formEditarRegistro");
+const registroEditandoId = document.getElementById("registroEditandoId");
+const editarFecha = document.getElementById("editarFecha");
+const editarEntrada = document.getElementById("editarEntrada");
+const editarSalida = document.getElementById("editarSalida");
+const editarActividad = document.getElementById("editarActividad");
+const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
+const btnCancelarEdicion = document.getElementById("btnCancelarEdicion");
+
 const prestadorIdActual = sessionStorage.getItem("prestador_id");
 const prestadorNombreActual = sessionStorage.getItem("prestador_nombre");
 
@@ -45,9 +54,54 @@ async function cargarResumen() {
       <td>${r.hora_salida || "-"}</td>
       <td>${Number(r.horas).toFixed(2)}</td>
       <td>${r.actividad || "-"}</td>
+      <td>
+        <button 
+          class="small-btn btn-editar-registro"
+          data-id="${r.id}"
+          data-fecha="${r.fecha}"
+          data-entrada="${r.hora_entrada || ""}"
+          data-salida="${r.hora_salida || ""}"
+          data-actividad="${r.actividad || ""}"
+        >
+          Editar
+        </button>
+
+        <button 
+          class="small-btn danger btn-eliminar-registro"
+          data-id="${r.id}"
+        >
+          Eliminar
+        </button>
+      </td>
     `;
 
     tablaRegistros.appendChild(tr);
+  });
+
+  activarBotonesRegistros();
+}
+
+function activarBotonesRegistros() {
+  const botonesEditar = document.querySelectorAll(".btn-editar-registro");
+  const botonesEliminar = document.querySelectorAll(".btn-eliminar-registro");
+
+  botonesEditar.forEach((boton) => {
+    boton.addEventListener("click", () => {
+      registroEditandoId.value = boton.dataset.id;
+      editarFecha.value = boton.dataset.fecha;
+      editarEntrada.value = boton.dataset.entrada;
+      editarSalida.value = boton.dataset.salida;
+      editarActividad.value = boton.dataset.actividad;
+
+      formEditarRegistro.classList.remove("hidden");
+      formEditarRegistro.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+
+  botonesEliminar.forEach((boton) => {
+    boton.addEventListener("click", () => {
+      eliminarRegistro(boton.dataset.id);
+    });
   });
 }
 
@@ -158,6 +212,75 @@ async function guardarRegistroManual() {
   cargarResumen();
 }
 
+async function guardarEdicionRegistro() {
+  const id = registroEditandoId.value;
+
+  if (!id) {
+    mostrarMensaje("No hay ningún registro seleccionado para editar.", "error");
+    return;
+  }
+
+  if (!editarFecha.value || !editarEntrada.value || !editarSalida.value) {
+    mostrarMensaje("Completa fecha, hora de entrada y hora de salida.", "error");
+    return;
+  }
+
+  const respuesta = await fetch(`/api/registros/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      fecha: editarFecha.value,
+      hora_entrada: editarEntrada.value,
+      hora_salida: editarSalida.value,
+      actividad: editarActividad.value.trim()
+    })
+  });
+
+  const resultado = await respuesta.json();
+
+  if (!respuesta.ok) {
+    mostrarMensaje(resultado.mensaje, "error");
+    return;
+  }
+
+  mostrarMensaje(resultado.mensaje, "success");
+  limpiarFormularioEdicion();
+  cargarResumen();
+}
+
+async function eliminarRegistro(id) {
+  const confirmar = confirm("¿Seguro que deseas eliminar este registro?");
+
+  if (!confirmar) {
+    return;
+  }
+
+  const respuesta = await fetch(`/api/registros/${id}`, {
+    method: "DELETE"
+  });
+
+  const resultado = await respuesta.json();
+
+  if (!respuesta.ok) {
+    mostrarMensaje(resultado.mensaje, "error");
+    return;
+  }
+
+  mostrarMensaje(resultado.mensaje, "success");
+  cargarResumen();
+}
+
+function limpiarFormularioEdicion() {
+  registroEditandoId.value = "";
+  editarFecha.value = "";
+  editarEntrada.value = "";
+  editarSalida.value = "";
+  editarActividad.value = "";
+  formEditarRegistro.classList.add("hidden");
+}
+
 function mostrarMensaje(texto, tipo) {
   mensaje.textContent = texto;
   mensaje.className = `mensaje ${tipo}`;
@@ -166,6 +289,8 @@ function mostrarMensaje(texto, tipo) {
 btnEntrada.addEventListener("click", registrarEntrada);
 btnSalida.addEventListener("click", registrarSalida);
 btnRegistroManual.addEventListener("click", guardarRegistroManual);
+btnGuardarEdicion.addEventListener("click", guardarEdicionRegistro);
+btnCancelarEdicion.addEventListener("click", limpiarFormularioEdicion);
 
 if (!prestadorIdActual) {
   window.location.href = "index.html";

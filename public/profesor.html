@@ -2,10 +2,10 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vista Profesor | Servicio Social</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vista Profesor | Servicio Social</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -19,12 +19,7 @@
 
       <form id="formPin" class="form">
         <label for="pinResponsable">PIN del responsable</label>
-        <input 
-          type="password" 
-          id="pinResponsable" 
-          placeholder="Ingresa el PIN"
-          required
-        >
+        <input type="password" id="pinResponsable" placeholder="Ingresa el PIN" required>
 
         <button type="submit">INGRESAR</button>
       </form>
@@ -60,10 +55,39 @@
               <th>Salida</th>
               <th>Horas</th>
               <th>Actividad</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="tablaHistorial"></tbody>
         </table>
+      </section>
+
+      <section id="formEditarRegistroResponsable" class="summary hidden">
+        <h2>Editar registro</h2>
+        <p>Corrige la fecha, horario o actividad del registro seleccionado.</p>
+
+        <input type="hidden" id="registroResponsableEditandoId">
+        <input type="hidden" id="prestadorResponsableEditandoId">
+        <input type="hidden" id="prestadorResponsableEditandoNombre">
+
+        <div class="form">
+          <label for="editarFechaResponsable">Fecha</label>
+          <input type="date" id="editarFechaResponsable">
+
+          <label for="editarEntradaResponsable">Hora entrada</label>
+          <input type="time" id="editarEntradaResponsable">
+
+          <label for="editarSalidaResponsable">Hora salida</label>
+          <input type="time" id="editarSalidaResponsable">
+
+          <label for="editarActividadResponsable">Actividad realizada</label>
+          <input type="text" id="editarActividadResponsable" placeholder="Ejemplo: Mantenimiento preventivo">
+
+          <div class="buttons">
+            <button id="btnGuardarEdicionResponsable" type="button">Guardar cambios</button>
+            <button id="btnCancelarEdicionResponsable" type="button" class="danger">Cancelar</button>
+          </div>
+        </div>
       </section>
 
       <table>

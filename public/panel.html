@@ -18,7 +18,7 @@
             </div>
 
             <div class="actions-top">
-            <a href="index.html" class="link small-link">Cerrar Secion</a>
+                <a href="index.html" class="link small-link">Cerrar Secion</a>
             </div>
 
             <div class="form">
@@ -57,6 +57,31 @@
             </div>
 
             <p id="mensaje" class="mensaje"></p>
+            <section id="formEditarRegistro" class="summary hidden">
+                <h2>Editar registro</h2>
+                <p>Corrige la fecha, horario o actividad del registro seleccionado.</p>
+
+                <input type="hidden" id="registroEditandoId">
+
+                <div class="form">
+                    <label for="editarFecha">Fecha</label>
+                    <input type="date" id="editarFecha">
+
+                    <label for="editarEntrada">Hora entrada</label>
+                    <input type="time" id="editarEntrada">
+
+                    <label for="editarSalida">Hora salida</label>
+                    <input type="time" id="editarSalida">
+
+                    <label for="editarActividad">Actividad realizada</label>
+                    <input type="text" id="editarActividad" placeholder="Ejemplo: Mantenimiento preventivo">
+
+                    <div class="buttons">
+                        <button id="btnGuardarEdicion" type="button">Guardar cambios</button>
+                        <button id="btnCancelarEdicion" type="button" class="danger">Cancelar</button>
+                    </div>
+                </div>
+            </section>
 
             <section id="resumen" class="summary hidden">
                 <h2>Resumen personal</h2>
@@ -88,6 +113,7 @@
                             <th>Salida</th>
                             <th>Horas</th>
                             <th>Actividad</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaRegistros"></tbody>
