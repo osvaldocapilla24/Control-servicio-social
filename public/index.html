@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inicio | Control de Servicio Social</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <main class="page">
     <section class="card">
@@ -17,24 +19,26 @@
 
       <form id="formAcceso" class="form">
         <label for="busquedaPrestador">Nombre o Matrícula</label>
-        <input 
-          type="text" 
-          id="busquedaPrestador" 
-          required
-        >
+        <input type="text" id="busquedaPrestador" required>
 
         <button type="submit">INGRESAR</button>
       </form>
 
       <p id="mensajeAcceso" class="mensaje"></p>
 
-      <div class="actions-top menu-inicio">
-        <a href="registro.html" class="link small-link">Registrarme</a>
-        <a href="profesor.html" class="link small-link">Acceso responsable</a>
+      <div class="text-links">
+        <p>
+          ¿Aún no estás registrado?
+          <a href="registro.html">Registrarme</a>
+        </p>
+        <p>
+          <a href="profesor.html">Acceso del responsable</a>
+        </p>
       </div>
     </section>
   </main>
 
   <script src="inicio.js"></script>
 </body>
+
 </html>

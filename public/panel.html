@@ -11,6 +11,7 @@
 <body>
     <main class="page">
         <section class="card wide">
+
             <div class="header">
                 <div class="logo">BUAP</div>
                 <h1>Panel del Prestador</h1>
@@ -18,45 +19,79 @@
             </div>
 
             <div class="actions-top">
-                <a href="index.html" class="link small-link">Cerrar Secion</a>
+                <a href="index.html" class="link small-link">Salir / cambiar usuario</a>
             </div>
 
-            <div class="form">
-                <div class="student-info">
-                    <p>Prestador actual:</p>
-                    <h2 id="nombrePrestadorPanel">Cargando...</h2>
-                </div>
-
-                <label for="actividad">Actividad realizada</label>
-                <input type="text" id="actividad" placeholder="Ejemplo: Revisión de equipos">
-
-                <div class="buttons">
-                    <button id="btnEntrada">Hora de Entrada</button>
-                    <button id="btnSalida" class="danger">Hora de Salida</button>
-                </div>
+            <div class="student-info">
+                <p>Prestador actual:</p>
+                <h2 id="nombrePrestadorPanel">Cargando...</h2>
             </div>
+
+            <!-- RESUMEN PERSONAL PRIMERO -->
+            <section id="resumen" class="summary hidden">
+                <h2>Resumen personal</h2>
+
+                <div class="stats">
+                    <div>
+                        <span>Horas acumuladas</span>
+                        <strong id="horasAcumuladas">0</strong>
+                    </div>
+
+                    <div>
+                        <span>Horas faltantes</span>
+                        <strong id="horasFaltantes">0</strong>
+                    </div>
+
+                    <div>
+                        <span>Horario</span>
+                        <strong id="horarioTexto">---</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- REGISTRO AUTOMÁTICO -->
+            <section class="section-block">
+                <h2>Registro del día</h2>
+                <p>Marca tu entrada o salida del día actual.</p>
+
+                <div class="form">
+                    <label for="actividad">Actividad realizada</label>
+                    <input type="text" id="actividad" placeholder="Ejemplo: Revisión de equipos">
+
+                    <div class="buttons">
+                        <button id="btnEntrada">Marcar entrada</button>
+                        <button id="btnSalida" class="danger">Marcar salida</button>
+                    </div>
+                </div>
+            </section>
+
             <hr>
 
-            <h2>Agregar registro manual</h2>
-            <p>Usa esta opción para capturar días anteriores o corregir horarios.</p>
+            <!-- REGISTRO MANUAL -->
+            <section class="section-block">
+                <h2>Agregar registro manual</h2>
+                <p>Usa esta opción para capturar días anteriores o corregir horarios.</p>
 
-            <div class="form">
-                <label for="fechaManual">Fecha</label>
-                <input type="date" id="fechaManual">
+                <div class="form">
+                    <label for="fechaManual">Fecha</label>
+                    <input type="date" id="fechaManual">
 
-                <label for="entradaManual">Hora entrada</label>
-                <input type="time" id="entradaManual">
+                    <label for="entradaManual">Hora entrada</label>
+                    <input type="time" id="entradaManual">
 
-                <label for="salidaManual">Hora salida</label>
-                <input type="time" id="salidaManual">
+                    <label for="salidaManual">Hora salida</label>
+                    <input type="time" id="salidaManual">
 
-                <label for="actividadManual">Actividad realizada</label>
-                <input type="text" id="actividadManual" placeholder="Ejemplo: Mantenimiento preventivo">
+                    <label for="actividadManual">Actividad realizada</label>
+                    <input type="text" id="actividadManual" placeholder="Ejemplo: Mantenimiento preventivo">
 
-                <button id="btnRegistroManual" class="secondary-btn">Guardar registro manual</button>
-            </div>
+                    <button id="btnRegistroManual" class="secondary-btn">Agregar horas</button>
+                </div>
+            </section>
 
             <p id="mensaje" class="mensaje"></p>
+
+            <!-- FORMULARIO DE EDICIÓN -->
             <section id="formEditarRegistro" class="summary hidden">
                 <h2>Editar registro</h2>
                 <p>Corrige la fecha, horario o actividad del registro seleccionado.</p>
@@ -77,33 +112,15 @@
                     <input type="text" id="editarActividad" placeholder="Ejemplo: Mantenimiento preventivo">
 
                     <div class="buttons">
-                        <button id="btnGuardarEdicion" type="button">Guardar cambios</button>
+                        <button id="btnGuardarEdicion" type="button">Actualizar registro</button>
                         <button id="btnCancelarEdicion" type="button" class="danger">Cancelar</button>
                     </div>
                 </div>
             </section>
 
-            <section id="resumen" class="summary hidden">
-                <h2>Resumen personal</h2>
-
-                <div class="stats">
-                    <div>
-                        <span>Horas acumuladas</span>
-                        <strong id="horasAcumuladas">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Horas faltantes</span>
-                        <strong id="horasFaltantes">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Horario</span>
-                        <strong id="horarioTexto">---</strong>
-                    </div>
-                </div>
-
-                <h3>Últimos registros</h3>
+            <!-- ÚLTIMOS REGISTROS AL FINAL -->
+            <section class="summary">
+                <h2>Últimos registros</h2>
 
                 <table>
                     <thead>
@@ -119,6 +136,7 @@
                     <tbody id="tablaRegistros"></tbody>
                 </table>
             </section>
+
         </section>
     </main>
 

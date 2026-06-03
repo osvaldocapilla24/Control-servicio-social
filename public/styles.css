@@ -3,11 +3,26 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
+:root {
+  --azul-claro: #e8f7ff;
+  --azul-cielo: #c9ecff;
+  --azul-suave: #7cc7ee;
+  --azul-medio: #247cae;
+  --azul-institucional: #003b71;
+  --azul-profundo: #064b7a;
+  --blanco: #ffffff;
+  --gris-fondo: #f5f8fb;
+  --gris-borde: #d8e2ea;
+  --texto: #1f2933;
+  --verde: #1c7c35;
+  --rojo: #9b1c31;
+}
+
 body {
   margin: 0;
-  background: linear-gradient(135deg, #003b71, #005b96);
   min-height: 100vh;
-  color: #222;
+  background: linear-gradient(135deg, var(--azul-claro), var(--azul-cielo));
+  color: var(--texto);
 }
 
 .page {
@@ -15,45 +30,62 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 30px;
+  padding: 32px;
 }
 
 .card {
-  background: #ffffff;
+  background: var(--blanco);
   width: 100%;
-  max-width: 520px;
-  border-radius: 22px;
-  padding: 30px;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  max-width: 540px;
+  border-radius: 26px;
+  padding: 34px;
+  box-shadow: 0 18px 45px rgba(0, 59, 113, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.card.wide {
+  max-width: 1120px;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .logo {
-  width: 90px;
-  height: 90px;
-  margin: 0 auto 15px;
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 18px;
   border-radius: 50%;
-  background: #003b71;
-  color: white;
+  background: #ffffff;
+  color: var(--azul-institucional);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+  font-weight: 900;
   font-size: 22px;
-  border: 5px solid #c9a227;
+  letter-spacing: 1px;
+  border: 4px solid var(--azul-suave);
+  box-shadow: 0 8px 20px rgba(0, 59, 113, 0.15);
 }
 
 h1 {
   margin: 0;
-  color: #003b71;
+  color: var(--azul-institucional);
+  font-size: 30px;
+}
+
+h2 {
+  color: var(--azul-institucional);
+  margin-bottom: 8px;
+}
+
+h3 {
+  color: var(--azul-institucional);
 }
 
 p {
-  color: #555;
+  color: #4b5563;
 }
 
 .form {
@@ -64,21 +96,23 @@ p {
 
 label {
   font-weight: bold;
-  color: #003b71;
+  color: var(--azul-institucional);
 }
 
 input,
 select {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
+  padding: 13px 14px;
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
   outline: none;
   font-size: 15px;
+  background: white;
 }
 
 input:focus,
 select:focus {
-  border-color: #003b71;
+  border-color: var(--azul-medio);
+  box-shadow: 0 0 0 3px rgba(36, 124, 174, 0.15);
 }
 
 button,
@@ -87,18 +121,30 @@ button,
   text-align: center;
   text-decoration: none;
   border: none;
-  padding: 12px 18px;
-  border-radius: 12px;
-  background: #003b71;
+  padding: 13px 20px;
+  border-radius: 14px;
+  background: var(--azul-institucional);
   color: white;
   font-weight: bold;
   cursor: pointer;
   font-size: 15px;
+  transition: all 0.2s ease;
 }
 
 button:hover,
 .link:hover {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 59, 113, 0.22);
+}
+
+.danger {
+  background: var(--rojo);
+}
+
+.secondary-btn,
+.small-link {
+  background: var(--azul-medio);
+  color: white;
 }
 
 .link {
@@ -106,37 +152,70 @@ button:hover,
   margin-top: 15px;
 }
 
-.mensaje {
-  text-align: center;
-  font-weight: bold;
-  margin-top: 15px;
-}
-
-.success {
-  color: #1c7c35;
-}
-
-.error {
-  color: #b00020;
-}
-
-.card.wide {
-  max-width: 1100px;
-}
-
 .actions-top {
   display: flex;
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.menu-inicio {
+  margin-top: 20px;
+}
+
+.text-links {
+  margin-top: 12px;
+  text-align: center;
+  color: #4b5563;
+}
+
+.text-links a {
+  color: var(--azul-institucional);
+  font-weight: bold;
+  text-decoration: none;
+  margin: 0 8px;
+}
+
+.text-links a:hover {
+  color: var(--azul-medio);
+  text-decoration: underline;
+}
+
+.mensaje {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.success {
+  color: var(--verde);
+  background: rgba(28, 124, 53, 0.1);
+}
+
+.error {
+  color: var(--rojo);
+  background: rgba(155, 28, 49, 0.1);
+}
+
+.student-info {
+  background: var(--gris-fondo);
+  border-left: 6px solid var(--dorado);
+  padding: 18px;
+  border-radius: 16px;
   margin-bottom: 20px;
 }
 
-.small-link {
-  width: auto;
-  margin-top: 0;
-  background: #c9a227;
-  color: #1e1e1e;
+.student-info p {
+  margin: 0;
+  color: #555;
+}
+
+.student-info h2 {
+  margin: 6px 0 0;
+  color: var(--azul-institucional);
 }
 
 .buttons {
@@ -144,15 +223,11 @@ button:hover,
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-.danger {
-  background: #9b1c31;
+  margin-top: 12px;
 }
 
 .summary {
-  margin-top: 25px;
+  margin-top: 28px;
 }
 
 .hidden {
@@ -167,10 +242,11 @@ button:hover,
 }
 
 .stats div {
-  background: #f3f6fa;
-  border-radius: 14px;
-  padding: 18px;
+  background: var(--gris-fondo);
+  border-radius: 18px;
+  padding: 20px;
   text-align: center;
+  border: 1px solid var(--gris-borde);
 }
 
 .stats span {
@@ -182,34 +258,81 @@ button:hover,
 .stats strong {
   display: block;
   margin-top: 8px;
-  font-size: 22px;
-  color: #003b71;
+  font-size: 23px;
+  color: var(--azul-institucional);
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-top: 15px;
   background: white;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--gris-borde);
 }
 
 th {
-  background: #003b71;
+  background: var(--azul-institucional);
   color: white;
-  padding: 12px;
+  padding: 13px;
   text-align: left;
+  font-size: 14px;
 }
 
 td {
-  border-bottom: 1px solid #ddd;
-  padding: 12px;
+  border-bottom: 1px solid var(--gris-borde);
+  padding: 13px;
+  font-size: 14px;
+}
+
+tr:last-child td {
+  border-bottom: none;
 }
 
 tr:hover {
-  background: #f3f6fa;
+  background: #f2f8fc;
+}
+
+.small-btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin: 2px;
+}
+
+.btn-editar-registro,
+.btn-editar-responsable {
+  background: var(--dorado);
+  color: #1f2933;
+}
+
+.btn-eliminar-registro,
+.btn-eliminar-responsable {
+  background: var(--rojo);
+  color: white;
+}
+
+hr {
+  margin: 30px 0;
+  border: none;
+  border-top: 1px solid var(--gris-borde);
 }
 
 @media (max-width: 768px) {
+  .page {
+    padding: 18px;
+  }
+
+  .card {
+    padding: 24px;
+  }
+
+  h1 {
+    font-size: 25px;
+  }
+
   .stats {
     grid-template-columns: 1fr;
   }
@@ -217,48 +340,101 @@ tr:hover {
   table {
     font-size: 13px;
   }
-
-  .card {
-    padding: 20px;
-  }
-}
-.small-btn {
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
 }
 
-.student-info {
-  background: #f3f6fa;
-  border-left: 5px solid #c9a227;
-  padding: 16px;
-  border-radius: 12px;
+.form button {
+  margin-top: 4px;
+}
+
+.header p {
   margin-bottom: 18px;
 }
 
-.student-info p {
-  margin: 0;
-  color: #555;
+.compact-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 16px 0 22px;
 }
 
-.student-info h2 {
-  margin: 6px 0 0;
-  color: #003b71;
+.compact-actions .link,
+.compact-actions button {
+  width: auto;
+  margin-top: 0;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
 }
 
-.small-btn {
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  margin: 2px;
+.section-block {
+  margin-top: 26px;
 }
 
-.btn-editar-registro {
-  background: #c9a227;
-  color: #1e1e1e;
+.panel-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 12px 0 22px;
+  flex-wrap: wrap;
 }
 
-.btn-eliminar-registro {
-  background: #9b1c31;
-  color: white;
+.header {
+  margin-bottom: 18px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.header p {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.actions-top,
+.compact-actions,
+.panel-actions {
+  margin-top: 10px;
+  margin-bottom: 18px;
+}
+
+.form {
+  gap: 10px;
+}
+
+.summary {
+  margin-top: 22px;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+p {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.buttons {
+  margin-top: 8px;
+}
+
+.panel-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 22px;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.panel-actions .link,
+.panel-actions button {
+  width: auto;
+  margin-top: 0;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 14px;
 }
