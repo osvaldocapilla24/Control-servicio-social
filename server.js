@@ -135,6 +135,45 @@ app.get("/api/prestadores", (req, res) => {
   );
 });
 
+app.get("/api/prestadores/buscar/:texto", (req, res) => {
+  const texto = req.params.texto.trim();
+
+  if (!texto) {
+    return res.status(400).json({
+      mensaje: "Debes escribir un nombre o matrícula."
+    });
+  }
+
+  db.get(
+    `
+    SELECT id, nombre, matricula, carrera, horario, horas_requeridas
+    FROM prestadores
+    WHERE matricula = ?
+    OR nombre LIKE ?
+    LIMIT 1
+    `,
+    [texto, `%${texto}%`],
+    (error, prestador) => {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al buscar prestador."
+        });
+      }
+
+      if (!prestador) {
+        return res.status(404).json({
+          mensaje: "No se encontró ningún prestador con ese nombre o matrícula."
+        });
+      }
+
+      res.json({
+        mensaje: "Prestador encontrado.",
+        prestador
+      });
+    }
+  );
+});
+
 app.post("/api/entrada", (req, res) => {
   const { prestador_id, actividad } = req.body;
 

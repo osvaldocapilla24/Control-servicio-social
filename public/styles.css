@@ -227,3 +227,21 @@ tr:hover {
   border-radius: 8px;
   font-size: 13px;
 }
+
+.student-info {
+  background: #f3f6fa;
+  border-left: 5px solid #c9a227;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+}
+
+.student-info p {
+  margin: 0;
+  color: #555;
+}
+
+.student-info h2 {
+  margin: 6px 0 0;
+  color: #003b71;
+}

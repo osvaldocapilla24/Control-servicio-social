@@ -2,7 +2,7 @@ const formAcceso = document.getElementById("formAcceso");
 const busquedaPrestador = document.getElementById("busquedaPrestador");
 const mensajeAcceso = document.getElementById("mensajeAcceso");
 
-formAcceso.addEventListener("submit", (e) => {
+formAcceso.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const texto = busquedaPrestador.value.trim();
@@ -13,10 +13,30 @@ formAcceso.addEventListener("submit", (e) => {
     return;
   }
 
-  mensajeAcceso.textContent = "En la siguiente tarea conectaremos esta búsqueda con la base de datos.";
-  mensajeAcceso.className = "mensaje success";
+  try {
+    const respuesta = await fetch(`/api/prestadores/buscar/${encodeURIComponent(texto)}`);
+    const resultado = await respuesta.json();
 
-  setTimeout(() => {
-    window.location.href = "panel.html";
-  }, 1000);
+    if (!respuesta.ok) {
+      mensajeAcceso.textContent = resultado.mensaje;
+      mensajeAcceso.className = "mensaje error";
+      return;
+    }
+
+    const prestador = resultado.prestador;
+
+    sessionStorage.setItem("prestador_id", prestador.id);
+    sessionStorage.setItem("prestador_nombre", prestador.nombre);
+
+    mensajeAcceso.textContent = `Bienvenido, ${prestador.nombre}. Redirigiendo a tu panel...`;
+    mensajeAcceso.className = "mensaje success";
+
+    setTimeout(() => {
+      window.location.href = "panel.html";
+    }, 1000);
+
+  } catch (error) {
+    mensajeAcceso.textContent = "Error al conectar con el servidor.";
+    mensajeAcceso.className = "mensaje error";
+  }
 });
