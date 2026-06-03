@@ -1,0 +1,56 @@
+const express = require("express");
+const sqlite3 = require("sqlite3").verbose();
+const cors = require("cors");
+const path = require("path");
+
+const app = express();
+const PORT = 3000;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+
+const db = new sqlite3.Database("./servicio_social.db", (error) => {
+  if (error) {
+    console.error("Error al conectar con SQLite:", error.message);
+  } else {
+    console.log("Base de datos conectada correctamente.");
+  }
+});
+
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS prestadores (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT NOT NULL,
+      matricula TEXT NOT NULL UNIQUE,
+      carrera TEXT NOT NULL,
+      horario TEXT NOT NULL,
+      horas_requeridas REAL DEFAULT 480,
+      fecha_registro TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS registros (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      prestador_id INTEGER NOT NULL,
+      fecha TEXT NOT NULL,
+      hora_entrada TEXT,
+      hora_salida TEXT,
+      horas REAL DEFAULT 0,
+      actividad TEXT,
+      FOREIGN KEY (prestador_id) REFERENCES prestadores(id)
+    )
+  `);
+});
+
+app.get("/api/prueba", (req, res) => {
+  res.json({
+    mensaje: "Servidor funcionando correctamente"
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
