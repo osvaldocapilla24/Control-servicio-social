@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro | Servicio Social</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <div class="header">
+        <div class="logo">BUAP</div>
+        <h1>Registro de Prestador</h1>
+        <p>Regístrate una sola vez para comenzar a registrar tus horas de servicio social.</p>
+      </div>
+
+      <form id="formRegistro" class="form">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" placeholder="Ejemplo: José Aldo" required>
+
+        <label for="matricula">Matrícula</label>
+        <input type="text" id="matricula" placeholder="Ejemplo: 202345678" required>
+
+        <label for="carrera">Carrera</label>
+        <input type="text" id="carrera" value="Ingeniería en Tecnologías de la Información" required>
+
+        <label for="horario">Horario de servicio</label>
+        <input type="text" id="horario" placeholder="Ejemplo: Lunes a viernes 14:00 - 18:00" required>
+
+        <label for="horas_requeridas">Horas requeridas</label>
+        <input type="number" id="horas_requeridas" value="480" required>
+
+        <button type="submit">Registrarme</button>
+      </form>
+
+      <p id="mensaje" class="mensaje"></p>
+
+      <a href="index.html" class="link">Ya estoy registrado</a>
+    </section>
+  </main>
+
+  <script src="registro.js"></script>
+</body>
+</html>

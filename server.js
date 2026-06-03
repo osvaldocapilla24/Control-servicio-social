@@ -45,6 +45,56 @@ db.serialize(() => {
   `);
 });
 
+function obtenerFechaActual() {
+  return new Date().toISOString().split("T")[0];
+}
+
+app.post("/api/prestadores", (req, res) => {
+  const { nombre, matricula, carrera, horario, horas_requeridas } = req.body;
+
+  if (!nombre || !matricula || !carrera || !horario) {
+    return res.status(400).json({
+      mensaje: "Todos los campos son obligatorios."
+    });
+  }
+
+  const fechaRegistro = obtenerFechaActual();
+
+  db.run(
+    `
+    INSERT INTO prestadores 
+    (nombre, matricula, carrera, horario, horas_requeridas, fecha_registro)
+    VALUES (?, ?, ?, ?, ?, ?)
+    `,
+    [
+      nombre,
+      matricula,
+      carrera,
+      horario,
+      horas_requeridas || 480,
+      fechaRegistro
+    ],
+    function (error) {
+      if (error) {
+        if (error.message.includes("UNIQUE")) {
+          return res.status(409).json({
+            mensaje: "Ya existe un prestador registrado con esa matrícula."
+          });
+        }
+
+        return res.status(500).json({
+          mensaje: "Error al registrar prestador."
+        });
+      }
+
+      res.json({
+        mensaje: "Prestador registrado correctamente.",
+        id: this.lastID
+      });
+    }
+  );
+});
+
 app.get("/api/prueba", (req, res) => {
   res.json({
     mensaje: "Servidor funcionando correctamente"
