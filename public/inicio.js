@@ -28,7 +28,7 @@ formAcceso.addEventListener("submit", async (e) => {
     sessionStorage.setItem("prestador_id", prestador.id);
     sessionStorage.setItem("prestador_nombre", prestador.nombre);
 
-    mensajeAcceso.textContent = `Bienvenido, ${prestador.nombre}. Redirigiendo a tu panel...`;
+    mensajeAcceso.textContent = `Bienvenido, ${prestador.nombre}.`;
     mensajeAcceso.className = "mensaje success";
 
     setTimeout(() => {

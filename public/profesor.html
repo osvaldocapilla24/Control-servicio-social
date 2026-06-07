@@ -10,6 +10,8 @@
 
 <body>
   <main class="page">
+
+    <!-- PANTALLA DE PIN -->
     <section id="pinSection" class="card">
       <div class="header">
         <div class="logo">BUAP</div>
@@ -19,25 +21,37 @@
 
       <form id="formPin" class="form">
         <label for="pinResponsable">PIN del responsable</label>
-        <input type="password" id="pinResponsable" placeholder="Ingresa el PIN" required>
+        <input 
+          type="password" 
+          id="pinResponsable" 
+          placeholder="Ingresa el PIN" 
+          required
+        >
 
         <button type="submit">INGRESAR</button>
       </form>
 
       <p id="mensajePin" class="mensaje"></p>
 
-      <div class="actions-top menu-inicio">
-        <a href="index.html" class="link small-link">Volver al inicio</a>
+      <div class="text-links">
+        <p>
+          <a href="index.html">Volver al inicio</a>
+        </p>
       </div>
     </section>
 
+    <!-- PANEL DEL RESPONSABLE -->
     <section id="panelResponsable" class="card wide hidden">
-      <div class="header">
+
+      <div class="header header-responsable">
+        <button id="btnCerrarResponsable" class="logout-text">Cerrar sesión</button>
+
         <div class="logo">BUAP</div>
         <h1>Panel del Responsable</h1>
         <p>Consulta el avance de horas de todos los prestadores.</p>
       </div>
 
+      <!-- HISTORIAL DEL PRESTADOR -->
       <section id="detallePrestador" class="summary hidden">
         <h2>Historial del prestador</h2>
         <p id="nombreDetalle"></p>
@@ -57,6 +71,7 @@
         </table>
       </section>
 
+      <!-- FORMULARIO PARA EDITAR REGISTRO -->
       <section id="formEditarRegistroResponsable" class="summary hidden">
         <h2>Editar registro</h2>
         <p>Corrige la fecha, horario o actividad del registro seleccionado.</p>
@@ -76,15 +91,20 @@
           <input type="time" id="editarSalidaResponsable">
 
           <label for="editarActividadResponsable">Actividad realizada</label>
-          <input type="text" id="editarActividadResponsable" placeholder="Ejemplo: Mantenimiento preventivo">
+          <input 
+            type="text" 
+            id="editarActividadResponsable" 
+            placeholder="Ejemplo: Mantenimiento preventivo"
+          >
 
           <div class="buttons">
-            <button id="btnGuardarEdicionResponsable" type="button">Guardar cambios</button>
+            <button id="btnGuardarEdicionResponsable" type="button">Actualizar registro</button>
             <button id="btnCancelarEdicionResponsable" type="button" class="danger">Cancelar</button>
           </div>
         </div>
       </section>
 
+      <!-- TABLA GENERAL DE PRESTADORES -->
       <table>
         <thead>
           <tr>
@@ -100,10 +120,12 @@
         </thead>
         <tbody id="tablaProfesor"></tbody>
       </table>
-       <div class="compact-actions">
+
+      <!-- ACCIONES ABAJO DE LA TABLA -->
+      <div class="compact-actions">
         <a href="registro.html" class="link small-link">Registrar prestador</a>
-        <button id="btnCerrarResponsable" class="danger">Cerrar sesión</button>
       </div>
+
     </section>
   </main>
 
