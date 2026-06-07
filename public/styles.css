@@ -498,3 +498,164 @@ tr:hover {
     text-align: right;
   }
 }
+
+.btn-finalizar {
+  background: var(--verde);
+  color: white;
+}
+
+.btn-finalizar:hover {
+  background: #15803d;
+}
+
+.btn-activar {
+  background: var(--azul-oscuro);
+  color: white;
+}
+
+.btn-activar:hover {
+  background: var(--azul-principal-hover);
+}
+
+.acciones-prestador {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  min-width: 170px;
+}
+
+.btn-accion {
+  padding: 8px 10px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+  width: 100%;
+  box-shadow: none;
+}
+
+.btn-accion:hover {
+  transform: translateY(-1px);
+}
+
+.btn-historial {
+  background: var(--azul-principal);
+  color: white;
+}
+
+.btn-historial:hover {
+  background: var(--azul-principal-hover);
+}
+
+.btn-finalizar {
+  background: var(--verde);
+  color: white;
+}
+
+.btn-finalizar:hover {
+  background: #15803d;
+}
+
+.btn-activar {
+  background: var(--azul-oscuro);
+  color: white;
+}
+
+.btn-activar:hover {
+  background: var(--azul-principal-hover);
+}
+
+.btn-borrar-registros {
+  background: var(--rojo);
+  color: white;
+  grid-column: span 2;
+}
+
+.btn-borrar-registros:hover {
+  background: var(--rojo-hover);
+}
+
+.acciones-historial {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.btn-texto {
+  background: transparent;
+  color: var(--azul-principal);
+  padding: 0;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.btn-texto:hover {
+  background: transparent;
+  color: var(--azul-principal-hover);
+  text-decoration: underline;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-texto.peligro {
+  color: var(--rojo);
+}
+
+.btn-texto.peligro:hover {
+  color: var(--rojo-hover);
+}
+
+.acciones-historial-card {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--gris-fondo);
+  border: 1px solid var(--gris-borde);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.acciones-historial-card span {
+  font-weight: 700;
+  color: var(--azul-texto);
+}
+
+.acciones-historial-botones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-mini,
+.btn-mini-danger {
+  padding: 8px 13px;
+  font-size: 13px;
+  border-radius: 9px;
+  box-shadow: none;
+}
+
+.btn-mini {
+  background: var(--azul-principal);
+  color: white;
+}
+
+.btn-mini:hover {
+  background: var(--azul-principal-hover);
+}
+
+.btn-mini-danger {
+  background: transparent;
+  color: var(--rojo);
+  border: 1px solid var(--rojo);
+}
+
+.btn-mini-danger:hover {
+  background: var(--rojo);
+  color: white;
+}

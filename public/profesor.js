@@ -64,6 +64,7 @@ async function cargarResumenProfesor() {
         <td>${p.horario}</td>
         <td>${Number(p.horas_acumuladas).toFixed(2)}</td>
         <td>${Number(p.horas_faltantes).toFixed(2)}</td>
+        <td>${p.estatus || "activo"}</td>
         <td>${p.estado_hoy}</td>
         <td>
           <button class="small-btn btn-historial" data-id="${p.id}" data-nombre="${p.nombre}">
@@ -84,11 +85,10 @@ async function cargarResumenProfesor() {
         verHistorial(id, nombre);
       });
     });
-
   } catch (error) {
     tablaProfesor.innerHTML = `
       <tr>
-        <td colspan="8">Error al cargar la información.</td>
+        <td colspan="9">Error al cargar la información.</td>
       </tr>
     `;
   }
@@ -100,21 +100,39 @@ async function verHistorial(id, nombre) {
     const registros = await respuesta.json();
 
     detallePrestador.classList.remove("hidden");
-    nombreDetalle.textContent = `Prestador: ${nombre}`;
+    nombreDetalle.innerHTML = `
+  <strong>Prestador:</strong> ${nombre}
 
-    prestadorResponsableEditandoId.value = id;
-    prestadorResponsableEditandoNombre.value = nombre;
+  <div class="acciones-historial-card">
+    <span>Acciones del prestador</span>
 
-    tablaHistorial.innerHTML = "";
+    <div class="acciones-historial-botones">
+      <button class="btn-mini btn-finalizar-detalle" type="button">
+        Finalizar
+      </button>
 
-    if (registros.length === 0) {
-      tablaHistorial.innerHTML = `
-        <tr>
-          <td colspan="6">Este prestador todavía no tiene registros.</td>
-        </tr>
-      `;
-      return;
-    }
+      <button class="btn-mini btn-activar-detalle" type="button">
+        Reactivar
+      </button>
+
+      <button class="btn-mini-danger btn-borrar-detalle" type="button">
+        Borrar registros
+      </button>
+    </div>
+  </div>
+`;
+
+    document.querySelector(".btn-finalizar-detalle").addEventListener("click", () => {
+      finalizarPrestador(id);
+    });
+
+    document.querySelector(".btn-activar-detalle").addEventListener("click", () => {
+      activarPrestador(id);
+    });
+
+    document.querySelector(".btn-borrar-detalle").addEventListener("click", () => {
+      borrarRegistrosPrestador(id, nombre);
+    });
 
     registros.forEach((r) => {
       const tr = document.createElement("tr");
@@ -136,14 +154,6 @@ async function verHistorial(id, nombre) {
           >
             Editar
           </button>
-
-          <button 
-            class="small-btn danger btn-eliminar-responsable"
-            data-id="${r.id}"
-          >
-            Eliminar
-          </button>
-        </td>
       `;
 
       tablaHistorial.appendChild(tr);
@@ -252,6 +262,84 @@ async function eliminarRegistroResponsable(id) {
 
   await verHistorial(prestadorId, prestadorNombre);
   await cargarResumenProfesor();
+}
+
+async function finalizarPrestador(id) {
+  const confirmar = confirm("¿Seguro que deseas marcar este prestador como finalizado?");
+
+  if (!confirmar) {
+    return;
+  }
+
+  const respuesta = await fetch(`/api/prestadores/${id}/finalizar`, {
+    method: "PATCH"
+  });
+
+  const resultado = await respuesta.json();
+
+  if (!respuesta.ok) {
+    alert(resultado.mensaje);
+    return;
+  }
+
+  alert(resultado.mensaje);
+  cargarResumenProfesor();
+}
+
+async function activarPrestador(id) {
+  const confirmar = confirm("¿Seguro que deseas reactivar este prestador?");
+
+  if (!confirmar) {
+    return;
+  }
+
+  const respuesta = await fetch(`/api/prestadores/${id}/activar`, {
+    method: "PATCH"
+  });
+
+  const resultado = await respuesta.json();
+
+  if (!respuesta.ok) {
+    alert(resultado.mensaje);
+    return;
+  }
+
+  alert(resultado.mensaje);
+  cargarResumenProfesor();
+}
+
+async function borrarRegistrosPrestador(id, nombre) {
+  const confirmar = confirm(
+    `¿Seguro que deseas borrar TODOS los registros de ${nombre}?\n\nEsta acción no se puede deshacer.`
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  const segundaConfirmacion = confirm(
+    "Confirma nuevamente: se eliminarán todas las horas registradas de este prestador."
+  );
+
+  if (!segundaConfirmacion) {
+    return;
+  }
+
+  const respuesta = await fetch(`/api/prestadores/${id}/registros`, {
+    method: "DELETE"
+  });
+
+  const resultado = await respuesta.json();
+
+  if (!respuesta.ok) {
+    alert(resultado.mensaje);
+    return;
+  }
+
+  alert(`${resultado.mensaje} Registros eliminados: ${resultado.registros_eliminados}`);
+  detallePrestador.classList.add("hidden");
+  formEditarRegistroResponsable.classList.add("hidden");
+  cargarResumenProfesor();
 }
 
 function limpiarFormularioEdicionResponsable() {

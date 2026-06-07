@@ -21,13 +21,14 @@ const db = new sqlite3.Database("./servicio_social.db", (error) => {
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS prestadores (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nombre TEXT NOT NULL,
-      matricula TEXT NOT NULL UNIQUE,
-      carrera TEXT NOT NULL,
-      horario TEXT NOT NULL,
-      horas_requeridas REAL DEFAULT 480,
-      fecha_registro TEXT NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    matricula TEXT NOT NULL UNIQUE,
+    carrera TEXT NOT NULL,
+    horario TEXT NOT NULL,
+    horas_requeridas REAL DEFAULT 480,
+    fecha_registro TEXT NOT NULL,
+    estatus TEXT DEFAULT 'activo'
     )
   `);
 
@@ -43,6 +44,25 @@ db.serialize(() => {
       FOREIGN KEY (prestador_id) REFERENCES prestadores(id)
     )
   `);
+});
+
+db.all("PRAGMA table_info(prestadores)", [], (error, columnas) => {
+  if (error) {
+    console.error("Error al revisar columnas:", error.message);
+    return;
+  }
+
+  const existeEstatus = columnas.some((columna) => columna.name === "estatus");
+
+  if (!existeEstatus) {
+    db.run("ALTER TABLE prestadores ADD COLUMN estatus TEXT DEFAULT 'activo'", (error) => {
+      if (error) {
+        console.error("Error al agregar columna estatus:", error.message);
+      } else {
+        console.log("Columna estatus agregada correctamente.");
+      }
+    });
+  }
 });
 
 function obtenerFechaActual() {
@@ -403,6 +423,7 @@ app.get("/api/profesor/resumen", (req, res) => {
       p.carrera,
       p.horario,
       p.horas_requeridas,
+      p.estatus,
       IFNULL(SUM(r.horas), 0) AS horas_acumuladas,
       p.horas_requeridas - IFNULL(SUM(r.horas), 0) AS horas_faltantes,
       (
@@ -540,6 +561,90 @@ app.delete("/api/registros/:id", (req, res) => {
 
       res.json({
         mensaje: "Registro eliminado correctamente."
+      });
+    }
+  );
+});
+
+app.patch("/api/prestadores/:id/finalizar", (req, res) => {
+  const prestadorId = req.params.id;
+
+  db.run(
+    `
+    UPDATE prestadores
+    SET estatus = 'finalizado'
+    WHERE id = ?
+    `,
+    [prestadorId],
+    function (error) {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al finalizar prestador."
+        });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({
+          mensaje: "Prestador no encontrado."
+        });
+      }
+
+      res.json({
+        mensaje: "Prestador marcado como finalizado correctamente."
+      });
+    }
+  );
+});
+
+app.patch("/api/prestadores/:id/activar", (req, res) => {
+  const prestadorId = req.params.id;
+
+  db.run(
+    `
+    UPDATE prestadores
+    SET estatus = 'activo'
+    WHERE id = ?
+    `,
+    [prestadorId],
+    function (error) {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al reactivar prestador."
+        });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({
+          mensaje: "Prestador no encontrado."
+        });
+      }
+
+      res.json({
+        mensaje: "Prestador reactivado correctamente."
+      });
+    }
+  );
+});
+
+app.delete("/api/prestadores/:id/registros", (req, res) => {
+  const prestadorId = req.params.id;
+
+  db.run(
+    `
+    DELETE FROM registros
+    WHERE prestador_id = ?
+    `,
+    [prestadorId],
+    function (error) {
+      if (error) {
+        return res.status(500).json({
+          mensaje: "Error al borrar registros del prestador."
+        });
+      }
+
+      res.json({
+        mensaje: "Registros del prestador borrados correctamente.",
+        registros_eliminados: this.changes
       });
     }
   );

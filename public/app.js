@@ -281,9 +281,18 @@ function limpiarFormularioEdicion() {
   formEditarRegistro.classList.add("hidden");
 }
 
+let temporizadorMensaje;
+
 function mostrarMensaje(texto, tipo) {
   mensaje.textContent = texto;
   mensaje.className = `mensaje ${tipo}`;
+
+  clearTimeout(temporizadorMensaje);
+
+  temporizadorMensaje = setTimeout(() => {
+    mensaje.textContent = "";
+    mensaje.className = "mensaje";
+  }, 4000);
 }
 
 btnEntrada.addEventListener("click", registrarEntrada);
