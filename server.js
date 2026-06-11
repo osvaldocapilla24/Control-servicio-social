@@ -4,7 +4,7 @@ const cors = require("cors");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -156,7 +156,12 @@ app.post("/api/prestadores", (req, res) => {
 });
 
 function obtenerHoraActual() {
-  return new Date().toTimeString().split(" ")[0].substring(0, 5);
+  return new Date().toLocaleTimeString("en-GB", {
+    timeZone: "America/Mexico_City",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
 }
 
 function calcularHoras(horaEntrada, horaSalida) {
@@ -482,8 +487,8 @@ app.post("/api/registro-manual", (req, res) => {
         FROM registros
         WHERE prestador_id = ?
         AND fecha = ?
-        AND hora_entrada = ?
-        AND hora_salida = ?
+        AND hora_entrada < ?
+        AND hora_salida > ?
         LIMIT 1
         `,
         [prestador_id, fecha, hora_entrada, hora_salida],
@@ -721,8 +726,8 @@ app.put("/api/registros/:id", (req, res) => {
         FROM registros
         WHERE prestador_id = ?
         AND fecha = ?
-        AND hora_entrada = ?
-        AND hora_salida = ?
+        AND hora_entrada < ?
+        AND hora_salida > ?
         AND id != ?
         LIMIT 1
         `,
