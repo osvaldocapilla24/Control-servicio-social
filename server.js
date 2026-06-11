@@ -66,15 +66,54 @@ db.all("PRAGMA table_info(prestadores)", [], (error, columnas) => {
 });
 
 function obtenerFechaActual() {
-  return new Date().toISOString().split("T")[0];
+  const fechaMexico = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Mexico_City"
+  });
+
+  return fechaMexico;
+}
+
+function fechaEsFutura(fecha) {
+  const hoy = obtenerFechaActual();
+  return fecha > hoy;
 }
 
 app.post("/api/prestadores", (req, res) => {
-  const { nombre, matricula, carrera, horario, horas_requeridas } = req.body;
+  let { nombre, matricula, carrera, horario, horas_requeridas } = req.body;
 
-  if (!nombre || !matricula || !carrera || !horario) {
+  nombre = nombre ? nombre.trim() : "";
+  matricula = matricula ? matricula.trim() : "";
+  carrera = carrera ? carrera.trim() : "";
+  horario = horario ? horario.trim() : "";
+  horas_requeridas = Number(horas_requeridas);
+
+  if (!nombre) {
     return res.status(400).json({
-      mensaje: "Todos los campos son obligatorios."
+      mensaje: "El nombre es obligatorio."
+    });
+  }
+
+  if (!matricula) {
+    return res.status(400).json({
+      mensaje: "La matrícula es obligatoria."
+    });
+  }
+
+  if (!carrera) {
+    return res.status(400).json({
+      mensaje: "La carrera es obligatoria."
+    });
+  }
+
+  if (!horario) {
+    return res.status(400).json({
+      mensaje: "El horario es obligatorio."
+    });
+  }
+
+  if (!horas_requeridas || horas_requeridas <= 0) {
+    return res.status(400).json({
+      mensaje: "Las horas requeridas deben ser mayor a 0."
     });
   }
 
@@ -83,16 +122,17 @@ app.post("/api/prestadores", (req, res) => {
   db.run(
     `
     INSERT INTO prestadores 
-    (nombre, matricula, carrera, horario, horas_requeridas, fecha_registro)
-    VALUES (?, ?, ?, ?, ?, ?)
+    (nombre, matricula, carrera, horario, horas_requeridas, fecha_registro, estatus)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     `,
     [
       nombre,
       matricula,
       carrera,
       horario,
-      horas_requeridas || 480,
-      fechaRegistro
+      horas_requeridas,
+      fechaRegistro,
+      "activo"
     ],
     function (error) {
       if (error) {
@@ -166,7 +206,7 @@ app.get("/api/prestadores/buscar/:texto", (req, res) => {
 
   db.get(
     `
-    SELECT id, nombre, matricula, carrera, horario, horas_requeridas
+    SELECT id, nombre, matricula, carrera, horario, horas_requeridas, estatus
     FROM prestadores
     WHERE matricula = ?
     OR nombre LIKE ?
@@ -208,43 +248,72 @@ app.post("/api/entrada", (req, res) => {
 
   db.get(
     `
-    SELECT * FROM registros
-    WHERE prestador_id = ?
-    AND fecha = ?
-    AND hora_salida IS NULL
+    SELECT id, nombre, estatus
+    FROM prestadores
+    WHERE id = ?
     `,
-    [prestador_id, fecha],
-    (error, registroAbierto) => {
+    [prestador_id],
+    (error, prestador) => {
       if (error) {
         return res.status(500).json({
-          mensaje: "Error al verificar registro."
+          mensaje: "Error al verificar prestador."
         });
       }
 
-      if (registroAbierto) {
-        return res.status(409).json({
-          mensaje: "Ya tienes una entrada registrada sin salida."
+      if (!prestador) {
+        return res.status(404).json({
+          mensaje: "Prestador no encontrado."
         });
       }
 
-      db.run(
+      if (prestador.estatus === "finalizado") {
+        return res.status(403).json({
+          mensaje: "No puedes registrar entrada porque este prestador ya finalizó su servicio."
+        });
+      }
+
+      db.get(
         `
-        INSERT INTO registros 
-        (prestador_id, fecha, hora_entrada, actividad)
-        VALUES (?, ?, ?, ?)
+        SELECT * FROM registros
+        WHERE prestador_id = ?
+        AND hora_salida IS NULL
+        ORDER BY id DESC
+        LIMIT 1
         `,
-        [prestador_id, fecha, horaEntrada, actividad || ""],
-        function (error) {
+        [prestador_id],
+        (error, registroAbierto) => {
           if (error) {
             return res.status(500).json({
-              mensaje: "Error al registrar entrada."
+              mensaje: "Error al verificar registro."
             });
           }
 
-          res.json({
-            mensaje: "Entrada registrada correctamente.",
-            hora_entrada: horaEntrada
-          });
+          if (registroAbierto) {
+            return res.status(409).json({
+              mensaje: "Ya tienes una entrada abierta. Primero debes marcar salida."
+            });
+          }
+
+          db.run(
+            `
+            INSERT INTO registros 
+            (prestador_id, fecha, hora_entrada, actividad)
+            VALUES (?, ?, ?, ?)
+            `,
+            [prestador_id, fecha, horaEntrada, actividad || ""],
+            function (error) {
+              if (error) {
+                return res.status(500).json({
+                  mensaje: "Error al registrar entrada."
+                });
+              }
+
+              res.json({
+                mensaje: "Entrada registrada correctamente.",
+                hora_entrada: horaEntrada
+              });
+            }
+          );
         }
       );
     }
@@ -265,48 +334,81 @@ app.post("/api/salida", (req, res) => {
 
   db.get(
     `
-    SELECT * FROM registros
-    WHERE prestador_id = ?
-    AND fecha = ?
-    AND hora_salida IS NULL
-    ORDER BY id DESC
-    LIMIT 1
+    SELECT id, nombre, estatus
+    FROM prestadores
+    WHERE id = ?
     `,
-    [prestador_id, fecha],
-    (error, registro) => {
+    [prestador_id],
+    (error, prestador) => {
       if (error) {
         return res.status(500).json({
-          mensaje: "Error al buscar entrada."
+          mensaje: "Error al verificar prestador."
         });
       }
 
-      if (!registro) {
+      if (!prestador) {
         return res.status(404).json({
-          mensaje: "No tienes una entrada abierta para registrar salida."
+          mensaje: "Prestador no encontrado."
         });
       }
 
-      const horas = calcularHoras(registro.hora_entrada, horaSalida);
+      if (prestador.estatus === "finalizado") {
+        return res.status(403).json({
+          mensaje: "No puedes registrar salida porque este prestador ya finalizó su servicio."
+        });
+      }
 
-      db.run(
+      db.get(
         `
-        UPDATE registros
-        SET hora_salida = ?, horas = ?
-        WHERE id = ?
+        SELECT * FROM registros
+        WHERE prestador_id = ?
+        AND hora_salida IS NULL
+        ORDER BY id DESC
+        LIMIT 1
         `,
-        [horaSalida, horas, registro.id],
-        function (error) {
+        [prestador_id],
+        (error, registro) => {
           if (error) {
             return res.status(500).json({
-              mensaje: "Error al registrar salida."
+              mensaje: "Error al buscar entrada."
             });
           }
 
-          res.json({
-            mensaje: "Salida registrada correctamente.",
-            hora_salida: horaSalida,
-            horas
-          });
+          if (!registro) {
+            return res.status(404).json({
+              mensaje: "No tienes una entrada abierta para registrar salida."
+            });
+          }
+
+          const horas = calcularHoras(registro.hora_entrada, horaSalida);
+
+          if (horas <= 0) {
+            return res.status(400).json({
+              mensaje: "La hora de salida debe ser mayor que la hora de entrada."
+            });
+          }
+
+          db.run(
+            `
+            UPDATE registros
+            SET hora_salida = ?, horas = ?
+            WHERE id = ?
+            `,
+            [horaSalida, horas, registro.id],
+            function (error) {
+              if (error) {
+                return res.status(500).json({
+                  mensaje: "Error al registrar salida."
+                });
+              }
+
+              res.json({
+                mensaje: "Salida registrada correctamente.",
+                hora_salida: horaSalida,
+                horas
+              });
+            }
+          );
         }
       );
     }
@@ -316,9 +418,27 @@ app.post("/api/salida", (req, res) => {
 app.post("/api/registro-manual", (req, res) => {
   const { prestador_id, fecha, hora_entrada, hora_salida, actividad } = req.body;
 
-  if (!prestador_id || !fecha || !hora_entrada || !hora_salida) {
+  if (!prestador_id) {
     return res.status(400).json({
-      mensaje: "Prestador, fecha, hora de entrada y hora de salida son obligatorios."
+      mensaje: "Debes seleccionar un prestador."
+    });
+  }
+
+  if (!fecha) {
+    return res.status(400).json({
+      mensaje: "Debes seleccionar una fecha."
+    });
+  }
+
+  if (fechaEsFutura(fecha)) {
+    return res.status(400).json({
+      mensaje: "No puedes registrar horas en una fecha futura."
+    });
+  }
+
+  if (!hora_entrada || !hora_salida) {
+    return res.status(400).json({
+      mensaje: "Debes seleccionar hora de entrada y hora de salida."
     });
   }
 
@@ -330,24 +450,78 @@ app.post("/api/registro-manual", (req, res) => {
     });
   }
 
-  db.run(
+  db.get(
     `
-    INSERT INTO registros
-    (prestador_id, fecha, hora_entrada, hora_salida, horas, actividad)
-    VALUES (?, ?, ?, ?, ?, ?)
+    SELECT id, nombre, estatus
+    FROM prestadores
+    WHERE id = ?
     `,
-    [prestador_id, fecha, hora_entrada, hora_salida, horas, actividad || ""],
-    function (error) {
+    [prestador_id],
+    (error, prestador) => {
       if (error) {
         return res.status(500).json({
-          mensaje: "Error al guardar el registro manual."
+          mensaje: "Error al verificar prestador."
         });
       }
 
-      res.json({
-        mensaje: "Registro manual guardado correctamente.",
-        horas
-      });
+      if (!prestador) {
+        return res.status(404).json({
+          mensaje: "Prestador no encontrado."
+        });
+      }
+
+      if (prestador.estatus === "finalizado") {
+        return res.status(403).json({
+          mensaje: "No puedes agregar horas porque este prestador ya finalizó su servicio."
+        });
+      }
+
+      db.get(
+        `
+        SELECT id
+        FROM registros
+        WHERE prestador_id = ?
+        AND fecha = ?
+        AND hora_entrada = ?
+        AND hora_salida = ?
+        LIMIT 1
+        `,
+        [prestador_id, fecha, hora_entrada, hora_salida],
+        (error, registroDuplicado) => {
+          if (error) {
+            return res.status(500).json({
+              mensaje: "Error al verificar registros duplicados."
+            });
+          }
+
+          if (registroDuplicado) {
+            return res.status(409).json({
+              mensaje: "Ya existe un registro con ese horario"
+            });
+          }
+
+          db.run(
+            `
+            INSERT INTO registros
+            (prestador_id, fecha, hora_entrada, hora_salida, horas, actividad)
+            VALUES (?, ?, ?, ?, ?, ?)
+            `,
+            [prestador_id, fecha, hora_entrada, hora_salida, horas, actividad || ""],
+            function (error) {
+              if (error) {
+                return res.status(500).json({
+                  mensaje: "Error al guardar el registro manual."
+                });
+              }
+
+              res.json({
+                mensaje: "Registro manual guardado correctamente.",
+                horas
+              });
+            }
+          );
+        }
+      );
     }
   );
 });
@@ -495,9 +669,21 @@ app.put("/api/registros/:id", (req, res) => {
   const registroId = req.params.id;
   const { fecha, hora_entrada, hora_salida, actividad } = req.body;
 
-  if (!fecha || !hora_entrada || !hora_salida) {
+  if (!fecha) {
     return res.status(400).json({
-      mensaje: "Fecha, hora de entrada y hora de salida son obligatorias."
+      mensaje: "Debes seleccionar una fecha."
+    });
+  }
+
+  if (fechaEsFutura(fecha)) {
+    return res.status(400).json({
+      mensaje: "No puedes usar una fecha futura."
+    });
+  }
+
+  if (!hora_entrada || !hora_salida) {
+    return res.status(400).json({
+      mensaje: "Debes seleccionar hora de entrada y hora de salida."
     });
   }
 
@@ -509,34 +695,82 @@ app.put("/api/registros/:id", (req, res) => {
     });
   }
 
-  db.run(
+  db.get(
     `
-    UPDATE registros
-    SET fecha = ?, hora_entrada = ?, hora_salida = ?, horas = ?, actividad = ?
+    SELECT id, prestador_id
+    FROM registros
     WHERE id = ?
     `,
-    [fecha, hora_entrada, hora_salida, horas, actividad || "", registroId],
-    function (error) {
+    [registroId],
+    (error, registroActual) => {
       if (error) {
         return res.status(500).json({
-          mensaje: "Error al actualizar el registro."
+          mensaje: "Error al buscar el registro."
         });
       }
 
-      if (this.changes === 0) {
+      if (!registroActual) {
         return res.status(404).json({
           mensaje: "Registro no encontrado."
         });
       }
 
-      res.json({
-        mensaje: "Registro actualizado correctamente.",
-        horas
-      });
+      db.get(
+        `
+        SELECT id
+        FROM registros
+        WHERE prestador_id = ?
+        AND fecha = ?
+        AND hora_entrada = ?
+        AND hora_salida = ?
+        AND id != ?
+        LIMIT 1
+        `,
+        [
+          registroActual.prestador_id,
+          fecha,
+          hora_entrada,
+          hora_salida,
+          registroId
+        ],
+        (error, registroDuplicado) => {
+          if (error) {
+            return res.status(500).json({
+              mensaje: "Error al verificar registros duplicados."
+            });
+          }
+
+          if (registroDuplicado) {
+            return res.status(409).json({
+              mensaje: "Ya existe otro registro con la misma fecha, entrada y salida."
+            });
+          }
+
+          db.run(
+            `
+            UPDATE registros
+            SET fecha = ?, hora_entrada = ?, hora_salida = ?, horas = ?, actividad = ?
+            WHERE id = ?
+            `,
+            [fecha, hora_entrada, hora_salida, horas, actividad || "", registroId],
+            function (error) {
+              if (error) {
+                return res.status(500).json({
+                  mensaje: "Error al actualizar el registro."
+                });
+              }
+
+              res.json({
+                mensaje: "Registro actualizado correctamente.",
+                horas
+              });
+            }
+          );
+        }
+      );
     }
   );
 });
-
 app.delete("/api/registros/:id", (req, res) => {
   const registroId = req.params.id;
 
@@ -569,29 +803,51 @@ app.delete("/api/registros/:id", (req, res) => {
 app.patch("/api/prestadores/:id/finalizar", (req, res) => {
   const prestadorId = req.params.id;
 
-  db.run(
+  db.get(
     `
-    UPDATE prestadores
-    SET estatus = 'finalizado'
+    SELECT id, nombre, estatus
+    FROM prestadores
     WHERE id = ?
     `,
     [prestadorId],
-    function (error) {
+    (error, prestador) => {
       if (error) {
         return res.status(500).json({
-          mensaje: "Error al finalizar prestador."
+          mensaje: "Error al verificar prestador."
         });
       }
 
-      if (this.changes === 0) {
+      if (!prestador) {
         return res.status(404).json({
           mensaje: "Prestador no encontrado."
         });
       }
 
-      res.json({
-        mensaje: "Prestador marcado como finalizado correctamente."
-      });
+      if (prestador.estatus === "finalizado") {
+        return res.status(409).json({
+          mensaje: "Este prestador ya está marcado como finalizado."
+        });
+      }
+
+      db.run(
+        `
+        UPDATE prestadores
+        SET estatus = 'finalizado'
+        WHERE id = ?
+        `,
+        [prestadorId],
+        function (error) {
+          if (error) {
+            return res.status(500).json({
+              mensaje: "Error al finalizar prestador."
+            });
+          }
+
+          res.json({
+            mensaje: "Prestador marcado como finalizado correctamente."
+          });
+        }
+      );
     }
   );
 });
@@ -599,29 +855,51 @@ app.patch("/api/prestadores/:id/finalizar", (req, res) => {
 app.patch("/api/prestadores/:id/activar", (req, res) => {
   const prestadorId = req.params.id;
 
-  db.run(
+  db.get(
     `
-    UPDATE prestadores
-    SET estatus = 'activo'
+    SELECT id, nombre, estatus
+    FROM prestadores
     WHERE id = ?
     `,
     [prestadorId],
-    function (error) {
+    (error, prestador) => {
       if (error) {
         return res.status(500).json({
-          mensaje: "Error al reactivar prestador."
+          mensaje: "Error al verificar prestador."
         });
       }
 
-      if (this.changes === 0) {
+      if (!prestador) {
         return res.status(404).json({
           mensaje: "Prestador no encontrado."
         });
       }
 
-      res.json({
-        mensaje: "Prestador reactivado correctamente."
-      });
+      if (prestador.estatus === "activo") {
+        return res.status(409).json({
+          mensaje: "Este prestador ya se encuentra activo."
+        });
+      }
+
+      db.run(
+        `
+        UPDATE prestadores
+        SET estatus = 'activo'
+        WHERE id = ?
+        `,
+        [prestadorId],
+        function (error) {
+          if (error) {
+            return res.status(500).json({
+              mensaje: "Error al reactivar prestador."
+            });
+          }
+
+          res.json({
+            mensaje: "Prestador reactivado correctamente."
+          });
+        }
+      );
     }
   );
 });
@@ -629,23 +907,67 @@ app.patch("/api/prestadores/:id/activar", (req, res) => {
 app.delete("/api/prestadores/:id/registros", (req, res) => {
   const prestadorId = req.params.id;
 
-  db.run(
+  db.get(
     `
-    DELETE FROM registros
-    WHERE prestador_id = ?
+    SELECT id, nombre
+    FROM prestadores
+    WHERE id = ?
     `,
     [prestadorId],
-    function (error) {
+    (error, prestador) => {
       if (error) {
         return res.status(500).json({
-          mensaje: "Error al borrar registros del prestador."
+          mensaje: "Error al verificar prestador."
         });
       }
 
-      res.json({
-        mensaje: "Registros del prestador borrados correctamente.",
-        registros_eliminados: this.changes
-      });
+      if (!prestador) {
+        return res.status(404).json({
+          mensaje: "Prestador no encontrado."
+        });
+      }
+
+      db.get(
+        `
+        SELECT COUNT(*) AS total
+        FROM registros
+        WHERE prestador_id = ?
+        `,
+        [prestadorId],
+        (error, resultado) => {
+          if (error) {
+            return res.status(500).json({
+              mensaje: "Error al revisar registros del prestador."
+            });
+          }
+
+          if (resultado.total === 0) {
+            return res.status(409).json({
+              mensaje: "Este prestador no tiene registros para eliminar."
+            });
+          }
+
+          db.run(
+            `
+            DELETE FROM registros
+            WHERE prestador_id = ?
+            `,
+            [prestadorId],
+            function (error) {
+              if (error) {
+                return res.status(500).json({
+                  mensaje: "Error al borrar registros del prestador."
+                });
+              }
+
+              res.json({
+                mensaje: "Registros del prestador borrados correctamente.",
+                registros_eliminados: this.changes
+              });
+            }
+          );
+        }
+      );
     }
   );
 });

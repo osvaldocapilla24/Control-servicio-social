@@ -1,6 +1,25 @@
+sessionStorage.removeItem("responsable_autorizado");
+sessionStorage.removeItem("prestador_id");
+sessionStorage.removeItem("prestador_nombre");
+sessionStorage.removeItem("prestador_estatus");
+
 const formAcceso = document.getElementById("formAcceso");
 const busquedaPrestador = document.getElementById("busquedaPrestador");
 const mensajeAcceso = document.getElementById("mensajeAcceso");
+
+let temporizadorMensaje;
+
+function mostrarMensaje(texto, tipo) {
+  mensajeAcceso.textContent = texto;
+  mensajeAcceso.className = `mensaje ${tipo}`;
+
+  clearTimeout(temporizadorMensaje);
+
+  temporizadorMensaje = setTimeout(() => {
+    mensajeAcceso.textContent = "";
+    mensajeAcceso.className = "mensaje";
+  }, 4000);
+}
 
 formAcceso.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -8,8 +27,7 @@ formAcceso.addEventListener("submit", async (e) => {
   const texto = busquedaPrestador.value.trim();
 
   if (!texto) {
-    mensajeAcceso.textContent = "Escribe tu nombre o matrícula para continuar.";
-    mensajeAcceso.className = "mensaje error";
+    mostrarMensaje("Escribe tu nombre o matrícula para continuar.", "error");
     return;
   }
 
@@ -18,8 +36,7 @@ formAcceso.addEventListener("submit", async (e) => {
     const resultado = await respuesta.json();
 
     if (!respuesta.ok) {
-      mensajeAcceso.textContent = resultado.mensaje;
-      mensajeAcceso.className = "mensaje error";
+      mostrarMensaje(resultado.mensaje, "error");
       return;
     }
 
@@ -27,16 +44,21 @@ formAcceso.addEventListener("submit", async (e) => {
 
     sessionStorage.setItem("prestador_id", prestador.id);
     sessionStorage.setItem("prestador_nombre", prestador.nombre);
+    sessionStorage.setItem("prestador_estatus", prestador.estatus || "activo");
 
-    mensajeAcceso.textContent = `Bienvenido, ${prestador.nombre}.`;
-    mensajeAcceso.className = "mensaje success";
+    if (prestador.estatus === "finalizado") {
+      mensajeAcceso.textContent = `Bienvenido, ${prestador.nombre}. Tu servicio está marcado como finalizado.`;
+      mensajeAcceso.className = "mensaje success";
+    } else {
+      mensajeAcceso.textContent = `Bienvenido, ${prestador.nombre}.`;
+      mensajeAcceso.className = "mensaje success";
+    }
 
     setTimeout(() => {
       window.location.href = "panel.html";
     }, 1000);
 
   } catch (error) {
-    mensajeAcceso.textContent = "Error al conectar con el servidor.";
-    mensajeAcceso.className = "mensaje error";
+    mostrarMensaje("Error al conectar con el servidor.", "error");
   }
 });

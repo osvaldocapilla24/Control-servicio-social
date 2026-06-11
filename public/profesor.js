@@ -270,6 +270,76 @@ async function guardarEdicionResponsable() {
   await cargarResumenProfesor();
 }
 
+async function finalizarPrestador(id) {
+  const confirmar = confirm("¿Seguro que deseas marcar este prestador como finalizado?");
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`/api/prestadores/${id}/finalizar`, {
+      method: "PATCH"
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(resultado.mensaje);
+      return;
+    }
+
+    alert(resultado.mensaje);
+
+    const prestadorId = prestadorResponsableEditandoId.value;
+    const prestadorNombre = prestadorResponsableEditandoNombre.value;
+
+    await cargarResumenProfesor();
+
+    if (prestadorId && prestadorNombre) {
+      await verHistorial(prestadorId, prestadorNombre);
+    }
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
+  }
+}
+
+async function activarPrestador(id) {
+  const confirmar = confirm("¿Seguro que deseas reactivar este prestador?");
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`/api/prestadores/${id}/activar`, {
+      method: "PATCH"
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(resultado.mensaje);
+      return;
+    }
+
+    alert(resultado.mensaje);
+
+    const prestadorId = prestadorResponsableEditandoId.value;
+    const prestadorNombre = prestadorResponsableEditandoNombre.value;
+
+    await cargarResumenProfesor();
+
+    if (prestadorId && prestadorNombre) {
+      await verHistorial(prestadorId, prestadorNombre);
+    }
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
+  }
+}
+
 
 
 async function borrarRegistrosPrestador(id, nombre) {
