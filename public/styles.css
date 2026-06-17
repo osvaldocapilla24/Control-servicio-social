@@ -415,6 +415,44 @@ button:hover,
   box-shadow: none;
 }
 
+/* HORARIO DE SERVICIO */
+
+.dias-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.check-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gris-fondo);
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: var(--texto);
+  cursor: pointer;
+}
+
+.check-option input {
+  width: auto;
+  margin: 0;
+}
+
+.horario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.horario-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* MENSAJES */
 
 .mensaje {
@@ -640,5 +678,10 @@ tr:hover {
     display: block;
     margin: 0 0 12px auto;
     text-align: right;
+  }
+
+  .dias-grid,
+  .horario-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -54,6 +54,26 @@ function validarRegistroPrestador(datos) {
     return "La carrera es obligatoria.";
   }
 
+  const diasSeleccionados = document.querySelectorAll("input[name='diasServicio']:checked");
+  const horaEntradaServicio = document.getElementById("horaEntradaServicio").value;
+  const horaSalidaServicio = document.getElementById("horaSalidaServicio").value;
+
+  if (diasSeleccionados.length === 0) {
+    return "Selecciona al menos un día de servicio.";
+  }
+
+  if (!horaEntradaServicio) {
+    return "La hora de entrada es obligatoria.";
+  }
+
+  if (!horaSalidaServicio) {
+    return "La hora de salida es obligatoria.";
+  }
+
+  if (horaSalidaServicio <= horaEntradaServicio) {
+    return "La hora de salida debe ser mayor que la hora de entrada.";
+  }
+
   if (!datos.horario) {
     return "El horario es obligatorio.";
   }
@@ -68,13 +88,50 @@ function validarRegistroPrestador(datos) {
 formRegistro.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  const diasSeleccionados = Array.from(
+    document.querySelectorAll("input[name='diasServicio']:checked")
+  ).map((dia) => dia.value);
+
+  const horaEntradaServicio = document.getElementById("horaEntradaServicio").value;
+  const horaSalidaServicio = document.getElementById("horaSalidaServicio").value;
+
+  const horarioArmado = armarHorario(
+    diasSeleccionados,
+    horaEntradaServicio,
+    horaSalidaServicio
+  );
+
   const datos = {
     nombre: document.getElementById("nombre").value.trim(),
     matricula: document.getElementById("matricula").value.trim(),
     carrera: document.getElementById("carrera").value.trim(),
-    horario: document.getElementById("horario").value.trim(),
+    horario: horarioArmado,
     horas_requeridas: Number(document.getElementById("horas_requeridas").value)
   };
+
+  function unirDias(dias) {
+    if (dias.length === 0) {
+      return "";
+    }
+
+    if (dias.length === 1) {
+      return dias[0];
+    }
+
+    if (dias.length === 2) {
+      return `${dias[0]} y ${dias[1]}`;
+    }
+
+    return `${dias.slice(0, -1).join(", ")} y ${dias[dias.length - 1]}`;
+  }
+
+  function armarHorario(dias, horaEntrada, horaSalida) {
+    if (dias.length === 0 || !horaEntrada || !horaSalida) {
+      return "";
+    }
+
+    return `${unirDias(dias)} de ${horaEntrada} a ${horaSalida}`;
+  }
 
   const errorValidacion = validarRegistroPrestador(datos);
 

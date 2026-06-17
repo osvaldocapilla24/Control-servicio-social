@@ -141,7 +141,7 @@ async function verHistorial(id, nombre) {
           </button>
 
           <button class="btn-mini-danger btn-borrar-detalle" type="button">
-            Borrar registros
+            Limpiar historial
           </button>
         </div>
       </div>

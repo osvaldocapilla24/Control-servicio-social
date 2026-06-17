@@ -12,51 +12,99 @@
   <main class="page">
     <section class="card">
       <div class="header header-registro">
-          <button type="button" id="btnVolverRegistro" class="volver-text">
-            Regresar al inicio
-          </button>
+        <button type="button" id="btnVolverRegistro" class="volver-text">
+          Regresar al inicio
+        </button>
 
-          <div class="logo">BUAP</div>
-          <h1 id="tituloRegistro">Registro de Prestador</h1>
-          <p id="descripcionRegistro">
-            Regístrate una sola vez para comenzar a registrar tus horas de servicio social.
-          </p>
+        <div class="logo">BUAP</div>
+        <h1 id="tituloRegistro">Registro de Prestador</h1>
+        <p id="descripcionRegistro">
+          Regístrate una sola vez para comenzar a registrar tus horas de servicio social.
+        </p>
+      </div>
+
+      <form id="formRegistro" class="form">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" placeholder="Ejemplo: José Aldo">
+
+        <label for="matricula">Matrícula</label>
+        <input type="text" id="matricula" placeholder="Ejemplo: 202345678">
+
+        <label for="carrera">Carrera</label>
+        <select id="carrera">
+          <option value="">Selecciona una carrera</option>
+          <option value="Ingeniería en Tecnologías de la Información">
+            Ingeniería en Tecnologías de la Información
+          </option>
+          <option value="Ingeniería en Ciencias de la Computación">
+            Ingeniería en Ciencias de la Computación
+          </option>
+          <option value="Licenciatura en Ciencias de la Computación">
+            Licenciatura en Ciencias de la Computación
+          </option>
+        </select>
+
+        <label>Días de servicio</label>
+
+        <div class="dias-grid">
+          <label class="check-option">
+            <input type="checkbox" name="diasServicio" value="Lunes">
+            Lunes
+          </label>
+
+          <label class="check-option">
+            <input type="checkbox" name="diasServicio" value="Martes">
+            Martes
+          </label>
+
+          <label class="check-option">
+            <input type="checkbox" name="diasServicio" value="Miércoles">
+            Miércoles
+          </label>
+
+          <label class="check-option">
+            <input type="checkbox" name="diasServicio" value="Jueves">
+            Jueves
+          </label>
+
+          <label class="check-option">
+            <input type="checkbox" name="diasServicio" value="Viernes">
+            Viernes
+          </label>
+
+          <label class="check-option">
+            <input type="checkbox" name="diasServicio" value="Sábado">
+            Sábado
+          </label>
+
+          <label class="check-option">
+            <input type="checkbox" name="diasServicio" value="Domingo">
+            Domingo
+          </label>
         </div>
 
-        <form id="formRegistro" class="form">
-          <label for="nombre">Nombre completo</label>
-          <input type="text" id="nombre" placeholder="Ejemplo: José Aldo">
+        <div class="horario-grid">
+          <div>
+            <label for="horaEntradaServicio">Hora de entrada</label>
+            <input type="time" id="horaEntradaServicio">
+          </div>
 
-          <label for="matricula">Matrícula</label>
-          <input type="text" id="matricula" placeholder="Ejemplo: 202345678">
+          <div>
+            <label for="horaSalidaServicio">Hora de salida</label>
+            <input type="time" id="horaSalidaServicio">
+          </div>
+        </div>
 
-          <label for="carrera">Carrera</label>
-          <select id="carrera">
-            <option value="">Selecciona una carrera</option>
-            <option value="Ingeniería en Tecnologías de la Información">
-              Ingeniería en Tecnologías de la Información
-            </option>
-            <option value="Ingeniería en Ciencias de la Computación">
-              Ingeniería en Ciencias de la Computación
-            </option>
-            <option value="Licenciatura en Ciencias de la Computación">
-              Licenciatura en Ciencias de la Computación
-            </option>
-          </select>
+        <label for="horas_requeridas">Horas requeridas</label>
+        <input type="number" id="horas_requeridas" value="480">
 
-          <label for="horario">Horario de servicio</label>
-          <input type="text" id="horario" placeholder="Ejemplo: Lunes a viernes 14:00 - 18:00">
+        <button type="submit" id="btnRegistrarPrestador">Registrarme</button>
 
-          <label for="horas_requeridas">Horas requeridas</label>
-          <input type="number" id="horas_requeridas" value="480">
+      </form>
 
-          <button type="submit" id="btnRegistrarPrestador">Registrarme</button>
+      <p id="mensaje" class="mensaje"></p>
 
-        </form>
-
-        <p id="mensaje" class="mensaje"></p>
-
-        <a href="index.html" class="link" id="btnYaRegistrado">Ya estoy registrado</a>
+      <a href="index.html" class="link" id="btnYaRegistrado">Ya estoy registrado</a>
     </section>
   </main>
 
