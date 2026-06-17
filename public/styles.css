@@ -453,6 +453,24 @@ button:hover,
   gap: 8px;
 }
 
+/* FORMULARIO EDITAR PRESTADOR */
+
+.form-editar-prestador {
+  margin-top: 18px;
+  padding: 18px;
+  background: var(--gris-fondo);
+  border: 1px solid var(--gris-borde);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-editar-prestador h3 {
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
 /* MENSAJES */
 
 .mensaje {

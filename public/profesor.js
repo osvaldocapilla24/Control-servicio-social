@@ -94,6 +94,62 @@ async function cargarResumenProfesor() {
   }
 }
 
+function unirDias(dias) {
+  if (dias.length === 0) {
+    return "";
+  }
+
+  if (dias.length === 1) {
+    return dias[0];
+  }
+
+  if (dias.length === 2) {
+    return `${dias[0]} y ${dias[1]}`;
+  }
+
+  return `${dias.slice(0, -1).join(", ")} y ${dias[dias.length - 1]}`;
+}
+
+function armarHorario(dias, horaEntrada, horaSalida) {
+  if (dias.length === 0 || !horaEntrada || !horaSalida) {
+    return "";
+  }
+
+  return `${unirDias(dias)} de ${horaEntrada} a ${horaSalida}`;
+}
+
+function obtenerDatosHorario(horario) {
+  const dias = [];
+  let horaEntrada = "";
+  let horaSalida = "";
+
+  if (!horario) {
+    return { dias, horaEntrada, horaSalida };
+  }
+
+  const partes = horario.split(" de ");
+
+  if (partes.length === 2) {
+    const diasTexto = partes[0];
+    const horasTexto = partes[1];
+
+    ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].forEach((dia) => {
+      if (diasTexto.includes(dia)) {
+        dias.push(dia);
+      }
+    });
+
+    const horas = horasTexto.split(" a ");
+
+    if (horas.length === 2) {
+      horaEntrada = horas[0];
+      horaSalida = horas[1];
+    }
+  }
+
+  return { dias, horaEntrada, horaSalida };
+}
+
 async function verHistorial(id, nombre) {
   try {
     const respuestaHistorial = await fetch(`/api/profesor/prestador/${id}/registros`);
@@ -103,6 +159,7 @@ async function verHistorial(id, nombre) {
     const dataResumen = await respuestaResumen.json();
 
     const resumen = dataResumen.resumen;
+    const datosHorario = obtenerDatosHorario(resumen.horario);
 
     detallePrestador.classList.remove("hidden");
 
@@ -143,8 +200,100 @@ async function verHistorial(id, nombre) {
           <button class="btn-mini-danger btn-borrar-detalle" type="button">
             Limpiar historial
           </button>
+
+          <button class="btn-mini btn-editar-prestador-detalle" type="button">
+            Editar datos
+          </button>
         </div>
       </div>
+
+      <div id="formEditarPrestador" class="form-editar-prestador hidden">
+  <h3>Editar datos del prestador</h3>
+
+  <label for="editarNombrePrestador">Nombre completo</label>
+  <input type="text" id="editarNombrePrestador" value="${resumen.nombre}">
+
+  <label for="editarMatriculaPrestador">Matrícula</label>
+  <input type="text" id="editarMatriculaPrestador" value="${resumen.matricula}">
+
+  <label for="editarCarreraPrestador">Carrera</label>
+  <select id="editarCarreraPrestador">
+    <option value="">Selecciona una carrera</option>
+    <option value="Ingeniería en Tecnologías de la Información">
+      Ingeniería en Tecnologías de la Información
+    </option>
+    <option value="Ingeniería en Ciencias de la Computación">
+      Ingeniería en Ciencias de la Computación
+    </option>
+    <option value="Licenciatura en Ciencias de la Computación">
+      Licenciatura en Ciencias de la Computación
+    </option>
+  </select>
+
+  <label>Días de servicio</label>
+
+  <div class="dias-grid">
+    <label class="check-option">
+      <input type="checkbox" name="editarDiasServicio" value="Lunes">
+      Lunes
+    </label>
+
+    <label class="check-option">
+      <input type="checkbox" name="editarDiasServicio" value="Martes">
+      Martes
+    </label>
+
+    <label class="check-option">
+      <input type="checkbox" name="editarDiasServicio" value="Miércoles">
+      Miércoles
+    </label>
+
+    <label class="check-option">
+      <input type="checkbox" name="editarDiasServicio" value="Jueves">
+      Jueves
+    </label>
+
+    <label class="check-option">
+      <input type="checkbox" name="editarDiasServicio" value="Viernes">
+      Viernes
+    </label>
+
+    <label class="check-option">
+      <input type="checkbox" name="editarDiasServicio" value="Sábado">
+      Sábado
+    </label>
+
+    <label class="check-option">
+      <input type="checkbox" name="editarDiasServicio" value="Domingo">
+      Domingo
+    </label>
+  </div>
+
+  <div class="horario-grid">
+    <div>
+      <label for="editarHoraEntradaServicio">Hora de entrada</label>
+      <input type="time" id="editarHoraEntradaServicio" value="${datosHorario.horaEntrada}">
+    </div>
+
+    <div>
+      <label for="editarHoraSalidaServicio">Hora de salida</label>
+      <input type="time" id="editarHoraSalidaServicio" value="${datosHorario.horaSalida}">
+    </div>
+  </div>
+
+  <label for="editarHorasRequeridasPrestador">Horas requeridas</label>
+  <input type="number" id="editarHorasRequeridasPrestador" value="${Number(resumen.horas_requeridas)}">
+
+  <div class="buttons">
+    <button type="button" id="btnGuardarPrestadorEditado">
+      Guardar cambios
+    </button>
+
+    <button type="button" id="btnCancelarPrestadorEditado" class="secondary-btn">
+      Cancelar
+    </button>
+  </div>
+</div>
     `;
 
     document.querySelector(".btn-finalizar-detalle").addEventListener("click", () => {
@@ -157,6 +306,18 @@ async function verHistorial(id, nombre) {
 
     document.querySelector(".btn-borrar-detalle").addEventListener("click", () => {
       borrarRegistrosPrestador(id, nombre);
+    });
+
+    document.querySelector(".btn-editar-prestador-detalle").addEventListener("click", () => {
+      mostrarFormularioEditarPrestador(resumen);
+    });
+
+    document.getElementById("btnGuardarPrestadorEditado").addEventListener("click", () => {
+      guardarDatosPrestadorEditado(id);
+    });
+
+    document.getElementById("btnCancelarPrestadorEditado").addEventListener("click", () => {
+      document.getElementById("formEditarPrestador").classList.add("hidden");
     });
 
     prestadorResponsableEditandoId.value = id;
@@ -207,6 +368,119 @@ async function verHistorial(id, nombre) {
         <td colspan="6">Error al cargar historial.</td>
       </tr>
     `;
+  }
+}
+
+function mostrarFormularioEditarPrestador(resumen) {
+  const formEditarPrestador = document.getElementById("formEditarPrestador");
+
+  document.getElementById("editarNombrePrestador").value = resumen.nombre;
+  document.getElementById("editarMatriculaPrestador").value = resumen.matricula;
+  document.getElementById("editarCarreraPrestador").value = resumen.carrera;
+  document.getElementById("editarHorasRequeridasPrestador").value = Number(resumen.horas_requeridas);
+
+  const datosHorario = obtenerDatosHorario(resumen.horario);
+
+  document.querySelectorAll("input[name='editarDiasServicio']").forEach((checkbox) => {
+    checkbox.checked = datosHorario.dias.includes(checkbox.value);
+  });
+
+  document.getElementById("editarHoraEntradaServicio").value = datosHorario.horaEntrada;
+  document.getElementById("editarHoraSalidaServicio").value = datosHorario.horaSalida;
+
+  formEditarPrestador.classList.remove("hidden");
+  formEditarPrestador.scrollIntoView({ behavior: "smooth" });
+}
+
+async function guardarDatosPrestadorEditado(id) {
+  const diasSeleccionados = Array.from(
+    document.querySelectorAll("input[name='editarDiasServicio']:checked")
+  ).map((dia) => dia.value);
+
+  const horaEntradaServicio = document.getElementById("editarHoraEntradaServicio").value;
+  const horaSalidaServicio = document.getElementById("editarHoraSalidaServicio").value;
+
+  if (diasSeleccionados.length === 0) {
+    alert("Selecciona al menos un día de servicio.");
+    return;
+  }
+
+  if (!horaEntradaServicio) {
+    alert("La hora de entrada es obligatoria.");
+    return;
+  }
+
+  if (!horaSalidaServicio) {
+    alert("La hora de salida es obligatoria.");
+    return;
+  }
+
+  if (horaSalidaServicio <= horaEntradaServicio) {
+    alert("La hora de salida debe ser mayor que la hora de entrada.");
+    return;
+  }
+
+  const horarioArmado = armarHorario(
+    diasSeleccionados,
+    horaEntradaServicio,
+    horaSalidaServicio
+  );
+
+  const datos = {
+    nombre: document.getElementById("editarNombrePrestador").value.trim(),
+    matricula: document.getElementById("editarMatriculaPrestador").value.trim(),
+    carrera: document.getElementById("editarCarreraPrestador").value.trim(),
+    horario: horarioArmado,
+    horas_requeridas: Number(document.getElementById("editarHorasRequeridasPrestador").value)
+  };
+
+  if (!datos.nombre) {
+    alert("El nombre es obligatorio.");
+    return;
+  }
+
+  if (!datos.matricula) {
+    alert("La matrícula es obligatoria.");
+    return;
+  }
+
+  if (!datos.carrera) {
+    alert("La carrera es obligatoria.");
+    return;
+  }
+
+  if (!datos.horas_requeridas || datos.horas_requeridas <= 0) {
+    alert("Las horas requeridas deben ser mayor a 0.");
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`/api/prestadores/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(datos)
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(resultado.mensaje);
+      return;
+    }
+
+    alert(resultado.mensaje);
+
+    document.getElementById("formEditarPrestador").classList.add("hidden");
+
+    prestadorResponsableEditandoNombre.value = datos.nombre;
+
+    await cargarResumenProfesor();
+    await verHistorial(id, datos.nombre);
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
   }
 }
 

@@ -750,6 +750,97 @@ app.delete("/api/registros/:id", async (req, res) => {
   }
 });
 
+/* EDITAR DATOS DEL PRESTADOR */
+
+app.put("/api/prestadores/:id", async (req, res) => {
+  try {
+    const prestadorId = req.params.id;
+    let { nombre, matricula, carrera, horario, horas_requeridas } = req.body;
+
+    nombre = nombre ? nombre.trim() : "";
+    matricula = matricula ? matricula.trim() : "";
+    carrera = carrera ? carrera.trim() : "";
+    horario = horario ? horario.trim() : "";
+    horas_requeridas = Number(horas_requeridas);
+
+    if (!nombre) {
+      return res.status(400).json({ mensaje: "El nombre es obligatorio." });
+    }
+
+    if (!matricula) {
+      return res.status(400).json({ mensaje: "La matrícula es obligatoria." });
+    }
+
+    if (!carrera) {
+      return res.status(400).json({ mensaje: "La carrera es obligatoria." });
+    }
+
+    if (!horario) {
+      return res.status(400).json({ mensaje: "El horario es obligatorio." });
+    }
+
+    if (!horas_requeridas || horas_requeridas <= 0) {
+      return res.status(400).json({
+        mensaje: "Las horas requeridas deben ser mayor a 0."
+      });
+    }
+
+    const prestadorResultado = await pool.query(
+      `
+      SELECT id
+      FROM prestadores
+      WHERE id = $1
+      `,
+      [prestadorId]
+    );
+
+    if (prestadorResultado.rows.length === 0) {
+      return res.status(404).json({
+        mensaje: "Prestador no encontrado."
+      });
+    }
+
+    const matriculaResultado = await pool.query(
+      `
+      SELECT id
+      FROM prestadores
+      WHERE matricula = $1
+      AND id != $2
+      `,
+      [matricula, prestadorId]
+    );
+
+    if (matriculaResultado.rows.length > 0) {
+      return res.status(409).json({
+        mensaje: "Ya existe otro prestador con esa matrícula."
+      });
+    }
+
+    await pool.query(
+      `
+      UPDATE prestadores
+      SET nombre = $1,
+          matricula = $2,
+          carrera = $3,
+          horario = $4,
+          horas_requeridas = $5
+      WHERE id = $6
+      `,
+      [nombre, matricula, carrera, horario, horas_requeridas, prestadorId]
+    );
+
+    res.json({
+      mensaje: "Datos del prestador actualizados correctamente."
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al actualizar los datos del prestador."
+    });
+  }
+});
+
 /* FINALIZAR PRESTADOR */
 
 app.patch("/api/prestadores/:id/finalizar", async (req, res) => {
