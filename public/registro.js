@@ -5,6 +5,7 @@ const tituloRegistro = document.getElementById("tituloRegistro");
 const descripcionRegistro = document.getElementById("descripcionRegistro");
 const btnRegistrarPrestador = document.getElementById("btnRegistrarPrestador");
 const btnYaRegistrado = document.getElementById("btnYaRegistrado");
+const btnVolverRegistro = document.getElementById("btnVolverRegistro");
 
 const parametros = new URLSearchParams(window.location.search);
 const origen = parametros.get("origen");
@@ -18,7 +19,22 @@ if (origen === "responsable") {
   btnRegistrarPrestador.textContent = "Registrar prestador";
 
   btnYaRegistrado.classList.add("hidden");
+
+  btnVolverRegistro.textContent = "Regresar al panel";
+} else {
+  btnVolverRegistro.textContent = "Regresar al inicio";
 }
+
+btnVolverRegistro.addEventListener("click", () => {
+  if (
+    origen === "responsable" &&
+    sessionStorage.getItem("responsable_autorizado") === "true"
+  ) {
+    window.location.href = "profesor.html";
+  } else {
+    window.location.href = "index.html";
+  }
+});
 
 function mostrarMensaje(texto, tipo) {
   mensaje.textContent = texto;
@@ -87,21 +103,18 @@ formRegistro.addEventListener("submit", async (e) => {
 
     formRegistro.reset();
     document.getElementById("horas_requeridas").value = 480;
-    document.getElementById("carrera").value = "Ingeniería en Tecnologías de la Información";
+    document.getElementById("carrera").value = "";
 
-   setTimeout(() => {
-  const parametros = new URLSearchParams(window.location.search);
-  const origen = parametros.get("origen");
-
-  if (
-    origen === "responsable" &&
-    sessionStorage.getItem("responsable_autorizado") === "true"
-  ) {
-    window.location.href = "profesor.html";
-  } else {
-    window.location.href = "index.html";
-  }
-}, 1500);
+    setTimeout(() => {
+      if (
+        origen === "responsable" &&
+        sessionStorage.getItem("responsable_autorizado") === "true"
+      ) {
+        window.location.href = "profesor.html";
+      } else {
+        window.location.href = "index.html";
+      }
+    }, 1500);
 
   } catch (error) {
     mostrarMensaje("Error al conectar con el servidor.", "error");

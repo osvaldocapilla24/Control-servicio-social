@@ -388,6 +388,33 @@ button:hover,
   box-shadow: none;
 }
 
+/* REGRESAR DESDE REGISTRO */
+
+.header-registro {
+  position: relative;
+}
+
+.volver-text {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: transparent;
+  color: var(--azul-principal);
+  padding: 0;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.volver-text:hover {
+  background: transparent;
+  color: var(--azul-principal-hover);
+  text-decoration: underline;
+  transform: none;
+  box-shadow: none;
+}
+
 /* MENSAJES */
 
 .mensaje {
@@ -606,5 +633,12 @@ tr:hover {
   .btn-mini,
   .btn-mini-danger {
     flex: 1;
+  }
+
+  .volver-text {
+    position: static;
+    display: block;
+    margin: 0 0 12px auto;
+    text-align: right;
   }
 }
