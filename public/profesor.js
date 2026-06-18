@@ -189,6 +189,10 @@ async function verHistorial(id, nombre) {
         </div>
 
         <div class="acciones-historial-botones">
+          <button class="btn-mini btn-editar-prestador-detalle" type="button">
+            Editar datos
+          </button>
+
           <button class="btn-mini btn-finalizar-detalle" type="button">
             Finalizar
           </button>
@@ -201,8 +205,8 @@ async function verHistorial(id, nombre) {
             Limpiar historial
           </button>
 
-          <button class="btn-mini btn-editar-prestador-detalle" type="button">
-            Editar datos
+          <button class="btn-mini btn-ocultar-historial-detalle" type="button">
+            Ocultar historial
           </button>
         </div>
       </div>
@@ -310,6 +314,10 @@ async function verHistorial(id, nombre) {
 
     document.querySelector(".btn-editar-prestador-detalle").addEventListener("click", () => {
       mostrarFormularioEditarPrestador(resumen);
+    });
+
+    document.querySelector(".btn-ocultar-historial-detalle").addEventListener("click", () => {
+      ocultarHistorialResponsable();
     });
 
     document.getElementById("btnGuardarPrestadorEditado").addEventListener("click", () => {
@@ -648,6 +656,17 @@ async function borrarRegistrosPrestador(id, nombre) {
   detallePrestador.classList.add("hidden");
   formEditarRegistroResponsable.classList.add("hidden");
   cargarResumenProfesor();
+}
+
+function ocultarHistorialResponsable() {
+  detallePrestador.classList.add("hidden");
+  tablaHistorial.innerHTML = "";
+  nombreDetalle.innerHTML = "";
+
+  limpiarFormularioEdicionResponsable();
+
+  prestadorResponsableEditandoId.value = "";
+  prestadorResponsableEditandoNombre.value = "";
 }
 
 function limpiarFormularioEdicionResponsable() {

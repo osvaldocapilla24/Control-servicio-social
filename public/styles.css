@@ -252,6 +252,7 @@ button:hover,
 
 .acciones-historial-botones {
   display: flex;
+  justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
 }
@@ -298,6 +299,20 @@ button:hover,
 .btn-borrar-detalle:hover {
   background: var(--rojo);
   color: white;
+  box-shadow: none;
+}
+
+/* BOTÓN OCULTAR HISTORIAL */
+
+.btn-ocultar-historial-detalle {
+  background: #eef2f7;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-ocultar-historial-detalle:hover {
+  background: #e2e8f0;
+  color: #334155;
   box-shadow: none;
 }
 
@@ -399,7 +414,7 @@ button:hover,
   top: 0;
   right: 0;
   background: transparent;
-  color: var(--azul-principal);
+  color: var(--rojo);
   padding: 0;
   border-radius: 0;
   font-size: 14px;
@@ -409,7 +424,7 @@ button:hover,
 
 .volver-text:hover {
   background: transparent;
-  color: var(--azul-principal-hover);
+  color: var(--rojo-hover);
   text-decoration: underline;
   transform: none;
   box-shadow: none;
@@ -636,6 +651,25 @@ tr:hover {
   background: #f2f8fc;
 }
 
+/* TÍTULOS CON ACCIONES */
+
+.section-title-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.section-title-actions h2 {
+  margin-bottom: 4px;
+}
+
+.section-title-actions p {
+  margin: 0;
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 768px) {
@@ -684,6 +718,7 @@ tr:hover {
 
   .acciones-historial-botones {
     width: 100%;
+    justify-content: flex-start;
   }
 
   .btn-mini,

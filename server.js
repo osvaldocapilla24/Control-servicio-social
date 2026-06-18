@@ -533,6 +533,53 @@ app.get("/api/resumen/:id", async (req, res) => {
   }
 });
 
+/* HISTORIAL COMPLETO DEL PRESTADOR */
+
+app.get("/api/prestadores/:id/registros", async (req, res) => {
+  try {
+    const prestadorId = req.params.id;
+
+    const prestadorResultado = await pool.query(
+      `
+      SELECT id
+      FROM prestadores
+      WHERE id = $1
+      `,
+      [prestadorId]
+    );
+
+    if (prestadorResultado.rows.length === 0) {
+      return res.status(404).json({
+        mensaje: "Prestador no encontrado."
+      });
+    }
+
+    const resultado = await pool.query(
+      `
+      SELECT
+        id,
+        TO_CHAR(fecha, 'YYYY-MM-DD') AS fecha,
+        TO_CHAR(hora_entrada, 'HH24:MI') AS hora_entrada,
+        TO_CHAR(hora_salida, 'HH24:MI') AS hora_salida,
+        horas,
+        actividad
+      FROM registros
+      WHERE prestador_id = $1
+      ORDER BY fecha DESC, id DESC
+      `,
+      [prestadorId]
+    );
+
+    res.json(resultado.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al obtener historial completo del prestador."
+    });
+  }
+});
+
 /* RESUMEN DEL RESPONSABLE */
 
 app.get("/api/profesor/resumen", async (req, res) => {

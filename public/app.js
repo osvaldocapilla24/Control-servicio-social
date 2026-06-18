@@ -25,6 +25,11 @@ const editarActividad = document.getElementById("editarActividad");
 const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
 const btnCancelarEdicion = document.getElementById("btnCancelarEdicion");
 
+const btnVerHistorialCompleto = document.getElementById("btnVerHistorialCompleto");
+const btnOcultarHistorialCompleto = document.getElementById("btnOcultarHistorialCompleto");
+const historialCompletoSection = document.getElementById("historialCompletoSection");
+const tablaHistorialCompletoPrestador = document.getElementById("tablaHistorialCompletoPrestador");
+
 const prestadorIdActual = sessionStorage.getItem("prestador_id");
 const prestadorNombreActual = sessionStorage.getItem("prestador_nombre");
 
@@ -37,6 +42,11 @@ async function cargarResumen() {
   const respuesta = await fetch(`/api/resumen/${prestadorIdActual}`);
   const data = await respuesta.json();
 
+  if (!respuesta.ok) {
+    mostrarMensaje(data.mensaje || "Error al cargar resumen.", "error");
+    return;
+  }
+
   resumenSection.classList.remove("hidden");
 
   horasAcumuladas.textContent = Number(data.resumen.horas_acumuladas).toFixed(2);
@@ -44,6 +54,15 @@ async function cargarResumen() {
   horarioTexto.textContent = data.resumen.horario;
 
   tablaRegistros.innerHTML = "";
+
+  if (data.registros.length === 0) {
+    tablaRegistros.innerHTML = `
+      <tr>
+        <td colspan="6">Todavía no tienes registros.</td>
+      </tr>
+    `;
+    return;
+  }
 
   data.registros.forEach((r) => {
     const tr = document.createElement("tr");
@@ -79,6 +98,57 @@ async function cargarResumen() {
   });
 
   activarBotonesRegistros();
+}
+
+async function cargarHistorialCompleto() {
+  if (!prestadorIdActual) {
+    mostrarMensaje("No se encontró el prestador actual.", "error");
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`/api/prestadores/${prestadorIdActual}/registros`);
+    const registros = await respuesta.json();
+
+    if (!respuesta.ok) {
+      mostrarMensaje(registros.mensaje || "Error al cargar historial completo.", "error");
+      return;
+    }
+
+    tablaHistorialCompletoPrestador.innerHTML = "";
+
+    if (registros.length === 0) {
+      tablaHistorialCompletoPrestador.innerHTML = `
+        <tr>
+          <td colspan="5">Todavía no tienes registros guardados.</td>
+        </tr>
+      `;
+    } else {
+      registros.forEach((r) => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${r.fecha}</td>
+          <td>${r.hora_entrada || "-"}</td>
+          <td>${r.hora_salida || "-"}</td>
+          <td>${Number(r.horas).toFixed(2)}</td>
+          <td>${r.actividad || "-"}</td>
+        `;
+
+        tablaHistorialCompletoPrestador.appendChild(tr);
+      });
+    }
+
+    historialCompletoSection.classList.remove("hidden");
+    historialCompletoSection.scrollIntoView({ behavior: "smooth" });
+
+  } catch (error) {
+    mostrarMensaje("Error al conectar con el servidor.", "error");
+  }
+}
+
+function ocultarHistorialCompleto() {
+  historialCompletoSection.classList.add("hidden");
 }
 
 function activarBotonesRegistros() {
@@ -133,7 +203,12 @@ async function registrarEntrada() {
 
   mostrarMensaje(`${resultado.mensaje} Hora: ${resultado.hora_entrada}`, "success");
   actividadInput.value = "";
-  cargarResumen();
+
+  await cargarResumen();
+
+  if (!historialCompletoSection.classList.contains("hidden")) {
+    await cargarHistorialCompleto();
+  }
 }
 
 async function registrarSalida() {
@@ -164,7 +239,11 @@ async function registrarSalida() {
     "success"
   );
 
-  cargarResumen();
+  await cargarResumen();
+
+  if (!historialCompletoSection.classList.contains("hidden")) {
+    await cargarHistorialCompleto();
+  }
 }
 
 async function guardarRegistroManual() {
@@ -209,7 +288,11 @@ async function guardarRegistroManual() {
   salidaManual.value = "";
   actividadManual.value = "";
 
-  cargarResumen();
+  await cargarResumen();
+
+  if (!historialCompletoSection.classList.contains("hidden")) {
+    await cargarHistorialCompleto();
+  }
 }
 
 async function guardarEdicionRegistro() {
@@ -247,7 +330,12 @@ async function guardarEdicionRegistro() {
 
   mostrarMensaje(resultado.mensaje, "success");
   limpiarFormularioEdicion();
-  cargarResumen();
+
+  await cargarResumen();
+
+  if (!historialCompletoSection.classList.contains("hidden")) {
+    await cargarHistorialCompleto();
+  }
 }
 
 async function eliminarRegistro(id) {
@@ -269,7 +357,12 @@ async function eliminarRegistro(id) {
   }
 
   mostrarMensaje(resultado.mensaje, "success");
-  cargarResumen();
+
+  await cargarResumen();
+
+  if (!historialCompletoSection.classList.contains("hidden")) {
+    await cargarHistorialCompleto();
+  }
 }
 
 function limpiarFormularioEdicion() {
@@ -300,6 +393,8 @@ btnSalida.addEventListener("click", registrarSalida);
 btnRegistroManual.addEventListener("click", guardarRegistroManual);
 btnGuardarEdicion.addEventListener("click", guardarEdicionRegistro);
 btnCancelarEdicion.addEventListener("click", limpiarFormularioEdicion);
+btnVerHistorialCompleto.addEventListener("click", cargarHistorialCompleto);
+btnOcultarHistorialCompleto.addEventListener("click", ocultarHistorialCompleto);
 
 if (!prestadorIdActual) {
   window.location.href = "index.html";
