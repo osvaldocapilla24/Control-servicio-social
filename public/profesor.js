@@ -201,6 +201,14 @@ async function verHistorial(id, nombre) {
             Reactivar
           </button>
 
+          <button class="btn-mini btn-exportar-pdf-detalle" type="button">
+            Exportar PDF
+          </button>
+
+          <button class="btn-mini btn-exportar-excel-detalle" type="button">
+            Exportar Excel
+          </button>
+
           <button class="btn-mini-danger btn-borrar-detalle" type="button">
             Limpiar historial
           </button>
@@ -318,6 +326,14 @@ async function verHistorial(id, nombre) {
 
     document.querySelector(".btn-ocultar-historial-detalle").addEventListener("click", () => {
       ocultarHistorialResponsable();
+    });
+
+    document.querySelector(".btn-exportar-pdf-detalle").addEventListener("click", () => {
+      exportarHistorialPDF(resumen, registros);
+    });
+
+    document.querySelector(".btn-exportar-excel-detalle").addEventListener("click", () => {
+      exportarHistorialExcel(resumen, registros);
     });
 
     document.getElementById("btnGuardarPrestadorEditado").addEventListener("click", () => {
@@ -490,6 +506,274 @@ async function guardarDatosPrestadorEditado(id) {
   } catch (error) {
     alert("Error al conectar con el servidor.");
   }
+}
+
+function limpiarTextoArchivo(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9-_]/g, "_")
+    .replace(/_+/g, "_");
+}
+
+function calcularTotalesExportacion(resumen) {
+  return {
+    horasAcumuladas: Number(resumen.horas_acumuladas || 0).toFixed(2),
+    horasFaltantes: Number(resumen.horas_faltantes || 0).toFixed(2),
+    horasRequeridas: Number(resumen.horas_requeridas || 0).toFixed(2)
+  };
+}
+
+function exportarHistorialExcel(resumen, registros) {
+  if (!registros || registros.length === 0) {
+    alert("Este prestador no tiene registros para exportar.");
+    return;
+  }
+
+  if (typeof XLSX === "undefined") {
+    alert("No se pudo cargar la librería para generar Excel. Revisa tu conexión a internet.");
+    return;
+  }
+
+  const totales = calcularTotalesExportacion(resumen);
+
+  const datosExcel = [
+    ["Historial de servicio social"],
+    [],
+    ["Prestador", resumen.nombre || ""],
+    ["Matrícula", resumen.matricula || ""],
+    ["Carrera", resumen.carrera || ""],
+    ["Horario", resumen.horario || ""],
+    ["Estatus", resumen.estatus || "activo"],
+    [],
+    ["Horas acumuladas", totales.horasAcumuladas],
+    ["Horas faltantes", totales.horasFaltantes],
+    ["Horas requeridas", totales.horasRequeridas],
+    [],
+    ["Fecha", "Entrada", "Salida", "Horas", "Actividad"]
+  ];
+
+  registros.forEach((registro) => {
+    datosExcel.push([
+      registro.fecha || "",
+      registro.hora_entrada || "-",
+      registro.hora_salida || "-",
+      Number(registro.horas || 0),
+      registro.actividad || "-"
+    ]);
+  });
+
+  const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
+
+  hoja["!cols"] = [
+    { wch: 14 },
+    { wch: 14 },
+    { wch: 14 },
+    { wch: 12 },
+    { wch: 45 }
+  ];
+
+  hoja["!merges"] = [
+    {
+      s: { r: 0, c: 0 },
+      e: { r: 0, c: 4 }
+    }
+  ];
+
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, "Historial");
+
+  const nombreArchivo = `historial_${limpiarTextoArchivo(resumen.nombre)}.xlsx`;
+
+  XLSX.writeFile(libro, nombreArchivo);
+}
+
+function exportarHistorialPDF(resumen, registros) {
+  if (!registros || registros.length === 0) {
+    alert("Este prestador no tiene registros para exportar.");
+    return;
+  }
+
+  const totales = calcularTotalesExportacion(resumen);
+
+  const filas = registros.map((registro) => `
+    <tr>
+      <td>${registro.fecha || ""}</td>
+      <td>${registro.hora_entrada || "-"}</td>
+      <td>${registro.hora_salida || "-"}</td>
+      <td>${Number(registro.horas || 0).toFixed(2)}</td>
+      <td>${registro.actividad || "-"}</td>
+    </tr>
+  `).join("");
+
+  const ventana = window.open("", "_blank");
+
+  ventana.document.write(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Historial ${resumen.nombre || ""}</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 28px;
+          color: #1f2937;
+        }
+
+        .encabezado {
+          text-align: center;
+          margin-bottom: 22px;
+        }
+
+        .logo {
+          font-weight: 800;
+          color: #1e3a8a;
+          font-size: 22px;
+          margin-bottom: 6px;
+        }
+
+        h1 {
+          color: #0f2f6e;
+          margin: 0;
+          font-size: 24px;
+        }
+
+        .datos {
+          margin-bottom: 18px;
+          border: 1px solid #dbe5f1;
+          border-radius: 10px;
+          padding: 14px;
+          background: #f8fafc;
+        }
+
+        .datos p {
+          margin: 6px 0;
+          font-size: 14px;
+        }
+
+        .resumen {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+          margin-bottom: 18px;
+        }
+
+        .resumen div {
+          border: 1px solid #dbe5f1;
+          border-radius: 10px;
+          padding: 10px;
+          text-align: center;
+          background: #f8fafc;
+        }
+
+        .resumen span {
+          display: block;
+          color: #4b5563;
+          font-size: 12px;
+        }
+
+        .resumen strong {
+          display: block;
+          color: #0f2f6e;
+          font-size: 18px;
+          margin-top: 5px;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 12px;
+          font-size: 12px;
+        }
+
+        th {
+          background: #1f3f93;
+          color: white;
+          padding: 8px;
+          border: 1px solid #1f3f93;
+          text-align: left;
+        }
+
+        td {
+          padding: 8px;
+          border: 1px solid #dbe5f1;
+        }
+
+        .nota {
+          margin-top: 18px;
+          font-size: 11px;
+          color: #4b5563;
+          text-align: center;
+        }
+
+        @media print {
+          button {
+            display: none;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="encabezado">
+        <div class="logo">BUAP</div>
+        <h1>Historial de servicio social</h1>
+      </div>
+
+      <div class="datos">
+        <p><strong>Prestador:</strong> ${resumen.nombre || ""}</p>
+        <p><strong>Matrícula:</strong> ${resumen.matricula || ""}</p>
+        <p><strong>Carrera:</strong> ${resumen.carrera || ""}</p>
+        <p><strong>Horario:</strong> ${resumen.horario || ""}</p>
+        <p><strong>Estatus:</strong> ${resumen.estatus || "activo"}</p>
+      </div>
+
+      <div class="resumen">
+        <div>
+          <span>Horas acumuladas</span>
+          <strong>${totales.horasAcumuladas}</strong>
+        </div>
+
+        <div>
+          <span>Horas faltantes</span>
+          <strong>${totales.horasFaltantes}</strong>
+        </div>
+
+        <div>
+          <span>Horas requeridas</span>
+          <strong>${totales.horasRequeridas}</strong>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+            <th>Horas</th>
+            <th>Actividad</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filas}
+        </tbody>
+      </table>
+
+      <p class="nota">
+        Documento generado desde el sistema de control de horas de servicio social.
+      </p>
+
+      <script>
+        window.onload = function() {
+          window.print();
+        };
+      </script>
+    </body>
+    </html>
+  `);
+
+  ventana.document.close();
 }
 
 function activarBotonesHistorialResponsable() {

@@ -614,6 +614,26 @@ hr {
   font-size: 22px;
 }
 
+/* BOTONES EXPORTAR HISTORIAL */
+
+.btn-exportar-pdf-detalle {
+  background: #7c3aed;
+  color: white;
+}
+
+.btn-exportar-pdf-detalle:hover {
+  background: #6d28d9;
+}
+
+.btn-exportar-excel-detalle {
+  background: #059669;
+  color: white;
+}
+
+.btn-exportar-excel-detalle:hover {
+  background: #047857;
+}
+
 /* TABLAS */
 
 table {
