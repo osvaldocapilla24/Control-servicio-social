@@ -110,20 +110,39 @@ formRegistro.addEventListener("submit", async (e) => {
   };
 
   function unirDias(dias) {
-    if (dias.length === 0) {
-      return "";
-    }
-
-    if (dias.length === 1) {
-      return dias[0];
-    }
-
-    if (dias.length === 2) {
-      return `${dias[0]} y ${dias[1]}`;
-    }
-
-    return `${dias.slice(0, -1).join(", ")} y ${dias[dias.length - 1]}`;
+  if (dias.length === 0) {
+    return "";
   }
+
+  const ordenDias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+  const indices = dias
+    .map((dia) => ordenDias.indexOf(dia))
+    .filter((indice) => indice !== -1)
+    .sort((a, b) => a - b);
+
+  const sonConsecutivos = indices.every((indice, posicion) => {
+    if (posicion === 0) return true;
+    return indice === indices[posicion - 1] + 1;
+  });
+
+  if (sonConsecutivos && indices.length >= 3) {
+    const primerDia = ordenDias[indices[0]];
+    const ultimoDia = ordenDias[indices[indices.length - 1]];
+
+    return `${primerDia} a ${ultimoDia}`;
+  }
+
+  if (dias.length === 1) {
+    return dias[0];
+  }
+
+  if (dias.length === 2) {
+    return `${dias[0]} y ${dias[1]}`;
+  }
+
+  return `${dias.slice(0, -1).join(", ")} y ${dias[dias.length - 1]}`;
+}
 
   function armarHorario(dias, horaEntrada, horaSalida) {
     if (dias.length === 0 || !horaEntrada || !horaSalida) {

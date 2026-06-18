@@ -99,6 +99,25 @@ function unirDias(dias) {
     return "";
   }
 
+  const ordenDias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+  const indices = dias
+    .map((dia) => ordenDias.indexOf(dia))
+    .filter((indice) => indice !== -1)
+    .sort((a, b) => a - b);
+
+  const sonConsecutivos = indices.every((indice, posicion) => {
+    if (posicion === 0) return true;
+    return indice === indices[posicion - 1] + 1;
+  });
+
+  if (sonConsecutivos && indices.length >= 3) {
+    const primerDia = ordenDias[indices[0]];
+    const ultimoDia = ordenDias[indices[indices.length - 1]];
+
+    return `${primerDia} a ${ultimoDia}`;
+  }
+
   if (dias.length === 1) {
     return dias[0];
   }
@@ -193,34 +212,40 @@ async function verHistorial(id, nombre) {
             Editar datos
           </button>
 
-          <button class="btn-mini btn-finalizar-detalle" type="button">
-            Finalizar
-          </button>
-
-          <button class="btn-mini btn-activar-detalle" type="button">
-            Reactivar
-          </button>
-
           <button class="btn-mini btn-exportar-pdf-detalle" type="button">
-            Exportar PDF
+            Exportar a PDF
           </button>
 
           <button class="btn-mini btn-exportar-excel-detalle" type="button">
-            Exportar Excel
+            Exportar a Excel
           </button>
 
-          <button class="btn-mini-danger btn-borrar-detalle" type="button">
-            Limpiar historial
-          </button>
+          <details class="menu-mas-opciones">
+            <summary>Más opciones</summary>
 
-          <button class="btn-mini btn-ocultar-historial-detalle" type="button">
-            Ocultar historial
-          </button>
+            <div class="menu-mas-opciones-lista">
+              <button class="btn-mini btn-finalizar-detalle" type="button">
+                Finalizar
+              </button>
+
+              <button class="btn-mini btn-activar-detalle" type="button">
+                Reactivar
+              </button>
+
+              <button class="btn-mini-danger btn-borrar-detalle" type="button">
+                Limpiar historial
+              </button>
+
+              <button class="btn-mini btn-ocultar-historial-detalle" type="button">
+                Ocultar historial
+              </button>
+            </div>
+          </details>
         </div>
       </div>
 
       <div id="formEditarPrestador" class="form-editar-prestador hidden">
-  <h3>Editar datos del prestador</h3>
+      <h3>Editar datos del prestador</h3>
 
   <label for="editarNombrePrestador">Nombre completo</label>
   <input type="text" id="editarNombrePrestador" value="${resumen.nombre}">
@@ -905,8 +930,6 @@ async function activarPrestador(id) {
     alert("Error al conectar con el servidor.");
   }
 }
-
-
 
 async function borrarRegistrosPrestador(id, nombre) {
   const confirmar = confirm(
