@@ -182,6 +182,13 @@ async function verHistorial(id, nombre) {
 
     detallePrestador.classList.remove("hidden");
 
+    setTimeout(() => {
+      detallePrestador.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }, 100);
+
     nombreDetalle.innerHTML = `
       <strong>Prestador:</strong> ${nombre}
 
