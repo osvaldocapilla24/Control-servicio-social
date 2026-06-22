@@ -928,6 +928,42 @@ button:disabled:hover {
   box-shadow: none;
 }
 
+/* BOTONES DE ICONOS */
+
+.icon-btn {
+  width: 38px;
+  height: 34px;
+  padding: 0;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: var(--azul-principal);
+  border: 1px solid #bfdbfe;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+}
+
+.icon-btn:hover {
+  background: #dbeafe;
+  transform: none;
+  box-shadow: none;
+}
+
+.danger-icon {
+  background: #fef2f2;
+  color: var(--rojo);
+  border: 1px solid #fecaca;
+}
+
+.danger-icon:hover {
+  background: #fee2e2;
+  color: var(--rojo-hover);
+  transform: none;
+  box-shadow: none;
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 768px) {

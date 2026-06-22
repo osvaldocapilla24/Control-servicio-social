@@ -83,21 +83,23 @@ async function cargarResumen() {
       <td>${r.actividad || "-"}</td>
       <td>
         <button 
-          class="small-btn btn-editar-registro"
+          class="icon-btn btn-editar-registro"
+          title="Editar registro"
           data-id="${r.id}"
           data-fecha="${r.fecha}"
           data-entrada="${r.hora_entrada || ""}"
           data-salida="${r.hora_salida || ""}"
           data-actividad="${r.actividad || ""}"
-        >
-          Editar
+          >
+          ✏️
         </button>
 
         <button 
-          class="small-btn danger btn-eliminar-registro"
+          class="icon-btn danger-icon btn-eliminar-registro"
+          title="Eliminar registro"
           data-id="${r.id}"
         >
-          Eliminar
+          🗑️
         </button>
       </td>
     `;

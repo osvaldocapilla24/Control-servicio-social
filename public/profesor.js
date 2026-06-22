@@ -388,6 +388,9 @@ async function verHistorial(id, nombre) {
     <option value="Licenciatura en Ciencias de la Computación">
       Licenciatura en Ciencias de la Computación
     </option>
+    <option value="Licenciatura en Ciencias de la Computación">
+      Administración
+    </option>
   </select>
 
   <label>Días de servicio</label>
@@ -517,14 +520,15 @@ async function verHistorial(id, nombre) {
         <td>${r.actividad || "-"}</td>
         <td>
           <button 
-           class="small-btn btn-editar-responsable"
-           data-id="${r.id}"
-           data-fecha="${r.fecha}"
-           data-entrada="${r.hora_entrada || ""}"
-           data-salida="${r.hora_salida || ""}"
-           data-actividad="${r.actividad || ""}"
-          >
-          Editar
+            class="icon-btn btn-editar-responsable"
+            title="Editar registro"
+            data-id="${r.id}"
+            data-fecha="${r.fecha}"
+            data-entrada="${r.hora_entrada || ""}"
+            data-salida="${r.hora_salida || ""}"
+            data-actividad="${r.actividad || ""}"
+            >
+            ✏️
           </button>
         </td>
       `;
