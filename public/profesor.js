@@ -360,7 +360,12 @@ async function generarReportePDF() {
     const nombrePeriodo =
       periodo === "mensual" ? obtenerNombreMes(mes) : "Reporte completo";
 
-    exportarHistorialPDF(resumen, registrosFinales, nombrePeriodo);
+    exportarHistorialPDF(
+      resumen,
+      registrosFinales,
+      nombrePeriodo,
+      periodo === "mensual"
+    );
   }
 }
 
@@ -404,7 +409,12 @@ async function generarReporteExcel() {
     const nombrePeriodo =
       periodo === "mensual" ? obtenerNombreMes(mes) : "Reporte completo";
 
-    exportarHistorialExcel(resumen, registrosFinales, nombrePeriodo);
+    exportarHistorialExcel(
+      resumen,
+      registrosFinales,
+      nombrePeriodo,
+      periodo === "mensual"
+    );
   }
 }
 
@@ -1136,7 +1146,12 @@ async function exportarReporteGeneralCompletoPDF() {
 }
 
 
-function exportarHistorialExcel(resumen, registros, nombrePeriodo = "Reporte completo") {
+function exportarHistorialExcel(
+  resumen,
+  registros,
+  nombrePeriodo = "Reporte completo",
+  mostrarHorasPeriodo = false
+) {
   if (!registros || registros.length === 0) {
     alert("Este prestador no tiene registros para exportar.");
     return;
@@ -1161,14 +1176,20 @@ function exportarHistorialExcel(resumen, registros, nombrePeriodo = "Reporte com
     ["Carrera", resumen.carrera || ""],
     ["Horario", resumen.horario || ""],
     ["Estatus", resumen.estatus || "activo"],
-    [],
-    ["Horas del periodo", horasPeriodo],
+    []
+  ];
+
+  if (mostrarHorasPeriodo) {
+    datosExcel.push(["Horas del periodo", horasPeriodo]);
+  }
+
+  datosExcel.push(
     ["Horas acumuladas", totales.horasAcumuladas],
     ["Horas faltantes", totales.horasFaltantes],
     ["Horas requeridas", totales.horasRequeridas],
     [],
     ["Fecha", "Entrada", "Salida", "Horas", "Actividad"]
-  ];
+  );
 
   registros.forEach((registro) => {
     datosExcel.push([
@@ -1205,7 +1226,12 @@ function exportarHistorialExcel(resumen, registros, nombrePeriodo = "Reporte com
   XLSX.writeFile(libro, nombreArchivo);
 }
 
-function exportarHistorialPDF(resumen, registros, nombrePeriodo = "Reporte completo") {
+function exportarHistorialPDF(
+  resumen,
+  registros,
+  nombrePeriodo = "Reporte completo",
+  mostrarHorasPeriodo = false
+) {
   if (!registros || registros.length === 0) {
     alert("Este prestador no tiene registros para exportar.");
     return;
@@ -1213,6 +1239,17 @@ function exportarHistorialPDF(resumen, registros, nombrePeriodo = "Reporte compl
 
   const totales = calcularTotalesExportacion(resumen);
   const horasPeriodo = calcularHorasDeRegistros(registros).toFixed(2);
+
+  const tarjetaHorasPeriodo = mostrarHorasPeriodo
+    ? `
+        <div>
+          <span>Horas del periodo</span>
+          <strong>${horasPeriodo}</strong>
+        </div>
+      `
+    : "";
+
+  const columnasResumen = mostrarHorasPeriodo ? "repeat(4, 1fr)" : "repeat(3, 1fr)";
 
   const filas = registros.map((registro) => `
     <tr>
@@ -1284,7 +1321,7 @@ function exportarHistorialPDF(resumen, registros, nombrePeriodo = "Reporte compl
 
         .resumen {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: ${columnasResumen};
           gap: 10px;
           margin-bottom: 18px;
         }
@@ -1361,10 +1398,7 @@ function exportarHistorialPDF(resumen, registros, nombrePeriodo = "Reporte compl
       </div>
 
       <div class="resumen">
-        <div>
-          <span>Horas del periodo</span>
-          <strong>${horasPeriodo}</strong>
-        </div>
+        ${tarjetaHorasPeriodo}
 
         <div>
           <span>Horas acumuladas</span>
