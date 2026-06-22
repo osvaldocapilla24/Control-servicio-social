@@ -32,6 +32,12 @@ const tablaHistorialCompletoPrestador = document.getElementById("tablaHistorialC
 
 const prestadorIdActual = sessionStorage.getItem("prestador_id");
 const prestadorNombreActual = sessionStorage.getItem("prestador_nombre");
+const bloqueRegistroDia = document.getElementById("bloqueRegistroDia");
+const bloqueRegistroManual = document.getElementById("bloqueRegistroManual");
+const avisoEstatusPrestador = document.getElementById("avisoEstatusPrestador");
+const etiquetaEstatusPrestador = document.getElementById("etiquetaEstatusPrestador");
+const tituloAvisoEstatus = document.getElementById("tituloAvisoEstatus");
+const textoAvisoEstatus = document.getElementById("textoAvisoEstatus");
 
 async function cargarResumen() {
   if (!prestadorIdActual) {
@@ -52,6 +58,8 @@ async function cargarResumen() {
   horasAcumuladas.textContent = Number(data.resumen.horas_acumuladas).toFixed(2);
   horasFaltantes.textContent = Number(data.resumen.horas_faltantes).toFixed(2);
   horarioTexto.textContent = data.resumen.horario;
+ 
+  aplicarVistaPorEstatus(data.resumen.estatus);
 
   tablaRegistros.innerHTML = "";
 
@@ -98,6 +106,49 @@ async function cargarResumen() {
   });
 
   activarBotonesRegistros();
+}
+
+
+function aplicarVistaPorEstatus(estatus) {
+  const estaFinalizado = estatus === "finalizado";
+  const estaArchivado = estatus === "archivado";
+  const estaBloqueado = estaFinalizado || estaArchivado;
+
+  btnEntrada.disabled = estaBloqueado;
+  btnSalida.disabled = estaBloqueado;
+  btnRegistroManual.disabled = estaBloqueado;
+
+  actividadInput.disabled = estaBloqueado;
+  fechaManual.disabled = estaBloqueado;
+  entradaManual.disabled = estaBloqueado;
+  salidaManual.disabled = estaBloqueado;
+  actividadManual.disabled = estaBloqueado;
+
+  if (!estaBloqueado) {
+    avisoEstatusPrestador.classList.add("hidden");
+    bloqueRegistroDia.classList.remove("hidden");
+    bloqueRegistroManual.classList.remove("hidden");
+    return;
+  }
+
+  avisoEstatusPrestador.classList.remove("hidden");
+  bloqueRegistroDia.classList.add("hidden");
+  bloqueRegistroManual.classList.add("hidden");
+  formEditarRegistro.classList.add("hidden");
+
+  if (estaFinalizado) {
+    etiquetaEstatusPrestador.textContent = "Finalizado";
+    tituloAvisoEstatus.textContent = "Servicio social finalizado";
+    textoAvisoEstatus.textContent =
+      "Este prestador ya fue marcado como finalizado por el responsable. Puede consultar su resumen e historial, pero ya no puede registrar nuevas horas.";
+  }
+
+  if (estaArchivado) {
+    etiquetaEstatusPrestador.textContent = "Archivado";
+    tituloAvisoEstatus.textContent = "Prestador archivado";
+    textoAvisoEstatus.textContent =
+      "Este prestador se encuentra archivado. Sus registros se conservan como historial, pero ya no puede usar el panel de registro.";
+  }
 }
 
 async function cargarHistorialCompleto() {

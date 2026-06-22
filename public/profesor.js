@@ -11,6 +11,9 @@ const tablaProfesor = document.getElementById("tablaProfesor");
 const detallePrestador = document.getElementById("detallePrestador");
 const nombreDetalle = document.getElementById("nombreDetalle");
 const tablaHistorial = document.getElementById("tablaHistorial");
+const mesReporteGeneral = document.getElementById("mesReporteGeneral");
+const btnReporteGeneralPDF = document.getElementById("btnReporteGeneralPDF");
+const btnReporteGeneralExcel = document.getElementById("btnReporteGeneralExcel");
 
 const formEditarRegistroResponsable = document.getElementById("formEditarRegistroResponsable");
 const registroResponsableEditandoId = document.getElementById("registroResponsableEditandoId");
@@ -22,11 +25,63 @@ const editarSalidaResponsable = document.getElementById("editarSalidaResponsable
 const editarActividadResponsable = document.getElementById("editarActividadResponsable");
 const btnGuardarEdicionResponsable = document.getElementById("btnGuardarEdicionResponsable");
 const btnCancelarEdicionResponsable = document.getElementById("btnCancelarEdicionResponsable");
+const btnMenuResponsable = document.getElementById("btnMenuResponsable");
+const menuResponsableOpciones = document.getElementById("menuResponsableOpciones");
+const btnMostrarReportes = document.getElementById("btnMostrarReportes");
+const btnMostrarArchivados = document.getElementById("btnMostrarArchivados");
+const btnCerrarReportes = document.getElementById("btnCerrarReportes");
+const btnCerrarArchivados = document.getElementById("btnCerrarArchivados");
+const seccionReportesResponsable = document.getElementById("seccionReportesResponsable");
+const seccionArchivadosResponsable = document.getElementById("seccionArchivadosResponsable");
+const tablaArchivados = document.getElementById("tablaArchivados");
 
 function mostrarPanelResponsable() {
   pinSection.classList.add("hidden");
   panelResponsable.classList.remove("hidden");
   cargarResumenProfesor();
+}
+
+function cerrarMenuResponsable() {
+  menuResponsableOpciones.classList.add("hidden");
+}
+
+function ocultarSeccionesResponsable() {
+  seccionReportesResponsable.classList.add("hidden");
+  seccionArchivadosResponsable.classList.add("hidden");
+}
+
+function mostrarSeccionReportes() {
+  const estaVisible = !seccionReportesResponsable.classList.contains("hidden");
+
+  ocultarSeccionesResponsable();
+
+  if (!estaVisible) {
+    seccionReportesResponsable.classList.remove("hidden");
+    seccionReportesResponsable.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+
+  cerrarMenuResponsable();
+}
+
+async function mostrarSeccionArchivados() {
+  const estaVisible = !seccionArchivadosResponsable.classList.contains("hidden");
+
+  ocultarSeccionesResponsable();
+
+  if (!estaVisible) {
+    await cargarPrestadoresArchivados();
+
+    seccionArchivadosResponsable.classList.remove("hidden");
+    seccionArchivadosResponsable.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+
+  cerrarMenuResponsable();
 }
 
 formPin.addEventListener("submit", (e) => {
@@ -80,6 +135,8 @@ async function cargarResumenProfesor() {
 
     botonesHistorial.forEach((boton) => {
       boton.addEventListener("click", () => {
+        cerrarMenuResponsable();
+
         const id = boton.dataset.id;
         const nombre = boton.dataset.nombre;
         verHistorial(id, nombre);
@@ -89,6 +146,65 @@ async function cargarResumenProfesor() {
     tablaProfesor.innerHTML = `
       <tr>
         <td colspan="9">Error al cargar la información.</td>
+      </tr>
+    `;
+  }
+}
+
+async function cargarPrestadoresArchivados() {
+  try {
+    const respuesta = await fetch("/api/profesor/archivados");
+    const archivados = await respuesta.json();
+
+    tablaArchivados.innerHTML = "";
+
+    if (!respuesta.ok) {
+      tablaArchivados.innerHTML = `
+        <tr>
+          <td colspan="6">${archivados.mensaje || "Error al cargar archivados."}</td>
+        </tr>
+      `;
+      return;
+    }
+
+    if (archivados.length === 0) {
+      tablaArchivados.innerHTML = `
+        <tr>
+          <td colspan="6">No hay prestadores archivados.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    archivados.forEach((p) => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${p.nombre}</td>
+        <td>${p.matricula}</td>
+        <td>${p.carrera}</td>
+        <td>${Number(p.horas_acumuladas || 0).toFixed(2)}</td>
+        <td>${p.estatus || "archivado"}</td>
+        <td>
+          <button class="small-btn btn-restaurar-archivado" data-id="${p.id}">
+            Restaurar
+          </button>
+        </td>
+      `;
+
+      tablaArchivados.appendChild(tr);
+    });
+
+    document.querySelectorAll(".btn-restaurar-archivado").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        restaurarPrestadorArchivado(boton.dataset.id);
+      });
+    });
+
+  } catch (error) {
+    tablaArchivados.innerHTML = `
+      <tr>
+        <td colspan="6">Error al conectar con el servidor.</td>
       </tr>
     `;
   }
@@ -239,8 +355,8 @@ async function verHistorial(id, nombre) {
                 Reactivar
               </button>
 
-              <button class="btn-mini-danger btn-borrar-detalle" type="button">
-                Limpiar historial
+              <button class="btn-mini-danger btn-archivar-detalle" type="button">
+                Archivar
               </button>
 
               <button class="btn-mini btn-ocultar-historial-detalle" type="button">
@@ -348,8 +464,8 @@ async function verHistorial(id, nombre) {
       activarPrestador(id);
     });
 
-    document.querySelector(".btn-borrar-detalle").addEventListener("click", () => {
-      borrarRegistrosPrestador(id, nombre);
+    document.querySelector(".btn-archivar-detalle").addEventListener("click", () => {
+      archivarPrestador(id, nombre);
     });
 
     document.querySelector(".btn-editar-prestador-detalle").addEventListener("click", () => {
@@ -555,6 +671,231 @@ function calcularTotalesExportacion(resumen) {
     horasRequeridas: Number(resumen.horas_requeridas || 0).toFixed(2)
   };
 }
+
+
+function obtenerNombreMes(mes) {
+  const [anio, numeroMes] = mes.split("-");
+  const fecha = new Date(Number(anio), Number(numeroMes) - 1, 1);
+
+  return fecha.toLocaleDateString("es-MX", {
+    month: "long",
+    year: "numeric"
+  });
+}
+
+async function obtenerReporteMensualGeneral() {
+  const mes = mesReporteGeneral.value;
+
+  if (!mes) {
+    alert("Selecciona el mes del reporte.");
+    return null;
+  }
+
+  try {
+    const respuesta = await fetch(`/api/reportes/mensual-general?mes=${mes}`);
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(datos.mensaje || "Error al obtener el reporte mensual.");
+      return null;
+    }
+
+    return {
+      mes,
+      nombreMes: obtenerNombreMes(mes),
+      datos
+    };
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
+    return null;
+  }
+}
+
+async function exportarReporteGeneralExcel() {
+  const reporte = await obtenerReporteMensualGeneral();
+
+  if (!reporte) {
+    return;
+  }
+
+  if (typeof XLSX === "undefined") {
+    alert("No se pudo cargar la librería para generar Excel.");
+    return;
+  }
+
+  const datosExcel = [
+    [`Reporte mensual general - ${reporte.nombreMes}`],
+    [],
+    ["Nombre", "Matrícula", "Carrera", "Horario", "Horas del mes", "Horas acumuladas", "Horas faltantes", "Estatus"]
+  ];
+
+  reporte.datos.forEach((p) => {
+    datosExcel.push([
+      p.nombre || "",
+      p.matricula || "",
+      p.carrera || "",
+      p.horario || "",
+      Number(p.horas_mes || 0),
+      Number(p.horas_acumuladas || 0),
+      Number(p.horas_faltantes || 0),
+      p.estatus || "activo"
+    ]);
+  });
+
+  const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
+
+  hoja["!cols"] = [
+    { wch: 28 },
+    { wch: 16 },
+    { wch: 38 },
+    { wch: 36 },
+    { wch: 16 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 14 }
+  ];
+
+  hoja["!merges"] = [
+    {
+      s: { r: 0, c: 0 },
+      e: { r: 0, c: 7 }
+    }
+  ];
+
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, "Reporte mensual");
+
+  const nombreArchivo = `reporte_mensual_general_${reporte.mes}.xlsx`;
+
+  XLSX.writeFile(libro, nombreArchivo);
+}
+
+async function exportarReporteGeneralPDF() {
+  const reporte = await obtenerReporteMensualGeneral();
+
+  if (!reporte) {
+    return;
+  }
+
+  const filas = reporte.datos.map((p) => `
+    <tr>
+      <td>${p.nombre || ""}</td>
+      <td>${p.matricula || ""}</td>
+      <td>${p.carrera || ""}</td>
+      <td>${Number(p.horas_mes || 0).toFixed(2)}</td>
+      <td>${Number(p.horas_acumuladas || 0).toFixed(2)}</td>
+      <td>${Number(p.horas_faltantes || 0).toFixed(2)}</td>
+      <td>${p.estatus || "activo"}</td>
+    </tr>
+  `).join("");
+
+  const ventana = window.open("", "_blank");
+
+  ventana.document.write(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Reporte mensual general</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 28px;
+          color: #1f2937;
+        }
+
+        .encabezado {
+          text-align: center;
+          margin-bottom: 22px;
+        }
+
+        .logo {
+          font-weight: 800;
+          color: #1e3a8a;
+          font-size: 22px;
+          margin-bottom: 6px;
+        }
+
+        h1 {
+          color: #0f2f6e;
+          margin: 0;
+          font-size: 24px;
+        }
+
+        .subtitulo {
+          color: #4b5563;
+          margin-top: 8px;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 18px;
+          font-size: 11px;
+        }
+
+        th {
+          background: #1f3f93;
+          color: white;
+          padding: 8px;
+          border: 1px solid #1f3f93;
+          text-align: left;
+        }
+
+        td {
+          padding: 7px;
+          border: 1px solid #dbe5f1;
+        }
+
+        .nota {
+          margin-top: 18px;
+          font-size: 11px;
+          color: #4b5563;
+          text-align: center;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="encabezado">
+        <div class="logo">BUAP</div>
+        <h1>Reporte mensual general</h1>
+        <p class="subtitulo">${reporte.nombreMes}</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Matrícula</th>
+            <th>Carrera</th>
+            <th>Horas mes</th>
+            <th>Acumuladas</th>
+            <th>Faltantes</th>
+            <th>Estatus</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filas}
+        </tbody>
+      </table>
+
+      <p class="nota">
+        Documento generado desde el sistema de control de horas de servicio social.
+      </p>
+
+      <script>
+        window.onload = function() {
+          window.print();
+        };
+      </script>
+    </body>
+    </html>
+  `);
+
+  ventana.document.close();
+}
+
 
 function exportarHistorialExcel(resumen, registros) {
   if (!registros || registros.length === 0) {
@@ -938,39 +1279,85 @@ async function activarPrestador(id) {
   }
 }
 
-async function borrarRegistrosPrestador(id, nombre) {
+async function archivarPrestador(id, nombre) {
   const confirmar = confirm(
-    `¿Seguro que deseas borrar TODOS los registros de ${nombre}?\n\nEsta acción no se puede deshacer.`
+    `¿Seguro que deseas archivar a ${nombre}?\n\n` +
+    "El prestador dejará de aparecer en la tabla principal del responsable.\n" +
+    "Sus registros e historial NO se eliminarán.\n\n" +
+    "Podrás consultarlo y restaurarlo después desde la sección Ver archivados."
   );
 
   if (!confirmar) {
     return;
   }
 
-  const segundaConfirmacion = confirm(
-    "Confirma nuevamente: se eliminarán todas las horas registradas de este prestador."
+  try {
+    const respuesta = await fetch(`/api/prestadores/${id}/archivar`, {
+      method: "PATCH"
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(resultado.mensaje);
+      return;
+    }
+
+    alert(resultado.mensaje);
+
+    detallePrestador.classList.add("hidden");
+    formEditarRegistroResponsable.classList.add("hidden");
+    tablaHistorial.innerHTML = "";
+    nombreDetalle.innerHTML = "";
+
+    limpiarFormularioEdicionResponsable();
+
+    prestadorResponsableEditandoId.value = "";
+    prestadorResponsableEditandoNombre.value = "";
+
+    await cargarResumenProfesor();
+
+    if (!seccionArchivadosResponsable.classList.contains("hidden")) {
+      await cargarPrestadoresArchivados();
+    }
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
+  }
+}
+
+async function restaurarPrestadorArchivado(id) {
+  const confirmar = confirm(
+    "¿Seguro que deseas restaurar este prestador?\n\n" +
+    "Volverá a aparecer en la tabla principal del responsable con estado activo."
   );
 
-  if (!segundaConfirmacion) {
+  if (!confirmar) {
     return;
   }
 
-  const respuesta = await fetch(`/api/prestadores/${id}/registros`, {
-    method: "DELETE"
-  });
+  try {
+    const respuesta = await fetch(`/api/prestadores/${id}/activar`, {
+      method: "PATCH"
+    });
 
-  const resultado = await respuesta.json();
+    const resultado = await respuesta.json();
 
-  if (!respuesta.ok) {
-    alert(resultado.mensaje);
-    return;
+    if (!respuesta.ok) {
+      alert(resultado.mensaje);
+      return;
+    }
+
+    alert("Prestador restaurado correctamente.");
+
+    await cargarPrestadoresArchivados();
+    await cargarResumenProfesor();
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
   }
-
-  alert(`${resultado.mensaje} Registros eliminados: ${resultado.registros_eliminados}`);
-  detallePrestador.classList.add("hidden");
-  formEditarRegistroResponsable.classList.add("hidden");
-  cargarResumenProfesor();
 }
+
 
 function ocultarHistorialResponsable() {
   detallePrestador.classList.add("hidden");
@@ -994,6 +1381,23 @@ function limpiarFormularioEdicionResponsable() {
 
 btnGuardarEdicionResponsable.addEventListener("click", guardarEdicionResponsable);
 btnCancelarEdicionResponsable.addEventListener("click", limpiarFormularioEdicionResponsable);
+btnReporteGeneralExcel.addEventListener("click", exportarReporteGeneralExcel);
+btnReporteGeneralPDF.addEventListener("click", exportarReporteGeneralPDF);
+
+btnMenuResponsable.addEventListener("click", () => {
+  menuResponsableOpciones.classList.toggle("hidden");
+});
+
+btnMostrarReportes.addEventListener("click", mostrarSeccionReportes);
+btnMostrarArchivados.addEventListener("click", mostrarSeccionArchivados);
+
+btnCerrarReportes.addEventListener("click", () => {
+  seccionReportesResponsable.classList.add("hidden");
+});
+
+btnCerrarArchivados.addEventListener("click", () => {
+  seccionArchivadosResponsable.classList.add("hidden");
+});
 
 if (sessionStorage.getItem("responsable_autorizado") === "true") {
   mostrarPanelResponsable();

@@ -236,9 +236,9 @@ app.post("/api/entrada", async (req, res) => {
 
     const prestador = prestadorResultado.rows[0];
 
-    if (prestador.estatus === "finalizado") {
+    if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
       return res.status(403).json({
-        mensaje: "No puedes registrar entrada porque este prestador ya finalizó su servicio."
+        mensaje: "No puedes registrar entrada porque este prestador ya no se encuentra activo."
       });
     }
 
@@ -315,7 +315,7 @@ app.post("/api/salida", async (req, res) => {
 
     if (prestador.estatus === "finalizado") {
       return res.status(403).json({
-        mensaje: "No puedes registrar salida porque este prestador ya finalizó su servicio."
+        mensaje: "No puedes registrar salida porque este prestador ya no se encuentra activo."
       });
     }
 
@@ -580,6 +580,76 @@ app.get("/api/prestadores/:id/registros", async (req, res) => {
   }
 });
 
+/* REPORTE MENSUAL GENERAL */
+
+app.get("/api/reportes/mensual-general", async (req, res) => {
+  try {
+    const { mes } = req.query;
+
+    if (!mes) {
+      return res.status(400).json({
+        mensaje: "El mes del reporte es obligatorio."
+      });
+    }
+
+    const fechaInicio = `${mes}-01`;
+
+    const resultado = await pool.query(
+      `
+      SELECT
+        p.id,
+        p.nombre,
+        p.matricula,
+        p.carrera,
+        p.horario,
+        p.horas_requeridas,
+        p.estatus,
+        COALESCE(SUM(r.horas), 0) AS horas_mes,
+        COALESCE((
+          SELECT SUM(r2.horas)
+          FROM registros r2
+          WHERE r2.prestador_id = p.id
+        ), 0) AS horas_acumuladas
+      FROM prestadores p
+      LEFT JOIN registros r
+        ON r.prestador_id = p.id
+        AND r.fecha >= $1::date
+        AND r.fecha < ($1::date + INTERVAL '1 month')
+      GROUP BY
+        p.id,
+        p.nombre,
+        p.matricula,
+        p.carrera,
+        p.horario,
+        p.horas_requeridas,
+        p.estatus
+      ORDER BY p.nombre ASC
+      `,
+      [fechaInicio]
+    );
+
+    const reporte = resultado.rows.map((prestador) => {
+      const horasAcumuladas = Number(prestador.horas_acumuladas || 0);
+      const horasRequeridas = Number(prestador.horas_requeridas || 480);
+
+      return {
+        ...prestador,
+        horas_mes: Number(prestador.horas_mes || 0),
+        horas_acumuladas: horasAcumuladas,
+        horas_faltantes: Math.max(horasRequeridas - horasAcumuladas, 0)
+      };
+    });
+
+    res.json(reporte);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al generar el reporte mensual general."
+    });
+  }
+});
+
 /* RESUMEN DEL RESPONSABLE */
 
 app.get("/api/profesor/resumen", async (req, res) => {
@@ -613,6 +683,7 @@ app.get("/api/profesor/resumen", async (req, res) => {
         ) AS estado_hoy
       FROM prestadores p
       LEFT JOIN registros r ON p.id = r.prestador_id
+      WHERE COALESCE(p.estatus, 'activo') != 'archivado'
       GROUP BY p.id
       ORDER BY p.nombre ASC
       `,
@@ -630,6 +701,40 @@ app.get("/api/profesor/resumen", async (req, res) => {
     console.error(error);
     res.status(500).json({
       mensaje: "Error al obtener resumen del profesor."
+    });
+  }
+});
+
+/* PRESTADORES ARCHIVADOS */
+
+app.get("/api/profesor/archivados", async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `
+      SELECT
+        p.id,
+        p.nombre,
+        p.matricula,
+        p.carrera,
+        p.horario,
+        p.horas_requeridas,
+        p.estatus,
+        COALESCE(SUM(r.horas), 0) AS horas_acumuladas,
+        p.horas_requeridas - COALESCE(SUM(r.horas), 0) AS horas_faltantes
+      FROM prestadores p
+      LEFT JOIN registros r ON p.id = r.prestador_id
+      WHERE p.estatus = 'archivado'
+      GROUP BY p.id
+      ORDER BY p.nombre ASC
+      `
+    );
+
+    res.json(resultado.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al obtener prestadores archivados."
     });
   }
 });
@@ -764,38 +869,7 @@ app.put("/api/registros/:id", async (req, res) => {
   }
 });
 
-/* ELIMINAR REGISTRO INDIVIDUAL */
 
-app.delete("/api/registros/:id", async (req, res) => {
-  try {
-    const registroId = req.params.id;
-
-    const resultado = await pool.query(
-      `
-      DELETE FROM registros
-      WHERE id = $1
-      RETURNING id
-      `,
-      [registroId]
-    );
-
-    if (resultado.rows.length === 0) {
-      return res.status(404).json({
-        mensaje: "Registro no encontrado."
-      });
-    }
-
-    res.json({
-      mensaje: "Registro eliminado correctamente."
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      mensaje: "Error al eliminar el registro."
-    });
-  }
-});
 
 /* EDITAR DATOS DEL PRESTADOR */
 
@@ -984,6 +1058,56 @@ app.patch("/api/prestadores/:id/activar", async (req, res) => {
     console.error(error);
     res.status(500).json({
       mensaje: "Error al reactivar prestador."
+    });
+  }
+});
+
+/* ARCHIVAR PRESTADOR */
+
+app.patch("/api/prestadores/:id/archivar", async (req, res) => {
+  try {
+    const prestadorId = req.params.id;
+
+    const prestadorResultado = await pool.query(
+      `
+      SELECT id, nombre, estatus
+      FROM prestadores
+      WHERE id = $1
+      `,
+      [prestadorId]
+    );
+
+    if (prestadorResultado.rows.length === 0) {
+      return res.status(404).json({
+        mensaje: "Prestador no encontrado."
+      });
+    }
+
+    const prestador = prestadorResultado.rows[0];
+
+    if (prestador.estatus === "archivado") {
+      return res.status(409).json({
+        mensaje: "Este prestador ya se encuentra archivado."
+      });
+    }
+
+    await pool.query(
+      `
+      UPDATE prestadores
+      SET estatus = 'archivado'
+      WHERE id = $1
+      `,
+      [prestadorId]
+    );
+
+    res.json({
+      mensaje: "Prestador archivado correctamente. Ya no aparecerá en la tabla principal."
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al archivar prestador."
     });
   }
 });

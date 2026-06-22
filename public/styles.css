@@ -376,6 +376,8 @@ button:hover,
   font-size: 14px;
 }
 
+
+
 /* CERRAR SESIÓN RESPONSABLE */
 
 .header-responsable {
@@ -400,6 +402,104 @@ button:hover,
   color: var(--rojo-hover);
   text-decoration: underline;
   transform: none;
+  box-shadow: none;
+}
+
+/* MENÚ RESPONSABLE */
+
+.menu-responsable {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 50;
+}
+
+.menu-responsable-btn {
+  background: transparent;
+  color: var(--azul-texto);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 24px;
+  box-shadow: none;
+}
+
+.menu-responsable-btn:hover {
+  background: var(--gris-fondo);
+  color: var(--azul-principal);
+  transform: none;
+  box-shadow: none;
+}
+
+.menu-responsable-opciones {
+  position: absolute;
+  right: 0;
+  top: 38px;
+  min-width: 190px;
+  padding: 10px;
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(15, 47, 110, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-responsable-opciones button {
+  background: transparent;
+  color: var(--texto);
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 9px;
+  font-size: 14px;
+  box-shadow: none;
+}
+
+.menu-responsable-opciones button:hover {
+  background: var(--gris-fondo);
+  color: var(--azul-principal);
+  transform: none;
+  box-shadow: none;
+}
+
+.menu-responsable-opciones .menu-cerrar-sesion {
+  color: var(--rojo);
+}
+
+.menu-responsable-opciones .menu-cerrar-sesion:hover {
+  color: var(--rojo-hover);
+  background: rgba(220, 38, 38, 0.08);
+}
+
+/* CERRAR SECCIONES COMO TEXTO */
+
+.cerrar-seccion-texto {
+  background: transparent;
+  color: var(--rojo);
+  padding: 0;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.cerrar-seccion-texto:hover {
+  background: transparent;
+  color: var(--rojo-hover);
+  text-decoration: underline;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-archivar-detalle {
+  background: transparent;
+  color: var(--rojo);
+  border: 1px solid var(--rojo);
+}
+
+.btn-archivar-detalle:hover {
+  background: var(--rojo);
+  color: white;
   box-shadow: none;
 }
 
@@ -692,6 +792,41 @@ hr {
   margin: 0;
 }
 
+/* REPORTE MENSUAL */
+
+.reporte-mensual-card {
+  background: var(--gris-fondo);
+  border: 1px solid var(--gris-borde);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 22px;
+}
+
+.reporte-mensual-controles {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.reporte-mensual-controles > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.reporte-mensual-botones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.reporte-mensual-botones button {
+  margin: 0;
+}
+
 /* TABLAS */
 
 table {
@@ -746,6 +881,51 @@ tr:hover {
 
 .section-title-actions p {
   margin: 0;
+}
+
+/* AVISO DE ESTATUS DEL PRESTADOR */
+
+.aviso-estatus-prestador {
+  margin-bottom: 22px;
+  padding: 18px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-left: 6px solid #f97316;
+  border-radius: 16px;
+}
+
+.aviso-estatus-prestador span {
+  display: inline-block;
+  background: #f97316;
+  color: white;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.aviso-estatus-prestador h2 {
+  color: #9a3412;
+  margin-bottom: 6px;
+}
+
+.aviso-estatus-prestador p {
+  color: #7c2d12;
+  margin-bottom: 0;
+}
+
+button:disabled,
+input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 /* RESPONSIVE */
@@ -828,5 +1008,21 @@ tr:hover {
     position: static;
     margin-top: 8px;
     box-shadow: none;
+  }
+
+    .reporte-mensual-controles {
+    align-items: stretch;
+  }
+
+  .reporte-mensual-controles > div:first-child {
+    width: 100%;
+  }
+
+  .reporte-mensual-botones {
+    width: 100%;
+  }
+
+  .reporte-mensual-botones button {
+    flex: 1;
   }
 }

@@ -21,12 +21,7 @@
 
       <form id="formPin" class="form">
         <label for="pinResponsable">PIN del responsable</label>
-        <input 
-          type="password" 
-          id="pinResponsable" 
-          placeholder="Ingresa el PIN" 
-          required
-        >
+        <input type="password" id="pinResponsable" placeholder="Ingresa el PIN" required>
 
         <button type="submit">INGRESAR</button>
       </form>
@@ -44,7 +39,17 @@
     <section id="panelResponsable" class="card wide hidden">
 
       <div class="header header-responsable">
-        <button id="btnCerrarResponsable" class="logout-text">Cerrar sesión</button>
+        <div class="menu-responsable">
+          <button id="btnMenuResponsable" class="menu-responsable-btn" type="button">
+            ☰
+          </button>
+
+          <div id="menuResponsableOpciones" class="menu-responsable-opciones hidden">
+            <button id="btnMostrarReportes" type="button">Generar reportes</button>
+            <button id="btnMostrarArchivados" type="button">Ver archivados</button>
+            <button id="btnCerrarResponsable" type="button" class="menu-cerrar-sesion">Cerrar sesión</button>
+          </div>
+        </div>
 
         <div class="logo">BUAP</div>
         <h1>Panel del Responsable</h1>
@@ -91,11 +96,7 @@
           <input type="time" id="editarSalidaResponsable">
 
           <label for="editarActividadResponsable">Actividad realizada</label>
-          <input 
-            type="text" 
-            id="editarActividadResponsable" 
-            placeholder="Ejemplo: Mantenimiento preventivo"
-          >
+          <input type="text" id="editarActividadResponsable" placeholder="Ejemplo: Mantenimiento preventivo">
 
           <div class="buttons">
             <button id="btnGuardarEdicionResponsable" type="button">Actualizar registro</button>
@@ -104,7 +105,67 @@
         </div>
       </section>
 
+
+      <section id="seccionReportesResponsable" class="summary reporte-mensual-card hidden">
+        <div class="section-title-actions">
+          <div>
+            <h2>Generar reportes</h2>
+            <p>Genera reportes del servicio social en PDF o Excel.</p>
+          </div>
+
+          <button id="btnCerrarReportes" type="button" class="cerrar-seccion-texto">
+            Cerrar
+          </button>
+        </div>
+
+        <div class="reporte-mensual-controles">
+          <div>
+            <label for="mesReporteGeneral">Mes del reporte</label>
+            <input type="month" id="mesReporteGeneral">
+          </div>
+
+          <div class="reporte-mensual-botones">
+            <button id="btnReporteGeneralPDF" type="button" class="btn-exportar-pdf-detalle">
+              Exportar PDF
+            </button>
+
+            <button id="btnReporteGeneralExcel" type="button" class="btn-exportar-excel-detalle">
+              Exportar Excel
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRESTADORES ARCHIVADOS -->
+      <section id="seccionArchivadosResponsable" class="summary reporte-mensual-card hidden">
+        <div class="section-title-actions">
+          <div>
+            <h2>Prestadores archivados</h2>
+            <p>Consulta prestadores ocultos de la tabla principal y restáuralos si es necesario.</p>
+          </div>
+
+          <button id="btnCerrarArchivados" type="button" class="cerrar-seccion-texto">
+            Cerrar
+          </button>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Matrícula</th>
+              <th>Carrera</th>
+              <th>Horas acumuladas</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaArchivados"></tbody>
+        </table>
+      </section>
+
       <!-- TABLA GENERAL DE PRESTADORES -->
+
       <table>
         <thead>
           <tr>
@@ -129,7 +190,7 @@
 
     </section>
   </main>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script src="profesor.js"></script>
