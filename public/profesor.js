@@ -53,6 +53,8 @@ function cerrarMenuResponsable() {
 function ocultarSeccionesResponsable() {
   seccionReportesResponsable.classList.add("hidden");
   seccionArchivadosResponsable.classList.add("hidden");
+  detallePrestador.classList.add("hidden");
+  formEditarRegistroResponsable.classList.add("hidden");
 }
 
 async function mostrarSeccionReportes() {
@@ -143,6 +145,7 @@ async function cargarResumenProfesor() {
     botonesHistorial.forEach((boton) => {
       boton.addEventListener("click", () => {
         cerrarMenuResponsable();
+        ocultarSeccionesResponsable();
 
         const id = boton.dataset.id;
         const nombre = boton.dataset.nombre;
