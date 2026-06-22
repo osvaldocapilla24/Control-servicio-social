@@ -313,9 +313,9 @@ app.post("/api/salida", async (req, res) => {
 
     const prestador = prestadorResultado.rows[0];
 
-    if (prestador.estatus === "finalizado") {
+    if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
       return res.status(403).json({
-        mensaje: "No puedes registrar salida porque este prestador ya no se encuentra activo."
+       mensaje: "No puedes registrar salida porque este prestador ya no se encuentra activo."
       });
     }
 
@@ -424,9 +424,9 @@ app.post("/api/registro-manual", async (req, res) => {
 
     const prestador = prestadorResultado.rows[0];
 
-    if (prestador.estatus === "finalizado") {
+    if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
       return res.status(403).json({
-        mensaje: "No puedes agregar horas porque este prestador ya finalizó su servicio."
+        mensaje: "No puedes agregar horas porque este prestador ya no se encuentra activo."
       });
     }
 
@@ -615,6 +615,7 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
         ON r.prestador_id = p.id
         AND r.fecha >= $1::date
         AND r.fecha < ($1::date + INTERVAL '1 month')
+        WHERE COALESCE(p.estatus, 'activo') != 'archivado'
       GROUP BY
         p.id,
         p.nombre,
@@ -869,7 +870,46 @@ app.put("/api/registros/:id", async (req, res) => {
   }
 });
 
+/* ELIMINAR REGISTRO INDIVIDUAL */
 
+app.delete("/api/registros/:id", async (req, res) => {
+  try {
+    const registroId = req.params.id;
+
+    const registroResultado = await pool.query(
+      `
+      SELECT id
+      FROM registros
+      WHERE id = $1
+      `,
+      [registroId]
+    );
+
+    if (registroResultado.rows.length === 0) {
+      return res.status(404).json({
+        mensaje: "Registro no encontrado."
+      });
+    }
+
+    await pool.query(
+      `
+      DELETE FROM registros
+      WHERE id = $1
+      `,
+      [registroId]
+    );
+
+    res.json({
+      mensaje: "Registro eliminado correctamente."
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al eliminar el registro."
+    });
+  }
+});
 
 /* EDITAR DATOS DEL PRESTADOR */
 
@@ -1112,62 +1152,28 @@ app.patch("/api/prestadores/:id/archivar", async (req, res) => {
   }
 });
 
-/* BORRAR REGISTROS DEL PRESTADOR */
 
-app.delete("/api/prestadores/:id/registros", async (req, res) => {
+/* PRESTADORES PARA REPORTES */
+
+app.get("/api/reportes/prestadores", async (req, res) => {
   try {
-    const prestadorId = req.params.id;
-
-    const prestadorResultado = await pool.query(
-      `
-      SELECT id, nombre
+    const resultado = await pool.query(`
+      SELECT 
+        id,
+        nombre,
+        matricula,
+        carrera,
+        COALESCE(estatus, 'activo') AS estatus
       FROM prestadores
-      WHERE id = $1
-      `,
-      [prestadorId]
-    );
+      WHERE COALESCE(estatus, 'activo') != 'archivado'
+      ORDER BY nombre ASC
+    `);
 
-    if (prestadorResultado.rows.length === 0) {
-      return res.status(404).json({
-        mensaje: "Prestador no encontrado."
-      });
-    }
-
-    const totalResultado = await pool.query(
-      `
-      SELECT COUNT(*) AS total
-      FROM registros
-      WHERE prestador_id = $1
-      `,
-      [prestadorId]
-    );
-
-    const total = Number(totalResultado.rows[0].total);
-
-    if (total === 0) {
-      return res.status(409).json({
-        mensaje: "Este prestador no tiene registros para eliminar."
-      });
-    }
-
-    const deleteResultado = await pool.query(
-      `
-      DELETE FROM registros
-      WHERE prestador_id = $1
-      RETURNING id
-      `,
-      [prestadorId]
-    );
-
-    res.json({
-      mensaje: "Registros del prestador borrados correctamente.",
-      registros_eliminados: deleteResultado.rows.length
-    });
-
+    res.json(resultado.rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al borrar registros del prestador."
+      mensaje: "Error al obtener prestadores para reportes."
     });
   }
 });
@@ -1179,6 +1185,8 @@ app.get("/api/prueba", (req, res) => {
     mensaje: "Servidor funcionando correctamente"
   });
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

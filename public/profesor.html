@@ -110,7 +110,7 @@
         <div class="section-title-actions">
           <div>
             <h2>Generar reportes</h2>
-            <p>Genera reportes del servicio social en PDF o Excel.</p>
+            <p>Genera reportes generales o por prestador en PDF y Excel.</p>
           </div>
 
           <button id="btnCerrarReportes" type="button" class="cerrar-seccion-texto">
@@ -118,21 +118,44 @@
           </button>
         </div>
 
-        <div class="reporte-mensual-controles">
+        <div class="reportes-grid">
           <div>
-            <label for="mesReporteGeneral">Mes del reporte</label>
+            <label for="tipoReporte">Tipo de reporte</label>
+            <select id="tipoReporte">
+              <option value="general">General</option>
+              <option value="prestador">Por prestador</option>
+            </select>
+          </div>
+
+          <div id="campoPrestadorReporte" class="hidden">
+            <label for="prestadorReporte">Prestador</label>
+            <select id="prestadorReporte">
+              <option value="">Selecciona un prestador</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="periodoReporte">Periodo</label>
+            <select id="periodoReporte">
+              <option value="mensual">Mensual</option>
+              <option value="completo">Completo</option>
+            </select>
+          </div>
+
+          <div id="campoMesReporte">
+            <label for="mesReporteGeneral">Mes</label>
             <input type="month" id="mesReporteGeneral">
           </div>
+        </div>
 
-          <div class="reporte-mensual-botones">
-            <button id="btnReporteGeneralPDF" type="button" class="btn-exportar-pdf-detalle">
-              Exportar PDF
-            </button>
+       <div class="buttons reporte-actions">
+          <button id="btnGenerarReportePDF" type="button" class="btn-reporte-pdf">
+            Generar PDF
+          </button>
 
-            <button id="btnReporteGeneralExcel" type="button" class="btn-exportar-excel-detalle">
-              Exportar Excel
-            </button>
-          </div>
+          <button id="btnGenerarReporteExcel" type="button" class="btn-reporte-excel">
+            Generar Excel
+          </button>
         </div>
       </section>
 

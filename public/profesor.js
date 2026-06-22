@@ -11,9 +11,14 @@ const tablaProfesor = document.getElementById("tablaProfesor");
 const detallePrestador = document.getElementById("detallePrestador");
 const nombreDetalle = document.getElementById("nombreDetalle");
 const tablaHistorial = document.getElementById("tablaHistorial");
+const tipoReporte = document.getElementById("tipoReporte");
+const campoPrestadorReporte = document.getElementById("campoPrestadorReporte");
+const prestadorReporte = document.getElementById("prestadorReporte");
+const periodoReporte = document.getElementById("periodoReporte");
+const campoMesReporte = document.getElementById("campoMesReporte");
 const mesReporteGeneral = document.getElementById("mesReporteGeneral");
-const btnReporteGeneralPDF = document.getElementById("btnReporteGeneralPDF");
-const btnReporteGeneralExcel = document.getElementById("btnReporteGeneralExcel");
+const btnGenerarReportePDF = document.getElementById("btnGenerarReportePDF");
+const btnGenerarReporteExcel = document.getElementById("btnGenerarReporteExcel");
 
 const formEditarRegistroResponsable = document.getElementById("formEditarRegistroResponsable");
 const registroResponsableEditandoId = document.getElementById("registroResponsableEditandoId");
@@ -50,12 +55,14 @@ function ocultarSeccionesResponsable() {
   seccionArchivadosResponsable.classList.add("hidden");
 }
 
-function mostrarSeccionReportes() {
+async function mostrarSeccionReportes() {
   const estaVisible = !seccionReportesResponsable.classList.contains("hidden");
 
   ocultarSeccionesResponsable();
 
   if (!estaVisible) {
+    await cargarPrestadoresParaReportes();
+
     seccionReportesResponsable.classList.remove("hidden");
     seccionReportesResponsable.scrollIntoView({
       behavior: "smooth",
@@ -210,6 +217,194 @@ async function cargarPrestadoresArchivados() {
   }
 }
 
+async function cargarPrestadoresParaReportes() {
+  try {
+    const respuesta = await fetch("/api/reportes/prestadores");
+    const prestadores = await respuesta.json();
+
+    prestadorReporte.innerHTML = `
+      <option value="">Selecciona un prestador</option>
+    `;
+
+    if (!respuesta.ok) {
+      alert(prestadores.mensaje || "Error al cargar prestadores para reportes.");
+      return;
+    }
+
+    prestadores.forEach((p) => {
+      const option = document.createElement("option");
+
+      option.value = p.id;
+      option.textContent = `${p.nombre} - ${p.matricula} (${p.estatus})`;
+
+      prestadorReporte.appendChild(option);
+    });
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
+  }
+}
+
+function actualizarFormularioReportes() {
+  if (tipoReporte.value === "prestador") {
+    campoPrestadorReporte.classList.remove("hidden");
+  } else {
+    campoPrestadorReporte.classList.add("hidden");
+    prestadorReporte.value = "";
+  }
+
+  if (periodoReporte.value === "mensual") {
+    campoMesReporte.classList.remove("hidden");
+  } else {
+    campoMesReporte.classList.add("hidden");
+    mesReporteGeneral.value = "";
+  }
+}
+
+async function obtenerResumenPrestadorReporte(id) {
+  const respuesta = await fetch(`/api/resumen/${id}`);
+  const data = await respuesta.json();
+
+  if (!respuesta.ok) {
+    alert(data.mensaje || "Error al obtener resumen del prestador.");
+    return null;
+  }
+
+  return data.resumen;
+}
+
+async function obtenerRegistrosPrestadorReporte(id) {
+  const respuesta = await fetch(`/api/profesor/prestador/${id}/registros`);
+  const registros = await respuesta.json();
+
+  if (!respuesta.ok) {
+    alert(registros.mensaje || "Error al obtener registros del prestador.");
+    return null;
+  }
+
+  return registros;
+}
+
+function filtrarRegistrosPorMes(registros, mes) {
+  return registros.filter((registro) => {
+    return String(registro.fecha || "").startsWith(mes);
+  });
+}
+
+function calcularHorasDeRegistros(registros) {
+  return registros.reduce((total, registro) => {
+    return total + Number(registro.horas || 0);
+  }, 0);
+}
+
+async function obtenerReporteGeneralCompleto() {
+  try {
+    const respuesta = await fetch("/api/profesor/resumen");
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(datos.mensaje || "Error al obtener el reporte general completo.");
+      return null;
+    }
+
+    return {
+      datos
+    };
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
+    return null;
+  }
+}
+
+async function generarReportePDF() {
+  const tipo = tipoReporte.value;
+  const periodo = periodoReporte.value;
+  const mes = mesReporteGeneral.value;
+  const prestadorId = prestadorReporte.value;
+
+  if (periodo === "mensual" && !mes) {
+    alert("Selecciona el mes del reporte.");
+    return;
+  }
+
+  if (tipo === "prestador" && !prestadorId) {
+    alert("Selecciona un prestador.");
+    return;
+  }
+
+  if (tipo === "general" && periodo === "mensual") {
+    await exportarReporteGeneralPDF();
+    return;
+  }
+
+  if (tipo === "general" && periodo === "completo") {
+    await exportarReporteGeneralCompletoPDF();
+    return;
+  }
+
+  if (tipo === "prestador") {
+    const resumen = await obtenerResumenPrestadorReporte(prestadorId);
+    const registros = await obtenerRegistrosPrestadorReporte(prestadorId);
+
+    if (!resumen || !registros) {
+      return;
+    }
+
+    const registrosFinales =
+      periodo === "mensual" ? filtrarRegistrosPorMes(registros, mes) : registros;
+
+    const nombrePeriodo =
+      periodo === "mensual" ? obtenerNombreMes(mes) : "Reporte completo";
+
+    exportarHistorialPDF(resumen, registrosFinales, nombrePeriodo);
+  }
+}
+
+async function generarReporteExcel() {
+  const tipo = tipoReporte.value;
+  const periodo = periodoReporte.value;
+  const mes = mesReporteGeneral.value;
+  const prestadorId = prestadorReporte.value;
+
+  if (periodo === "mensual" && !mes) {
+    alert("Selecciona el mes del reporte.");
+    return;
+  }
+
+  if (tipo === "prestador" && !prestadorId) {
+    alert("Selecciona un prestador.");
+    return;
+  }
+
+  if (tipo === "general" && periodo === "mensual") {
+    await exportarReporteGeneralExcel();
+    return;
+  }
+
+  if (tipo === "general" && periodo === "completo") {
+    await exportarReporteGeneralCompletoExcel();
+    return;
+  }
+
+  if (tipo === "prestador") {
+    const resumen = await obtenerResumenPrestadorReporte(prestadorId);
+    const registros = await obtenerRegistrosPrestadorReporte(prestadorId);
+
+    if (!resumen || !registros) {
+      return;
+    }
+
+    const registrosFinales =
+      periodo === "mensual" ? filtrarRegistrosPorMes(registros, mes) : registros;
+
+    const nombrePeriodo =
+      periodo === "mensual" ? obtenerNombreMes(mes) : "Reporte completo";
+
+    exportarHistorialExcel(resumen, registrosFinales, nombrePeriodo);
+  }
+}
+
 function unirDias(dias) {
   if (dias.length === 0) {
     return "";
@@ -327,20 +522,12 @@ async function verHistorial(id, nombre) {
 
       <div class="acciones-historial-card">
         <div class="acciones-historial-info">
-          <strong>Menu Prestador</strong>
+          <strong>Menú Prestador</strong>
         </div>
 
         <div class="acciones-historial-botones">
           <button class="btn-mini btn-editar-prestador-detalle" type="button">
             Editar datos
-          </button>
-
-          <button class="btn-mini btn-exportar-pdf-detalle" type="button">
-            Exportar a PDF
-          </button>
-
-          <button class="btn-mini btn-exportar-excel-detalle" type="button">
-            Exportar a Excel
           </button>
 
           <details class="menu-mas-opciones">
@@ -388,7 +575,7 @@ async function verHistorial(id, nombre) {
     <option value="Licenciatura en Ciencias de la Computación">
       Licenciatura en Ciencias de la Computación
     </option>
-    <option value="Licenciatura en Ciencias de la Computación">
+    <option value="Administración">
       Administración
     </option>
   </select>
@@ -477,14 +664,6 @@ async function verHistorial(id, nombre) {
 
     document.querySelector(".btn-ocultar-historial-detalle").addEventListener("click", () => {
       ocultarHistorialResponsable();
-    });
-
-    document.querySelector(".btn-exportar-pdf-detalle").addEventListener("click", () => {
-      exportarHistorialPDF(resumen, registros);
-    });
-
-    document.querySelector(".btn-exportar-excel-detalle").addEventListener("click", () => {
-      exportarHistorialExcel(resumen, registros);
     });
 
     document.getElementById("btnGuardarPrestadorEditado").addEventListener("click", () => {
@@ -723,24 +902,34 @@ async function exportarReporteGeneralExcel() {
     return;
   }
 
+  exportarReporteGeneralExcelDesdeDatos(
+    reporte.datos,
+    `Reporte mensual general - ${reporte.nombreMes}`,
+    `reporte_mensual_general_${reporte.mes}.xlsx`
+  );
+}
+
+function exportarReporteGeneralExcelDesdeDatos(datos, titulo, nombreArchivo) {
   if (typeof XLSX === "undefined") {
     alert("No se pudo cargar la librería para generar Excel.");
     return;
   }
 
   const datosExcel = [
-    [`Reporte mensual general - ${reporte.nombreMes}`],
+    ["BUAP"],
+    ["Facultad de Administración"],
+    [titulo],
     [],
-    ["Nombre", "Matrícula", "Carrera", "Horario", "Horas del mes", "Horas acumuladas", "Horas faltantes", "Estatus"]
+    ["Nombre", "Matrícula", "Carrera", "Horario", "Horas del periodo", "Horas acumuladas", "Horas faltantes", "Estatus"]
   ];
 
-  reporte.datos.forEach((p) => {
+  datos.forEach((p) => {
     datosExcel.push([
       p.nombre || "",
       p.matricula || "",
       p.carrera || "",
       p.horario || "",
-      Number(p.horas_mes || 0),
+      Number(p.horas_mes ?? p.horas_acumuladas ?? 0),
       Number(p.horas_acumuladas || 0),
       Number(p.horas_faltantes || 0),
       p.estatus || "activo"
@@ -754,25 +943,36 @@ async function exportarReporteGeneralExcel() {
     { wch: 16 },
     { wch: 38 },
     { wch: 36 },
-    { wch: 16 },
+    { wch: 18 },
     { wch: 18 },
     { wch: 18 },
     { wch: 14 }
   ];
 
   hoja["!merges"] = [
-    {
-      s: { r: 0, c: 0 },
-      e: { r: 0, c: 7 }
-    }
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
+    { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } }
   ];
 
   const libro = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(libro, hoja, "Reporte mensual");
-
-  const nombreArchivo = `reporte_mensual_general_${reporte.mes}.xlsx`;
+  XLSX.utils.book_append_sheet(libro, hoja, "Reporte general");
 
   XLSX.writeFile(libro, nombreArchivo);
+}
+
+async function exportarReporteGeneralCompletoExcel() {
+  const reporte = await obtenerReporteGeneralCompleto();
+
+  if (!reporte) {
+    return;
+  }
+
+  exportarReporteGeneralExcelDesdeDatos(
+    reporte.datos,
+    "Reporte general completo",
+    "reporte_general_completo.xlsx"
+  );
 }
 
 async function exportarReporteGeneralPDF() {
@@ -782,12 +982,21 @@ async function exportarReporteGeneralPDF() {
     return;
   }
 
-  const filas = reporte.datos.map((p) => `
+  exportarReporteGeneralPDFDesdeDatos(
+    reporte.datos,
+    "Reporte mensual general",
+    reporte.nombreMes
+  );
+}
+
+function exportarReporteGeneralPDFDesdeDatos(datos, titulo, subtitulo) {
+  const filas = datos.map((p) => `
     <tr>
       <td>${p.nombre || ""}</td>
       <td>${p.matricula || ""}</td>
       <td>${p.carrera || ""}</td>
-      <td>${Number(p.horas_mes || 0).toFixed(2)}</td>
+      <td>${p.horario || ""}</td>
+      <td>${Number(p.horas_mes ?? p.horas_acumuladas ?? 0).toFixed(2)}</td>
       <td>${Number(p.horas_acumuladas || 0).toFixed(2)}</td>
       <td>${Number(p.horas_faltantes || 0).toFixed(2)}</td>
       <td>${p.estatus || "activo"}</td>
@@ -801,7 +1010,7 @@ async function exportarReporteGeneralPDF() {
     <html lang="es">
     <head>
       <meta charset="UTF-8">
-      <title>Reporte mensual general</title>
+      <title>${titulo}</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -818,7 +1027,14 @@ async function exportarReporteGeneralPDF() {
           font-weight: 800;
           color: #1e3a8a;
           font-size: 22px;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
+        }
+
+        .facultad {
+          font-weight: 700;
+          color: #1e3a8a;
+          font-size: 14px;
+          margin-bottom: 8px;
         }
 
         h1 {
@@ -836,19 +1052,19 @@ async function exportarReporteGeneralPDF() {
           width: 100%;
           border-collapse: collapse;
           margin-top: 18px;
-          font-size: 11px;
+          font-size: 10px;
         }
 
         th {
           background: #1f3f93;
           color: white;
-          padding: 8px;
+          padding: 7px;
           border: 1px solid #1f3f93;
           text-align: left;
         }
 
         td {
-          padding: 7px;
+          padding: 6px;
           border: 1px solid #dbe5f1;
         }
 
@@ -863,8 +1079,9 @@ async function exportarReporteGeneralPDF() {
     <body>
       <div class="encabezado">
         <div class="logo">BUAP</div>
-        <h1>Reporte mensual general</h1>
-        <p class="subtitulo">${reporte.nombreMes}</p>
+        <div class="facultad">Facultad de Administración</div>
+        <h1>${titulo}</h1>
+        <p class="subtitulo">${subtitulo}</p>
       </div>
 
       <table>
@@ -873,7 +1090,8 @@ async function exportarReporteGeneralPDF() {
             <th>Nombre</th>
             <th>Matrícula</th>
             <th>Carrera</th>
-            <th>Horas mes</th>
+            <th>Horario</th>
+            <th>Horas periodo</th>
             <th>Acumuladas</th>
             <th>Faltantes</th>
             <th>Estatus</th>
@@ -900,8 +1118,22 @@ async function exportarReporteGeneralPDF() {
   ventana.document.close();
 }
 
+async function exportarReporteGeneralCompletoPDF() {
+  const reporte = await obtenerReporteGeneralCompleto();
 
-function exportarHistorialExcel(resumen, registros) {
+  if (!reporte) {
+    return;
+  }
+
+  exportarReporteGeneralPDFDesdeDatos(
+    reporte.datos,
+    "Reporte general completo",
+    "Todos los prestadores activos y finalizados"
+  );
+}
+
+
+function exportarHistorialExcel(resumen, registros, nombrePeriodo = "Reporte completo") {
   if (!registros || registros.length === 0) {
     alert("Este prestador no tiene registros para exportar.");
     return;
@@ -913,9 +1145,13 @@ function exportarHistorialExcel(resumen, registros) {
   }
 
   const totales = calcularTotalesExportacion(resumen);
+  const horasPeriodo = calcularHorasDeRegistros(registros).toFixed(2);
 
   const datosExcel = [
+    ["BUAP"],
+    ["Facultad de Administración"],
     ["Historial de servicio social"],
+    [nombrePeriodo],
     [],
     ["Prestador", resumen.nombre || ""],
     ["Matrícula", resumen.matricula || ""],
@@ -923,6 +1159,7 @@ function exportarHistorialExcel(resumen, registros) {
     ["Horario", resumen.horario || ""],
     ["Estatus", resumen.estatus || "activo"],
     [],
+    ["Horas del periodo", horasPeriodo],
     ["Horas acumuladas", totales.horasAcumuladas],
     ["Horas faltantes", totales.horasFaltantes],
     ["Horas requeridas", totales.horasRequeridas],
@@ -943,18 +1180,18 @@ function exportarHistorialExcel(resumen, registros) {
   const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
 
   hoja["!cols"] = [
-    { wch: 14 },
-    { wch: 14 },
-    { wch: 14 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 18 },
     { wch: 12 },
     { wch: 45 }
   ];
 
   hoja["!merges"] = [
-    {
-      s: { r: 0, c: 0 },
-      e: { r: 0, c: 4 }
-    }
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
+    { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } },
+    { s: { r: 3, c: 0 }, e: { r: 3, c: 4 } }
   ];
 
   const libro = XLSX.utils.book_new();
@@ -965,13 +1202,14 @@ function exportarHistorialExcel(resumen, registros) {
   XLSX.writeFile(libro, nombreArchivo);
 }
 
-function exportarHistorialPDF(resumen, registros) {
+function exportarHistorialPDF(resumen, registros, nombrePeriodo = "Reporte completo") {
   if (!registros || registros.length === 0) {
     alert("Este prestador no tiene registros para exportar.");
     return;
   }
 
   const totales = calcularTotalesExportacion(resumen);
+  const horasPeriodo = calcularHorasDeRegistros(registros).toFixed(2);
 
   const filas = registros.map((registro) => `
     <tr>
@@ -1007,13 +1245,25 @@ function exportarHistorialPDF(resumen, registros) {
           font-weight: 800;
           color: #1e3a8a;
           font-size: 22px;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
+        }
+
+        .facultad {
+          font-weight: 700;
+          color: #1e3a8a;
+          font-size: 14px;
+          margin-bottom: 8px;
         }
 
         h1 {
           color: #0f2f6e;
           margin: 0;
           font-size: 24px;
+        }
+
+        .subtitulo {
+          color: #4b5563;
+          margin-top: 8px;
         }
 
         .datos {
@@ -1031,7 +1281,7 @@ function exportarHistorialPDF(resumen, registros) {
 
         .resumen {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           gap: 10px;
           margin-bottom: 18px;
         }
@@ -1094,7 +1344,9 @@ function exportarHistorialPDF(resumen, registros) {
     <body>
       <div class="encabezado">
         <div class="logo">BUAP</div>
+        <div class="facultad">Facultad de Administración</div>
         <h1>Historial de servicio social</h1>
+        <p class="subtitulo">${nombrePeriodo}</p>
       </div>
 
       <div class="datos">
@@ -1106,6 +1358,11 @@ function exportarHistorialPDF(resumen, registros) {
       </div>
 
       <div class="resumen">
+        <div>
+          <span>Horas del periodo</span>
+          <strong>${horasPeriodo}</strong>
+        </div>
+
         <div>
           <span>Horas acumuladas</span>
           <strong>${totales.horasAcumuladas}</strong>
@@ -1385,11 +1642,23 @@ function limpiarFormularioEdicionResponsable() {
 
 btnGuardarEdicionResponsable.addEventListener("click", guardarEdicionResponsable);
 btnCancelarEdicionResponsable.addEventListener("click", limpiarFormularioEdicionResponsable);
-btnReporteGeneralExcel.addEventListener("click", exportarReporteGeneralExcel);
-btnReporteGeneralPDF.addEventListener("click", exportarReporteGeneralPDF);
+tipoReporte.addEventListener("change", actualizarFormularioReportes);
+periodoReporte.addEventListener("change", actualizarFormularioReportes);
 
-btnMenuResponsable.addEventListener("click", () => {
+btnGenerarReportePDF.addEventListener("click", generarReportePDF);
+btnGenerarReporteExcel.addEventListener("click", generarReporteExcel);
+
+btnMenuResponsable.addEventListener("click", (e) => {
+  e.stopPropagation();
   menuResponsableOpciones.classList.toggle("hidden");
+});
+
+document.addEventListener("click", (e) => {
+  const clickDentroDelMenu = e.target.closest(".menu-responsable");
+
+  if (!clickDentroDelMenu) {
+    cerrarMenuResponsable();
+  }
 });
 
 btnMostrarReportes.addEventListener("click", mostrarSeccionReportes);

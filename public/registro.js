@@ -17,9 +17,7 @@ if (origen === "responsable") {
     "Registra los datos del nuevo prestador para que pueda ingresar después con su matrícula.";
 
   btnRegistrarPrestador.textContent = "Registrar prestador";
-
   btnYaRegistrado.classList.add("hidden");
-
   btnVolverRegistro.textContent = "Regresar al panel";
 } else {
   btnVolverRegistro.textContent = "Regresar al inicio";
@@ -41,80 +39,20 @@ function mostrarMensaje(texto, tipo) {
   mensaje.className = `mensaje ${tipo}`;
 }
 
-function validarRegistroPrestador(datos) {
-  if (!datos.nombre) {
-    return "El nombre es obligatorio.";
-  }
-
-  if (!datos.matricula) {
-    return "La matrícula es obligatoria.";
-  }
-
-  if (!datos.carrera) {
-    return "La carrera es obligatoria.";
-  }
-
-  const diasSeleccionados = document.querySelectorAll("input[name='diasServicio']:checked");
-  const horaEntradaServicio = document.getElementById("horaEntradaServicio").value;
-  const horaSalidaServicio = document.getElementById("horaSalidaServicio").value;
-
-  if (diasSeleccionados.length === 0) {
-    return "Selecciona al menos un día de servicio.";
-  }
-
-  if (!horaEntradaServicio) {
-    return "La hora de entrada es obligatoria.";
-  }
-
-  if (!horaSalidaServicio) {
-    return "La hora de salida es obligatoria.";
-  }
-
-  if (horaSalidaServicio <= horaEntradaServicio) {
-    return "La hora de salida debe ser mayor que la hora de entrada.";
-  }
-
-  if (!datos.horario) {
-    return "El horario es obligatorio.";
-  }
-
-  if (!datos.horas_requeridas || datos.horas_requeridas <= 0) {
-    return "Las horas requeridas deben ser mayor a 0.";
-  }
-
-  return null;
-}
-
-formRegistro.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const diasSeleccionados = Array.from(
-    document.querySelectorAll("input[name='diasServicio']:checked")
-  ).map((dia) => dia.value);
-
-  const horaEntradaServicio = document.getElementById("horaEntradaServicio").value;
-  const horaSalidaServicio = document.getElementById("horaSalidaServicio").value;
-
-  const horarioArmado = armarHorario(
-    diasSeleccionados,
-    horaEntradaServicio,
-    horaSalidaServicio
-  );
-
-  const datos = {
-    nombre: document.getElementById("nombre").value.trim(),
-    matricula: document.getElementById("matricula").value.trim(),
-    carrera: document.getElementById("carrera").value.trim(),
-    horario: horarioArmado,
-    horas_requeridas: Number(document.getElementById("horas_requeridas").value)
-  };
-
-  function unirDias(dias) {
+function unirDias(dias) {
   if (dias.length === 0) {
     return "";
   }
 
-  const ordenDias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+  const ordenDias = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo"
+  ];
 
   const indices = dias
     .map((dia) => ordenDias.indexOf(dia))
@@ -144,13 +82,81 @@ formRegistro.addEventListener("submit", async (e) => {
   return `${dias.slice(0, -1).join(", ")} y ${dias[dias.length - 1]}`;
 }
 
-  function armarHorario(dias, horaEntrada, horaSalida) {
-    if (dias.length === 0 || !horaEntrada || !horaSalida) {
-      return "";
-    }
-
-    return `${unirDias(dias)} de ${horaEntrada} a ${horaSalida}`;
+function armarHorario(dias, horaEntrada, horaSalida) {
+  if (dias.length === 0 || !horaEntrada || !horaSalida) {
+    return "";
   }
+
+  return `${unirDias(dias)} de ${horaEntrada} a ${horaSalida}`;
+}
+
+function validarRegistroPrestador(datos) {
+  if (!datos.nombre) {
+    return "El nombre es obligatorio.";
+  }
+
+  if (!datos.matricula) {
+    return "La matrícula es obligatoria.";
+  }
+
+  if (!datos.carrera) {
+    return "La carrera es obligatoria.";
+  }
+
+  if (!datos.horario) {
+    return "El horario es obligatorio.";
+  }
+
+  if (!datos.horas_requeridas || datos.horas_requeridas <= 0) {
+    return "Las horas requeridas deben ser mayor a 0.";
+  }
+
+  return null;
+}
+
+formRegistro.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const diasSeleccionados = Array.from(
+    document.querySelectorAll("input[name='diasServicio']:checked")
+  ).map((dia) => dia.value);
+
+  const horaEntradaServicio = document.getElementById("horaEntradaServicio").value;
+  const horaSalidaServicio = document.getElementById("horaSalidaServicio").value;
+
+  if (diasSeleccionados.length === 0) {
+    mostrarMensaje("Selecciona al menos un día de servicio.", "error");
+    return;
+  }
+
+  if (!horaEntradaServicio) {
+    mostrarMensaje("La hora de entrada es obligatoria.", "error");
+    return;
+  }
+
+  if (!horaSalidaServicio) {
+    mostrarMensaje("La hora de salida es obligatoria.", "error");
+    return;
+  }
+
+  if (horaSalidaServicio <= horaEntradaServicio) {
+    mostrarMensaje("La hora de salida debe ser mayor que la hora de entrada.", "error");
+    return;
+  }
+
+  const horarioArmado = armarHorario(
+    diasSeleccionados,
+    horaEntradaServicio,
+    horaSalidaServicio
+  );
+
+  const datos = {
+    nombre: document.getElementById("nombre").value.trim(),
+    matricula: document.getElementById("matricula").value.trim(),
+    carrera: document.getElementById("carrera").value.trim(),
+    horario: horarioArmado,
+    horas_requeridas: Number(document.getElementById("horas_requeridas").value)
+  };
 
   const errorValidacion = validarRegistroPrestador(datos);
 

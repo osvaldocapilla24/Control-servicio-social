@@ -22,6 +22,9 @@
   --rojo-hover: #b91c1c;
   --verde: #16a34a;
   --verde-hover: #15803d;
+
+  --morado: #7c3aed;
+  --morado-hover: #6d28d9;
 }
 
 /* BASE GENERAL */
@@ -289,14 +292,14 @@ button:hover,
 }
 
 .btn-mini-danger,
-.btn-borrar-detalle {
+.btn-archivar-detalle {
   background: transparent;
   color: var(--rojo);
   border: 1px solid var(--rojo);
 }
 
 .btn-mini-danger:hover,
-.btn-borrar-detalle:hover {
+.btn-archivar-detalle:hover {
   background: var(--rojo);
   color: white;
   box-shadow: none;
@@ -375,8 +378,6 @@ button:hover,
   border-radius: 12px;
   font-size: 14px;
 }
-
-
 
 /* CERRAR SESIÓN RESPONSABLE */
 
@@ -488,18 +489,6 @@ button:hover,
   color: var(--rojo-hover);
   text-decoration: underline;
   transform: none;
-  box-shadow: none;
-}
-
-.btn-archivar-detalle {
-  background: transparent;
-  color: var(--rojo);
-  border: 1px solid var(--rojo);
-}
-
-.btn-archivar-detalle:hover {
-  background: var(--rojo);
-  color: white;
   box-shadow: none;
 }
 
@@ -714,26 +703,6 @@ hr {
   font-size: 22px;
 }
 
-/* BOTONES EXPORTAR HISTORIAL */
-
-.btn-exportar-pdf-detalle {
-  background: #7c3aed;
-  color: white;
-}
-
-.btn-exportar-pdf-detalle:hover {
-  background: #6d28d9;
-}
-
-.btn-exportar-excel-detalle {
-  background: #059669;
-  color: white;
-}
-
-.btn-exportar-excel-detalle:hover {
-  background: #047857;
-}
-
 /* MENÚ MÁS OPCIONES DEL PRESTADOR */
 
 .menu-mas-opciones {
@@ -792,7 +761,7 @@ hr {
   margin: 0;
 }
 
-/* REPORTE MENSUAL */
+/* MÓDULO DE REPORTES */
 
 .reporte-mensual-card {
   background: var(--gris-fondo);
@@ -802,29 +771,36 @@ hr {
   margin-bottom: 22px;
 }
 
-.reporte-mensual-controles {
+.reportes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.reporte-actions {
   display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
+  margin-top: 18px;
   flex-wrap: wrap;
 }
 
-.reporte-mensual-controles > div:first-child {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 220px;
+.btn-reporte-pdf {
+  background: var(--morado);
+  color: white;
 }
 
-.reporte-mensual-botones {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+.btn-reporte-pdf:hover {
+  background: var(--morado-hover);
 }
 
-.reporte-mensual-botones button {
-  margin: 0;
+.btn-reporte-excel {
+  background: #059669;
+  color: white;
+}
+
+.btn-reporte-excel:hover {
+  background: #047857;
 }
 
 /* TABLAS */
@@ -966,6 +942,12 @@ button:disabled:hover {
 
 /* RESPONSIVE */
 
+@media (max-width: 700px) {
+  .reportes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .page {
     padding: 18px;
@@ -1032,7 +1014,7 @@ button:disabled:hover {
     grid-template-columns: 1fr;
   }
 
-    .menu-mas-opciones {
+  .menu-mas-opciones {
     width: 100%;
   }
 
@@ -1044,21 +1026,5 @@ button:disabled:hover {
     position: static;
     margin-top: 8px;
     box-shadow: none;
-  }
-
-    .reporte-mensual-controles {
-    align-items: stretch;
-  }
-
-  .reporte-mensual-controles > div:first-child {
-    width: 100%;
-  }
-
-  .reporte-mensual-botones {
-    width: 100%;
-  }
-
-  .reporte-mensual-botones button {
-    flex: 1;
   }
 }
