@@ -59,36 +59,50 @@
 
             <!-- REGISTRO AUTOMÁTICO -->
             <section id="bloqueRegistroDia" class="section-block">
-              <h2>Registro del día</h2>
-                <p>Marca tu entrada o salida del día actual.</p>
+                <details class="bloque-desplegable" close>
+                    <summary>
+                        <span>Registro del día</span>
 
-                <div class="form">
-                    <label for="actividad">Actividad realizada</label>
-                    <input type="text" id="actividad" placeholder="Ejemplo: Revisión de equipos">
+                    </summary>
 
-                    <div class="buttons">
-                        <button id="btnEntrada">Marcar entrada</button>
-                        <button id="btnSalida" class="danger">Marcar salida</button>
+                    <div class="contenido-desplegable">
+                        <p>Marca tu entrada o salida del día actual.</p>
+
+                        <div class="form">
+                            <label for="actividad">Actividad realizada</label>
+                            <input type="text" id="actividad" placeholder="Ejemplo: Revisión de equipos">
+
+                            <div class="buttons">
+                                <button id="btnEntrada">Marcar entrada</button>
+                                <button id="btnSalida" class="danger">Marcar salida</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </details>
             </section>
 
             <hr>
 
             <!-- REGISTRO MANUAL -->
             <section id="bloqueRegistroManual" class="section-block">
-              <h2>Agregar registro manual</h2>
+                <h2>Registro Manual</h2>
                 <p>Usa esta opción para capturar días anteriores o corregir horarios.</p>
 
                 <div class="form">
                     <label for="fechaManual">Fecha</label>
                     <input type="date" id="fechaManual">
 
-                    <label for="entradaManual">Hora entrada</label>
-                    <input type="time" id="entradaManual">
+                    <div class="horario-grid">
+                        <div>
+                            <label for="entradaManual">Hora entrada</label>
+                            <input type="time" id="entradaManual">
+                        </div>
 
-                    <label for="salidaManual">Hora salida</label>
-                    <input type="time" id="salidaManual">
+                        <div>
+                            <label for="salidaManual">Hora salida</label>
+                            <input type="time" id="salidaManual">
+                        </div>
+                    </div>
 
                     <label for="actividadManual">Actividad realizada</label>
                     <input type="text" id="actividadManual" placeholder="Ejemplo: Mantenimiento preventivo">
@@ -110,11 +124,17 @@
                     <label for="editarFecha">Fecha</label>
                     <input type="date" id="editarFecha">
 
-                    <label for="editarEntrada">Hora entrada</label>
-                    <input type="time" id="editarEntrada">
+                    <div class="horario-grid">
+                        <div>
+                            <label for="editarEntrada">Hora entrada</label>
+                            <input type="time" id="editarEntrada">
+                        </div>
 
-                    <label for="editarSalida">Hora salida</label>
-                    <input type="time" id="editarSalida">
+                        <div>
+                            <label for="editarSalida">Hora salida</label>
+                            <input type="time" id="editarSalida">
+                        </div>
+                    </div>
 
                     <label for="editarActividad">Actividad realizada</label>
                     <input type="text" id="editarActividad" placeholder="Ejemplo: Mantenimiento preventivo">

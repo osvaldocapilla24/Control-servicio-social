@@ -940,6 +940,59 @@ button:disabled:hover {
   box-shadow: none;
 }
 
+/* BLOQUES DESPLEGABLES */
+
+.bloque-desplegable {
+  background: var(--gris-fondo);
+  border: 1px solid var(--gris-borde);
+  border-radius: 16px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.bloque-desplegable summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 18px;
+  background: var(--blanco);
+  color: var(--azul-texto);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  user-select: none;
+}
+
+.bloque-desplegable summary::-webkit-details-marker {
+  display: none;
+}
+
+.bloque-desplegable summary::after {
+  content: "▼";
+  font-size: 12px;
+  color: var(--azul-principal);
+}
+
+.bloque-desplegable:not([open]) summary::after {
+  content: "▶";
+}
+
+.bloque-desplegable summary span {
+  font-size: 20px;
+}
+
+.bloque-desplegable summary small {
+  color: var(--gris-texto);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.contenido-desplegable {
+  padding: 18px;
+  border-top: 1px solid var(--gris-borde);
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 700px) {
