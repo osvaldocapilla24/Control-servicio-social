@@ -67,6 +67,103 @@ function calcularHoras(horaEntrada, horaSalida) {
   return diferenciaMinutos / 60;
 }
 
+const TOLERANCIA_MINUTOS = 10;
+
+function convertirHoraAMinutos(hora) {
+  if (!hora) {
+    return null;
+  }
+
+  const horaTexto = hora.substring(0, 5);
+  const [horas, minutos] = horaTexto.split(":").map(Number);
+
+  if (Number.isNaN(horas) || Number.isNaN(minutos)) {
+    return null;
+  }
+
+  return horas * 60 + minutos;
+}
+
+function convertirMinutosAHora(totalMinutos) {
+  const horas = Math.floor(totalMinutos / 60);
+  const minutos = totalMinutos % 60;
+
+  return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}`;
+}
+
+function obtenerRangoHorasHorario(horario) {
+  if (!horario) {
+    return null;
+  }
+
+  const partes = horario.split(" de ");
+
+  if (partes.length !== 2) {
+    return null;
+  }
+
+  const horasTexto = partes[1];
+  const horas = horasTexto.split(" a ");
+
+  if (horas.length !== 2) {
+    return null;
+  }
+
+  const horaEntradaOficial = horas[0];
+  const horaSalidaOficial = horas[1];
+
+  if (!horaEntradaOficial || !horaSalidaOficial) {
+    return null;
+  }
+
+  return {
+    horaEntradaOficial,
+    horaSalidaOficial
+  };
+}
+
+function ajustarHoraEntradaPorHorario(horaReal, horario) {
+  const rango = obtenerRangoHorasHorario(horario);
+
+  if (!rango) {
+    return horaReal;
+  }
+
+  const minutosReales = convertirHoraAMinutos(horaReal);
+  const minutosEntradaOficial = convertirHoraAMinutos(rango.horaEntradaOficial);
+
+  if (minutosReales === null || minutosEntradaOficial === null) {
+    return horaReal;
+  }
+
+  if (minutosReales <= minutosEntradaOficial + TOLERANCIA_MINUTOS) {
+    return convertirMinutosAHora(minutosEntradaOficial);
+  }
+
+  return horaReal;
+}
+
+function ajustarHoraSalidaPorHorario(horaReal, horario) {
+  const rango = obtenerRangoHorasHorario(horario);
+
+  if (!rango) {
+    return horaReal;
+  }
+
+  const minutosReales = convertirHoraAMinutos(horaReal);
+  const minutosSalidaOficial = convertirHoraAMinutos(rango.horaSalidaOficial);
+
+  if (minutosReales === null || minutosSalidaOficial === null) {
+    return horaReal;
+  }
+
+  if (minutosReales >= minutosSalidaOficial - TOLERANCIA_MINUTOS) {
+    return convertirMinutosAHora(minutosSalidaOficial);
+  }
+
+  return horaReal;
+}
+
 /* REGISTRAR PRESTADOR */
 
 app.post("/api/prestadores", async (req, res) => {
@@ -217,11 +314,11 @@ app.post("/api/entrada", async (req, res) => {
     }
 
     const fecha = obtenerFechaActual();
-    const horaEntrada = obtenerHoraActual();
+    const horaEntradaReal = obtenerHoraActual();
 
     const prestadorResultado = await pool.query(
       `
-      SELECT id, nombre, estatus
+      SELECT id, nombre, horario, estatus
       FROM prestadores
       WHERE id = $1
       `,
@@ -235,6 +332,10 @@ app.post("/api/entrada", async (req, res) => {
     }
 
     const prestador = prestadorResultado.rows[0];
+    const horaEntrada = ajustarHoraEntradaPorHorario(
+    horaEntradaReal,
+    prestador.horario
+    );
 
     if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
       return res.status(403).json({
@@ -294,11 +395,11 @@ app.post("/api/salida", async (req, res) => {
       });
     }
 
-    const horaSalida = obtenerHoraActual();
+    const horaSalidaReal = obtenerHoraActual();
 
     const prestadorResultado = await pool.query(
       `
-      SELECT id, nombre, estatus
+      SELECT id, nombre, horario, estatus
       FROM prestadores
       WHERE id = $1
       `,
@@ -312,6 +413,10 @@ app.post("/api/salida", async (req, res) => {
     }
 
     const prestador = prestadorResultado.rows[0];
+    const horaSalida = ajustarHoraSalidaPorHorario(
+    horaSalidaReal,
+    prestador.horario
+    );
 
     if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
       return res.status(403).json({
