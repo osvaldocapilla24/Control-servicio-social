@@ -39,11 +39,18 @@ const btnCerrarArchivados = document.getElementById("btnCerrarArchivados");
 const seccionReportesResponsable = document.getElementById("seccionReportesResponsable");
 const seccionArchivadosResponsable = document.getElementById("seccionArchivadosResponsable");
 const tablaArchivados = document.getElementById("tablaArchivados");
+const textoPeriodoActual = document.getElementById("textoPeriodoActual");
+const selectorPeriodoResponsable = document.getElementById("selectorPeriodoResponsable");
+const btnCerrarPeriodoActual = document.getElementById("btnCerrarPeriodoActual");
 
-function mostrarPanelResponsable() {
+let periodoActualGlobal = null;
+let periodoSeleccionadoId = null;
+
+async function mostrarPanelResponsable() {
   pinSection.classList.add("hidden");
   panelResponsable.classList.remove("hidden");
-  cargarResumenProfesor();
+
+  await cargarPeriodosResponsable();
 }
 
 function cerrarMenuResponsable() {
@@ -55,6 +62,62 @@ function ocultarSeccionesResponsable() {
   seccionArchivadosResponsable.classList.add("hidden");
   detallePrestador.classList.add("hidden");
   formEditarRegistroResponsable.classList.add("hidden");
+}
+
+async function cargarPeriodosResponsable() {
+  try {
+    const respuestaActual = await fetch("/api/periodos/actual");
+    const periodoActual = await respuestaActual.json();
+
+    if (!respuestaActual.ok) {
+      textoPeriodoActual.textContent = periodoActual.mensaje || "No hay periodo actual";
+      selectorPeriodoResponsable.innerHTML = `
+        <option value="">Sin periodos</option>
+      `;
+      await cargarResumenProfesor();
+      return;
+    }
+
+    periodoActualGlobal = periodoActual;
+    periodoSeleccionadoId = periodoActual.id;
+
+    textoPeriodoActual.textContent = `${periodoActual.nombre} ${periodoActual.anio}`;
+
+    const respuestaPeriodos = await fetch("/api/periodos");
+    const periodos = await respuestaPeriodos.json();
+
+    selectorPeriodoResponsable.innerHTML = "";
+
+    if (!respuestaPeriodos.ok || periodos.length === 0) {
+      selectorPeriodoResponsable.innerHTML = `
+        <option value="">Sin periodos</option>
+      `;
+      await cargarResumenProfesor();
+      return;
+    }
+
+    periodos.forEach((periodo) => {
+      const option = document.createElement("option");
+
+      option.value = periodo.id;
+      option.textContent = `${periodo.nombre} ${periodo.anio}`;
+
+      if (periodo.id === periodoActual.id) {
+        option.selected = true;
+      }
+
+      selectorPeriodoResponsable.appendChild(option);
+    });
+
+    await cargarResumenProfesor();
+
+  } catch (error) {
+    textoPeriodoActual.textContent = "Error al cargar periodo";
+    selectorPeriodoResponsable.innerHTML = `
+      <option value="">Error</option>
+    `;
+    await cargarResumenProfesor();
+  }
 }
 
 async function mostrarSeccionReportes() {
@@ -113,10 +176,34 @@ btnCerrarResponsable.addEventListener("click", () => {
 
 async function cargarResumenProfesor() {
   try {
-    const respuesta = await fetch("/api/profesor/resumen");
-    const prestadores = await respuesta.json();
+    const url = periodoSeleccionadoId
+      ? `/api/profesor/resumen?periodo_id=${periodoSeleccionadoId}`
+      : "/api/profesor/resumen";
+
+    const respuesta = await fetch(url);
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+      tablaProfesor.innerHTML = `
+        <tr>
+          <td colspan="9">${datos.mensaje || "Error al cargar la información."}</td>
+        </tr>
+      `;
+      return;
+    }
+
+    const prestadores = datos.prestadores || [];
 
     tablaProfesor.innerHTML = "";
+
+    if (prestadores.length === 0) {
+      tablaProfesor.innerHTML = `
+        <tr>
+          <td colspan="9">No hay prestadores registrados en este periodo.</td>
+        </tr>
+      `;
+      return;
+    }
 
     prestadores.forEach((p) => {
       const tr = document.createElement("tr");
@@ -163,24 +250,30 @@ async function cargarResumenProfesor() {
 
 async function cargarPrestadoresArchivados() {
   try {
-    const respuesta = await fetch("/api/profesor/archivados");
-    const archivados = await respuesta.json();
+    const url = periodoSeleccionadoId
+    ? `/api/profesor/archivados?periodo_id=${periodoSeleccionadoId}`
+    : "/api/profesor/archivados";
+
+    const respuesta = await fetch(url);
+    const datos = await respuesta.json();
 
     tablaArchivados.innerHTML = "";
 
     if (!respuesta.ok) {
       tablaArchivados.innerHTML = `
         <tr>
-          <td colspan="6">${archivados.mensaje || "Error al cargar archivados."}</td>
+          <td colspan="6">${datos.mensaje || "Error al cargar archivados."}</td>
         </tr>
       `;
       return;
     }
 
+    const archivados = datos.prestadores || [];
+
     if (archivados.length === 0) {
       tablaArchivados.innerHTML = `
         <tr>
-          <td colspan="6">No hay prestadores archivados.</td>
+          <td colspan="6">No hay prestadores archivados en este periodo.</td>
         </tr>
       `;
       return;
@@ -222,17 +315,23 @@ async function cargarPrestadoresArchivados() {
 
 async function cargarPrestadoresParaReportes() {
   try {
-    const respuesta = await fetch("/api/reportes/prestadores");
-    const prestadores = await respuesta.json();
+    const url = periodoSeleccionadoId
+    ? `/api/reportes/prestadores?periodo_id=${periodoSeleccionadoId}`
+    : "/api/reportes/prestadores";
+
+    const respuesta = await fetch(url);
+    const datos = await respuesta.json();
 
     prestadorReporte.innerHTML = `
       <option value="">Selecciona un prestador</option>
     `;
 
     if (!respuesta.ok) {
-      alert(prestadores.mensaje || "Error al cargar prestadores para reportes.");
+      alert(datos.mensaje || "Error al cargar prestadores para reportes.");
       return;
     }
+
+    const prestadores = datos.prestadores || [];
 
     prestadores.forEach((p) => {
       const option = document.createElement("option");
@@ -302,7 +401,11 @@ function calcularHorasDeRegistros(registros) {
 
 async function obtenerReporteGeneralCompleto() {
   try {
-    const respuesta = await fetch("/api/profesor/resumen");
+    const url = periodoSeleccionadoId
+    ? `/api/profesor/resumen?periodo_id=${periodoSeleccionadoId}`
+    : "/api/profesor/resumen";
+
+    const respuesta = await fetch(url);
     const datos = await respuesta.json();
 
     if (!respuesta.ok) {
@@ -311,7 +414,7 @@ async function obtenerReporteGeneralCompleto() {
     }
 
     return {
-      datos
+      datos: datos.prestadores || []
     };
 
   } catch (error) {
@@ -860,6 +963,17 @@ function limpiarTextoArchivo(texto) {
     .replace(/_+/g, "_");
 }
 
+function obtenerTextoPeriodoSeleccionado() {
+  if (!selectorPeriodoResponsable || !selectorPeriodoResponsable.value) {
+    return "Periodo no seleccionado";
+  }
+
+  const opcionSeleccionada =
+    selectorPeriodoResponsable.options[selectorPeriodoResponsable.selectedIndex];
+
+  return opcionSeleccionada ? opcionSeleccionada.textContent : "Periodo no seleccionado";
+}
+
 function calcularTotalesExportacion(resumen) {
   return {
     horasAcumuladas: Number(resumen.horas_acumuladas || 0).toFixed(2),
@@ -888,7 +1002,11 @@ async function obtenerReporteMensualGeneral() {
   }
 
   try {
-    const respuesta = await fetch(`/api/reportes/mensual-general?mes=${mes}`);
+    const url = periodoSeleccionadoId
+    ? `/api/reportes/mensual-general?mes=${mes}&periodo_id=${periodoSeleccionadoId}`
+    : `/api/reportes/mensual-general?mes=${mes}`;
+
+    const respuesta = await fetch(url);
     const datos = await respuesta.json();
 
     if (!respuesta.ok) {
@@ -899,7 +1017,7 @@ async function obtenerReporteMensualGeneral() {
     return {
       mes,
       nombreMes: obtenerNombreMes(mes),
-      datos
+      datos: datos.reporte || []
     };
 
   } catch (error) {
@@ -929,12 +1047,13 @@ function exportarReporteGeneralExcelDesdeDatos(datos, titulo, nombreArchivo) {
   }
 
   const datosExcel = [
-    ["BUAP"],
-    ["Facultad de Administración"],
-    [titulo],
-    [],
-    ["Nombre", "Matrícula", "Carrera", "Horario", "Horas del periodo", "Horas acumuladas", "Horas faltantes", "Estatus"]
-  ];
+  ["BUAP"],
+  ["Facultad de Administración"],
+  [`Periodo de servicio social: ${obtenerTextoPeriodoSeleccionado()}`],
+  [titulo],
+  [],
+  ["Nombre", "Matrícula", "Carrera", "Horario", "Horas del periodo", "Horas acumuladas", "Horas faltantes", "Estatus"]
+];
 
   datos.forEach((p) => {
     datosExcel.push([
@@ -963,10 +1082,11 @@ function exportarReporteGeneralExcelDesdeDatos(datos, titulo, nombreArchivo) {
   ];
 
   hoja["!merges"] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
-    { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } }
-  ];
+  { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+  { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
+  { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
+  { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } }
+];
 
   const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, hoja, "Reporte general");
@@ -1094,6 +1214,9 @@ function exportarReporteGeneralPDFDesdeDatos(datos, titulo, subtitulo) {
         <div class="logo">BUAP</div>
         <div class="facultad">Facultad de Administración</div>
         <h1>${titulo}</h1>
+        <p class="subtitulo">
+         <strong>Periodo de servicio social:</strong> ${obtenerTextoPeriodoSeleccionado()}
+        </p>
         <p class="subtitulo">${subtitulo}</p>
       </div>
 
@@ -1169,6 +1292,7 @@ function exportarHistorialExcel(
     ["BUAP"],
     ["Facultad de Administración"],
     ["Historial de servicio social"],
+    [`Periodo de servicio social: ${obtenerTextoPeriodoSeleccionado()}`],
     [nombrePeriodo],
     [],
     ["Prestador", resumen.nombre || ""],
@@ -1211,12 +1335,13 @@ function exportarHistorialExcel(
     { wch: 45 }
   ];
 
-  hoja["!merges"] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
-    { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } },
-    { s: { r: 3, c: 0 }, e: { r: 3, c: 4 } }
-  ];
+ hoja["!merges"] = [
+  { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+  { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
+  { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } },
+  { s: { r: 3, c: 0 }, e: { r: 3, c: 4 } },
+  { s: { r: 4, c: 0 }, e: { r: 4, c: 4 } }
+];
 
   const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, hoja, "Historial");
@@ -1386,6 +1511,9 @@ function exportarHistorialPDF(
         <div class="logo">BUAP</div>
         <div class="facultad">Facultad de Administración</div>
         <h1>Historial de servicio social</h1>
+        <p class="subtitulo">
+          <strong>Periodo de servicio social:</strong> ${obtenerTextoPeriodoSeleccionado()}
+        </p>
         <p class="subtitulo">${nombrePeriodo}</p>
       </div>
 
@@ -1700,6 +1828,12 @@ document.addEventListener("click", (e) => {
 
 btnMostrarReportes.addEventListener("click", mostrarSeccionReportes);
 btnMostrarArchivados.addEventListener("click", mostrarSeccionArchivados);
+selectorPeriodoResponsable.addEventListener("change", async () => {
+  periodoSeleccionadoId = selectorPeriodoResponsable.value;
+
+  ocultarSeccionesResponsable();
+  await cargarResumenProfesor();
+});
 
 btnCerrarReportes.addEventListener("click", () => {
   seccionReportesResponsable.classList.add("hidden");

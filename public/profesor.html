@@ -56,6 +56,27 @@
         <p>Consulta el avance de horas de todos los prestadores.</p>
       </div>
 
+      <!-- CONTROL DE PERIODO -->
+      <section class="periodo-card">
+        <div class="periodo-info">
+          <span>Periodo actual</span>
+          <strong id="textoPeriodoActual">Cargando periodo...</strong>
+        </div>
+
+        <div class="periodo-controles">
+          <div>
+            <label for="selectorPeriodoResponsable">Ver periodo</label>
+            <select id="selectorPeriodoResponsable">
+              <option value="">Cargando periodos...</option>
+            </select>
+          </div>
+
+          <button id="btnCerrarPeriodoActual" type="button" class="danger small-action-btn">
+            Cerrar periodo 
+          </button>
+        </div>
+      </section>
+
       <!-- HISTORIAL DEL PRESTADOR -->
       <section id="detallePrestador" class="summary hidden">
         <h2>Historial del prestador</h2>
@@ -187,8 +208,9 @@
         </table>
       </section>
 
-      <!-- TABLA GENERAL DE PRESTADORES -->
 
+      <!-- TABLA GENERAL DE PRESTADORES -->
+    
       <table>
         <thead>
           <tr>

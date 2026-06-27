@@ -6,6 +6,22 @@ const descripcionRegistro = document.getElementById("descripcionRegistro");
 const btnRegistrarPrestador = document.getElementById("btnRegistrarPrestador");
 const btnYaRegistrado = document.getElementById("btnYaRegistrado");
 const btnVolverRegistro = document.getElementById("btnVolverRegistro");
+const periodoServicio = document.getElementById("periodoServicio");
+const anioPeriodoServicio = document.getElementById("anioPeriodoServicio");
+
+const anioActual = new Date().getFullYear();
+const anioMinimo = 2020;
+const anioMaximo = anioActual + 30;
+
+if (anioPeriodoServicio) {
+  anioPeriodoServicio.min = anioMinimo;
+  anioPeriodoServicio.max = anioMaximo;
+  anioPeriodoServicio.value = anioActual;
+}
+
+if (periodoServicio) {
+  periodoServicio.value = "Verano";
+}
 
 const parametros = new URLSearchParams(window.location.search);
 const origen = parametros.get("origen");
@@ -107,6 +123,22 @@ function validarRegistroPrestador(datos) {
     return "El horario es obligatorio.";
   }
 
+  if (!datos.periodo) {
+  return "El periodo de servicio social es obligatorio.";
+}
+
+  if (!datos.anio_periodo) {
+    return "El año del periodo es obligatorio.";
+  }
+
+  if (
+    !Number.isInteger(datos.anio_periodo) ||
+    datos.anio_periodo < anioMinimo ||
+    datos.anio_periodo > anioMaximo
+  ) {
+    return `El año del periodo debe estar entre ${anioMinimo} y ${anioMaximo}.`;
+  }
+
   if (!datos.horas_requeridas || datos.horas_requeridas <= 0) {
     return "Las horas requeridas deben ser mayor a 0.";
   }
@@ -151,11 +183,13 @@ formRegistro.addEventListener("submit", async (e) => {
   );
 
   const datos = {
-    nombre: document.getElementById("nombre").value.trim(),
-    matricula: document.getElementById("matricula").value.trim(),
-    carrera: document.getElementById("carrera").value.trim(),
-    horario: horarioArmado,
-    horas_requeridas: Number(document.getElementById("horas_requeridas").value)
+  nombre: document.getElementById("nombre").value.trim(),
+  matricula: document.getElementById("matricula").value.trim(),
+  carrera: document.getElementById("carrera").value.trim(),
+  horario: horarioArmado,
+  periodo: periodoServicio.value,
+  anio_periodo: Number(anioPeriodoServicio.value),
+  horas_requeridas: Number(document.getElementById("horas_requeridas").value)
   };
 
   const errorValidacion = validarRegistroPrestador(datos);
@@ -186,6 +220,14 @@ formRegistro.addEventListener("submit", async (e) => {
     formRegistro.reset();
     document.getElementById("horas_requeridas").value = 480;
     document.getElementById("carrera").value = "";
+
+    if (periodoServicio) {
+      periodoServicio.value = "Verano";
+    }
+
+    if (anioPeriodoServicio) {
+      anioPeriodoServicio.value = anioActual;
+    }
 
     setTimeout(() => {
       if (

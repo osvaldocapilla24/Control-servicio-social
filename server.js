@@ -164,17 +164,319 @@ function ajustarHoraSalidaPorHorario(horaReal, horario) {
   return horaReal;
 }
 
+function normalizarNombrePeriodo(nombre) {
+  const nombreLimpio = nombre ? nombre.trim() : "";
+
+  const periodosValidos = ["Primavera", "Verano", "Otoño"];
+
+  const periodoEncontrado = periodosValidos.find(
+    (periodo) => periodo.toLowerCase() === nombreLimpio.toLowerCase()
+  );
+
+  return periodoEncontrado || "";
+}
+
+function validarAnioPeriodo(anio) {
+  const anioNumero = Number(anio);
+  const anioActual = new Date().getFullYear();
+
+  if (!Number.isInteger(anioNumero)) {
+    return null;
+  }
+
+  if (anioNumero < 2020 || anioNumero > anioActual + 30) {
+    return null;
+  }
+
+  return anioNumero;
+}
+
+async function obtenerOCrearPeriodo(nombre, anio) {
+  const nombrePeriodo = normalizarNombrePeriodo(nombre);
+  const anioPeriodo = validarAnioPeriodo(anio);
+
+  if (!nombrePeriodo || !anioPeriodo) {
+    return null;
+  }
+
+  const periodoExistente = await pool.query(
+    `
+    SELECT id, nombre, anio, estatus, es_actual
+    FROM periodos
+    WHERE nombre = $1
+    AND anio = $2
+    LIMIT 1
+    `,
+    [nombrePeriodo, anioPeriodo]
+  );
+
+  if (periodoExistente.rows.length > 0) {
+    return periodoExistente.rows[0];
+  }
+
+  const nuevoPeriodo = await pool.query(
+    `
+    INSERT INTO periodos (nombre, anio, estatus, es_actual)
+    VALUES ($1, $2, 'activo', false)
+    RETURNING id, nombre, anio, estatus, es_actual
+    `,
+    [nombrePeriodo, anioPeriodo]
+  );
+
+  return nuevoPeriodo.rows[0];
+}
+
+
+/* PERIODOS */
+
+app.get("/api/periodos", async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `
+      SELECT id, nombre, anio, estatus, es_actual
+      FROM periodos
+      ORDER BY anio ASC,
+        CASE nombre
+          WHEN 'Primavera' THEN 1
+          WHEN 'Verano' THEN 2
+          WHEN 'Otoño' THEN 3
+          ELSE 4
+        END
+      `
+    );
+
+    res.json(resultado.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al obtener periodos."
+    });
+  }
+});
+
+app.get("/api/periodos/actual", async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `
+      SELECT id, nombre, anio, estatus, es_actual
+      FROM periodos
+      WHERE es_actual = true
+      LIMIT 1
+      `
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({
+        mensaje: "No hay un periodo actual configurado."
+      });
+    }
+
+    res.json(resultado.rows[0]);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al obtener el periodo actual."
+    });
+  }
+});
+
+app.post("/api/periodos/obtener-o-crear", async (req, res) => {
+  try {
+    const { nombre, anio } = req.body;
+
+    const periodo = await obtenerOCrearPeriodo(nombre, anio);
+
+    if (!periodo) {
+      return res.status(400).json({
+        mensaje: "Periodo o año inválido."
+      });
+    }
+
+    res.json({
+      mensaje: "Periodo listo.",
+      periodo
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al obtener o crear periodo."
+    });
+  }
+});
+
+app.patch("/api/periodos/:id/cerrar", async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const periodoId = Number(req.params.id);
+    let { siguiente_periodo, siguiente_anio } = req.body;
+
+    if (!Number.isInteger(periodoId) || periodoId <= 0) {
+      return res.status(400).json({
+        mensaje: "El periodo seleccionado no es válido."
+      });
+    }
+
+    siguiente_periodo = siguiente_periodo ? siguiente_periodo.trim() : "";
+    siguiente_anio = siguiente_anio || null;
+
+    const nombreSiguientePeriodo = normalizarNombrePeriodo(siguiente_periodo);
+    const anioSiguientePeriodo = validarAnioPeriodo(siguiente_anio);
+
+    if (!nombreSiguientePeriodo || !anioSiguientePeriodo) {
+      return res.status(400).json({
+        mensaje: "Debes seleccionar un periodo y año válido para continuar."
+      });
+    }
+
+    await client.query("BEGIN");
+
+    const periodoActualResultado = await client.query(
+      `
+      SELECT id, nombre, anio, estatus, es_actual
+      FROM periodos
+      WHERE id = $1
+      LIMIT 1
+      `,
+      [periodoId]
+    );
+
+    if (periodoActualResultado.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({
+        mensaje: "Periodo no encontrado."
+      });
+    }
+
+    const periodoActual = periodoActualResultado.rows[0];
+
+    if (periodoActual.estatus === "archivado") {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        mensaje: "Este periodo ya se encuentra archivado."
+      });
+    }
+
+    let siguientePeriodoResultado = await client.query(
+      `
+      SELECT id, nombre, anio, estatus, es_actual
+      FROM periodos
+      WHERE nombre = $1
+      AND anio = $2
+      LIMIT 1
+      `,
+      [nombreSiguientePeriodo, anioSiguientePeriodo]
+    );
+
+    let siguientePeriodo;
+
+    if (siguientePeriodoResultado.rows.length === 0) {
+      const nuevoPeriodoResultado = await client.query(
+        `
+        INSERT INTO periodos (nombre, anio, estatus, es_actual)
+        VALUES ($1, $2, 'activo', false)
+        RETURNING id, nombre, anio, estatus, es_actual
+        `,
+        [nombreSiguientePeriodo, anioSiguientePeriodo]
+      );
+
+      siguientePeriodo = nuevoPeriodoResultado.rows[0];
+    } else {
+      siguientePeriodo = siguientePeriodoResultado.rows[0];
+    }
+
+    if (siguientePeriodo.id === periodoActual.id) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        mensaje: "El siguiente periodo no puede ser el mismo que estás cerrando."
+      });
+    }
+
+    await client.query(
+      `
+      UPDATE prestadores
+      SET estatus = 'archivado'
+      WHERE periodo_id = $1
+      `,
+      [periodoActual.id]
+    );
+
+    await client.query(
+      `
+      UPDATE periodos
+      SET estatus = 'archivado',
+          es_actual = false
+      WHERE id = $1
+      `,
+      [periodoActual.id]
+    );
+
+    await client.query(
+      `
+      UPDATE periodos
+      SET es_actual = false
+      `
+    );
+
+    await client.query(
+      `
+      UPDATE periodos
+      SET estatus = 'activo',
+          es_actual = true
+      WHERE id = $1
+      `,
+      [siguientePeriodo.id]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      mensaje: `Periodo ${periodoActual.nombre} ${periodoActual.anio} cerrado y archivado correctamente.`,
+      periodo_cerrado: periodoActual,
+      periodo_actual: {
+        id: siguientePeriodo.id,
+        nombre: nombreSiguientePeriodo,
+        anio: anioSiguientePeriodo,
+        estatus: "activo",
+        es_actual: true
+      }
+    });
+
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al cerrar y archivar periodo."
+    });
+  } finally {
+    client.release();
+  }
+});
+
 /* REGISTRAR PRESTADOR */
 
 app.post("/api/prestadores", async (req, res) => {
   try {
-    let { nombre, matricula, carrera, horario, horas_requeridas } = req.body;
+    let {
+      nombre,
+      matricula,
+      carrera,
+      horario,
+      horas_requeridas,
+      periodo,
+      anio_periodo
+    } = req.body;
 
     nombre = nombre ? nombre.trim() : "";
     matricula = matricula ? matricula.trim() : "";
     carrera = carrera ? carrera.trim() : "";
     horario = horario ? horario.trim() : "";
     horas_requeridas = Number(horas_requeridas);
+    periodo = periodo ? periodo.trim() : "Verano";
+    anio_periodo = anio_periodo || 2026;
 
     if (!nombre) {
       return res.status(400).json({ mensaje: "El nombre es obligatorio." });
@@ -198,13 +500,21 @@ app.post("/api/prestadores", async (req, res) => {
       });
     }
 
+    const periodoSeleccionado = await obtenerOCrearPeriodo(periodo, anio_periodo);
+
+    if (!periodoSeleccionado) {
+      return res.status(400).json({
+        mensaje: "El periodo seleccionado no es válido."
+      });
+    }
+
     const fechaRegistro = obtenerFechaActual();
 
     const resultado = await pool.query(
       `
       INSERT INTO prestadores
-      (nombre, matricula, carrera, horario, horas_requeridas, fecha_registro, estatus)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      (nombre, matricula, carrera, horario, horas_requeridas, fecha_registro, estatus, periodo_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id
       `,
       [
@@ -214,7 +524,8 @@ app.post("/api/prestadores", async (req, res) => {
         horario,
         horas_requeridas,
         fechaRegistro,
-        "activo"
+        "activo",
+        periodoSeleccionado.id
       ]
     );
 
@@ -333,8 +644,8 @@ app.post("/api/entrada", async (req, res) => {
 
     const prestador = prestadorResultado.rows[0];
     const horaEntrada = ajustarHoraEntradaPorHorario(
-    horaEntradaReal,
-    prestador.horario
+      horaEntradaReal,
+      prestador.horario
     );
 
     if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
@@ -414,13 +725,13 @@ app.post("/api/salida", async (req, res) => {
 
     const prestador = prestadorResultado.rows[0];
     const horaSalida = ajustarHoraSalidaPorHorario(
-    horaSalidaReal,
-    prestador.horario
+      horaSalidaReal,
+      prestador.horario
     );
 
     if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
       return res.status(403).json({
-       mensaje: "No puedes registrar salida porque este prestador ya no se encuentra activo."
+        mensaje: "No puedes registrar salida porque este prestador ya no se encuentra activo."
       });
     }
 
@@ -689,12 +1000,39 @@ app.get("/api/prestadores/:id/registros", async (req, res) => {
 
 app.get("/api/reportes/mensual-general", async (req, res) => {
   try {
-    const { mes } = req.query;
+    const { mes, periodo_id } = req.query;
 
     if (!mes) {
       return res.status(400).json({
         mensaje: "El mes del reporte es obligatorio."
       });
+    }
+
+    let periodoId = periodo_id ? Number(periodo_id) : null;
+
+    if (periodo_id && (!Number.isInteger(periodoId) || periodoId <= 0)) {
+      return res.status(400).json({
+        mensaje: "El periodo seleccionado no es válido."
+      });
+    }
+
+    if (!periodoId) {
+      const periodoActualResultado = await pool.query(
+        `
+        SELECT id
+        FROM periodos
+        WHERE es_actual = true
+        LIMIT 1
+        `
+      );
+
+      if (periodoActualResultado.rows.length === 0) {
+        return res.status(404).json({
+          mensaje: "No hay un periodo actual configurado."
+        });
+      }
+
+      periodoId = periodoActualResultado.rows[0].id;
     }
 
     const fechaInicio = `${mes}-01`;
@@ -709,6 +1047,8 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
         p.horario,
         p.horas_requeridas,
         p.estatus,
+        per.nombre AS periodo,
+        per.anio AS anio_periodo,
         COALESCE(SUM(r.horas), 0) AS horas_mes,
         COALESCE((
           SELECT SUM(r2.horas)
@@ -716,22 +1056,20 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
           WHERE r2.prestador_id = p.id
         ), 0) AS horas_acumuladas
       FROM prestadores p
+      LEFT JOIN periodos per ON p.periodo_id = per.id
       LEFT JOIN registros r
         ON r.prestador_id = p.id
         AND r.fecha >= $1::date
         AND r.fecha < ($1::date + INTERVAL '1 month')
-        WHERE COALESCE(p.estatus, 'activo') != 'archivado'
+      WHERE LOWER(COALESCE(p.estatus, 'activo')) != 'archivado'
+      AND p.periodo_id = $2
       GROUP BY
         p.id,
-        p.nombre,
-        p.matricula,
-        p.carrera,
-        p.horario,
-        p.horas_requeridas,
-        p.estatus
+        per.nombre,
+        per.anio
       ORDER BY p.nombre ASC
       `,
-      [fechaInicio]
+      [fechaInicio, periodoId]
     );
 
     const reporte = resultado.rows.map((prestador) => {
@@ -746,7 +1084,10 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
       };
     });
 
-    res.json(reporte);
+    res.json({
+      periodo_id: periodoId,
+      reporte
+    });
 
   } catch (error) {
     console.error(error);
@@ -756,11 +1097,41 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
   }
 });
 
+
+
 /* RESUMEN DEL RESPONSABLE */
 
 app.get("/api/profesor/resumen", async (req, res) => {
   try {
     const fecha = obtenerFechaActual();
+    const { periodo_id } = req.query;
+
+    let periodoId = periodo_id ? Number(periodo_id) : null;
+
+    if (periodo_id && (!Number.isInteger(periodoId) || periodoId <= 0)) {
+      return res.status(400).json({
+        mensaje: "El periodo seleccionado no es válido."
+      });
+    }
+
+    if (!periodoId) {
+      const periodoActualResultado = await pool.query(
+        `
+        SELECT id
+        FROM periodos
+        WHERE es_actual = true
+        LIMIT 1
+        `
+      );
+
+      if (periodoActualResultado.rows.length === 0) {
+        return res.status(404).json({
+          mensaje: "No hay un periodo actual configurado."
+        });
+      }
+
+      periodoId = periodoActualResultado.rows[0].id;
+    }
 
     const resultado = await pool.query(
       `
@@ -772,6 +1143,8 @@ app.get("/api/profesor/resumen", async (req, res) => {
         p.horario,
         p.horas_requeridas,
         p.estatus,
+        per.nombre AS periodo,
+        per.anio AS anio_periodo,
         COALESCE(SUM(r.horas), 0) AS horas_acumuladas,
         p.horas_requeridas - COALESCE(SUM(r.horas), 0) AS horas_faltantes,
         (
@@ -789,11 +1162,16 @@ app.get("/api/profesor/resumen", async (req, res) => {
         ) AS estado_hoy
       FROM prestadores p
       LEFT JOIN registros r ON p.id = r.prestador_id
-      WHERE COALESCE(p.estatus, 'activo') != 'archivado'
-      GROUP BY p.id
+      LEFT JOIN periodos per ON p.periodo_id = per.id
+      WHERE LOWER(COALESCE(p.estatus, 'activo')) != 'archivado'
+      AND p.periodo_id = $2
+      GROUP BY
+        p.id,
+        per.nombre,
+        per.anio
       ORDER BY p.nombre ASC
       `,
-      [fecha]
+      [fecha, periodoId]
     );
 
     const filas = resultado.rows.map((item) => ({
@@ -801,7 +1179,10 @@ app.get("/api/profesor/resumen", async (req, res) => {
       estado_hoy: item.estado_hoy || "Sin registro hoy"
     }));
 
-    res.json(filas);
+    res.json({
+      periodo_id: periodoId,
+      prestadores: filas
+    });
 
   } catch (error) {
     console.error(error);
@@ -815,6 +1196,35 @@ app.get("/api/profesor/resumen", async (req, res) => {
 
 app.get("/api/profesor/archivados", async (req, res) => {
   try {
+    const { periodo_id } = req.query;
+
+    let periodoId = periodo_id ? Number(periodo_id) : null;
+
+    if (periodo_id && (!Number.isInteger(periodoId) || periodoId <= 0)) {
+      return res.status(400).json({
+        mensaje: "El periodo seleccionado no es válido."
+      });
+    }
+
+    if (!periodoId) {
+      const periodoActualResultado = await pool.query(
+        `
+        SELECT id
+        FROM periodos
+        WHERE es_actual = true
+        LIMIT 1
+        `
+      );
+
+      if (periodoActualResultado.rows.length === 0) {
+        return res.status(404).json({
+          mensaje: "No hay un periodo actual configurado."
+        });
+      }
+
+      periodoId = periodoActualResultado.rows[0].id;
+    }
+
     const resultado = await pool.query(
       `
       SELECT
@@ -825,17 +1235,28 @@ app.get("/api/profesor/archivados", async (req, res) => {
         p.horario,
         p.horas_requeridas,
         p.estatus,
+        per.nombre AS periodo,
+        per.anio AS anio_periodo,
         COALESCE(SUM(r.horas), 0) AS horas_acumuladas,
         p.horas_requeridas - COALESCE(SUM(r.horas), 0) AS horas_faltantes
       FROM prestadores p
       LEFT JOIN registros r ON p.id = r.prestador_id
-      WHERE p.estatus = 'archivado'
-      GROUP BY p.id
+      LEFT JOIN periodos per ON p.periodo_id = per.id
+      WHERE LOWER(COALESCE(p.estatus, 'activo')) = 'archivado'
+      AND p.periodo_id = $1
+      GROUP BY
+        p.id,
+        per.nombre,
+        per.anio
       ORDER BY p.nombre ASC
-      `
+      `,
+      [periodoId]
     );
 
-    res.json(resultado.rows);
+    res.json({
+      periodo_id: periodoId,
+      prestadores: resultado.rows
+    });
 
   } catch (error) {
     console.error(error);
@@ -1021,13 +1442,25 @@ app.delete("/api/registros/:id", async (req, res) => {
 app.put("/api/prestadores/:id", async (req, res) => {
   try {
     const prestadorId = req.params.id;
-    let { nombre, matricula, carrera, horario, horas_requeridas } = req.body;
+
+    let {
+      nombre,
+      matricula,
+      carrera,
+      horario,
+      horas_requeridas,
+      periodo,
+      anio_periodo
+    } = req.body;
 
     nombre = nombre ? nombre.trim() : "";
     matricula = matricula ? matricula.trim() : "";
     carrera = carrera ? carrera.trim() : "";
     horario = horario ? horario.trim() : "";
     horas_requeridas = Number(horas_requeridas);
+
+    periodo = periodo ? periodo.trim() : "";
+    anio_periodo = anio_periodo || null;
 
     if (!nombre) {
       return res.status(400).json({ mensaje: "El nombre es obligatorio." });
@@ -1082,6 +1515,18 @@ app.put("/api/prestadores/:id", async (req, res) => {
       });
     }
 
+    let periodoSeleccionado = null;
+
+    if (periodo || anio_periodo) {
+      periodoSeleccionado = await obtenerOCrearPeriodo(periodo, anio_periodo);
+
+      if (!periodoSeleccionado) {
+        return res.status(400).json({
+          mensaje: "El periodo seleccionado no es válido."
+        });
+      }
+    }
+
     await pool.query(
       `
       UPDATE prestadores
@@ -1089,17 +1534,35 @@ app.put("/api/prestadores/:id", async (req, res) => {
           matricula = $2,
           carrera = $3,
           horario = $4,
-          horas_requeridas = $5
-      WHERE id = $6
+          horas_requeridas = $5,
+          periodo_id = COALESCE($6, periodo_id)
+      WHERE id = $7
       `,
-      [nombre, matricula, carrera, horario, horas_requeridas, prestadorId]
+      [
+        nombre,
+        matricula,
+        carrera,
+        horario,
+        horas_requeridas,
+        periodoSeleccionado ? periodoSeleccionado.id : null,
+        prestadorId
+      ]
     );
 
     res.json({
-      mensaje: "Datos del prestador actualizados correctamente."
+      mensaje: "Datos del prestador actualizados correctamente.",
+      periodo: periodoSeleccionado
+        ? `${periodoSeleccionado.nombre} ${periodoSeleccionado.anio}`
+        : null
     });
 
   } catch (error) {
+    if (error.code === "23505") {
+      return res.status(409).json({
+        mensaje: "Ya existe otro prestador con esa matrícula."
+      });
+    }
+
     console.error(error);
     res.status(500).json({
       mensaje: "Error al actualizar los datos del prestador."
@@ -1262,19 +1725,59 @@ app.patch("/api/prestadores/:id/archivar", async (req, res) => {
 
 app.get("/api/reportes/prestadores", async (req, res) => {
   try {
-    const resultado = await pool.query(`
-      SELECT 
-        id,
-        nombre,
-        matricula,
-        carrera,
-        COALESCE(estatus, 'activo') AS estatus
-      FROM prestadores
-      WHERE COALESCE(estatus, 'activo') != 'archivado'
-      ORDER BY nombre ASC
-    `);
+    const { periodo_id } = req.query;
 
-    res.json(resultado.rows);
+    let periodoId = periodo_id ? Number(periodo_id) : null;
+
+    if (periodo_id && (!Number.isInteger(periodoId) || periodoId <= 0)) {
+      return res.status(400).json({
+        mensaje: "El periodo seleccionado no es válido."
+      });
+    }
+
+    if (!periodoId) {
+      const periodoActualResultado = await pool.query(
+        `
+        SELECT id
+        FROM periodos
+        WHERE es_actual = true
+        LIMIT 1
+        `
+      );
+
+      if (periodoActualResultado.rows.length === 0) {
+        return res.status(404).json({
+          mensaje: "No hay un periodo actual configurado."
+        });
+      }
+
+      periodoId = periodoActualResultado.rows[0].id;
+    }
+
+    const resultado = await pool.query(
+      `
+      SELECT 
+        p.id,
+        p.nombre,
+        p.matricula,
+        p.carrera,
+        COALESCE(p.estatus, 'activo') AS estatus,
+        per.nombre AS periodo,
+        per.anio AS anio_periodo
+      FROM prestadores p
+      LEFT JOIN periodos per ON p.periodo_id = per.id
+      WHERE LOWER(COALESCE(p.estatus, 'activo')) != 'archivado'
+      AND p.periodo_id = $1
+      ORDER BY p.nombre ASC
+      `,
+      [periodoId]
+    );
+
+    res.json({
+      periodo_id: periodoId,
+      prestadores: resultado.rows
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({

@@ -993,6 +993,90 @@ button:disabled:hover {
   border-top: 1px solid var(--gris-borde);
 }
 
+
+.periodo-card {
+  margin: 18px auto 20px;
+  padding: 16px 18px;
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fbff, #eef6ff);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  width: 100%;
+  box-shadow: 0 8px 22px rgba(15, 47, 110, 0.06);
+}
+
+.periodo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.periodo-info span {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.periodo-info strong {
+  color: #0f2f6e;
+  font-size: 20px;
+}
+
+.periodo-controles {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.periodo-controles label {
+  display: block;
+  margin-bottom: 6px;
+  color: #0f2f6e;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.periodo-controles select {
+  min-width: 170px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  padding: 0 12px;
+  background: white;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.small-action-btn {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .periodo-card {
+    align-items: stretch;
+  }
+
+  .periodo-controles {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .periodo-controles select,
+  .small-action-btn {
+    width: 100%;
+  }
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 700px) {
