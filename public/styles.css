@@ -1098,6 +1098,29 @@ button:disabled:hover {
   text-align: center;
 }
 
+/* FONDO SOLO PARA LOGIN */
+
+.login-page {
+  min-height: 100vh;
+  background:
+    linear-gradient(
+      rgba(7, 35, 87, 0.50),
+      rgba(7, 35, 87, 0.50)
+    ),
+    url("img/fondo.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.login-page .page {
+  background: transparent;
+}
+
+.login-page .card {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(6px);
+}
 
 /* RESPONSIVE */
 
