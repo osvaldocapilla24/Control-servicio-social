@@ -226,6 +226,66 @@ async function obtenerOCrearPeriodo(nombre, anio) {
   return nuevoPeriodo.rows[0];
 }
 
+async function validarPrestadorParaRegistroHoras(prestadorId) {
+  const resultado = await pool.query(
+    `
+    SELECT
+      p.id,
+      p.nombre,
+      p.horario,
+      COALESCE(p.estatus, 'activo') AS estatus,
+      p.periodo_id,
+      per.nombre AS periodo_nombre,
+      per.anio AS periodo_anio,
+      COALESCE(per.estatus, 'activo') AS periodo_estatus
+    FROM prestadores p
+    LEFT JOIN periodos per ON p.periodo_id = per.id
+    WHERE p.id = $1
+    LIMIT 1
+    `,
+    [prestadorId]
+  );
+
+  if (resultado.rows.length === 0) {
+    return {
+      puedeRegistrar: false,
+      status: 404,
+      mensaje: "Prestador no encontrado."
+    };
+  }
+
+  const prestador = resultado.rows[0];
+
+  if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
+    return {
+      puedeRegistrar: false,
+      status: 403,
+      mensaje: "No puedes registrar horas porque este prestador ya no se encuentra activo."
+    };
+  }
+
+  if (!prestador.periodo_id) {
+    return {
+      puedeRegistrar: false,
+      status: 409,
+      mensaje: "Este prestador no tiene un periodo asignado."
+    };
+  }
+
+  if (prestador.periodo_estatus === "archivado") {
+    return {
+      puedeRegistrar: false,
+      status: 403,
+      mensaje: "Este periodo ya fue cerrado. Solo puedes consultar tu historial."
+    };
+  }
+
+  return {
+    puedeRegistrar: true,
+    prestador
+  };
+}
+
 
 /* PERIODOS */
 
@@ -627,32 +687,20 @@ app.post("/api/entrada", async (req, res) => {
     const fecha = obtenerFechaActual();
     const horaEntradaReal = obtenerHoraActual();
 
-    const prestadorResultado = await pool.query(
-      `
-      SELECT id, nombre, horario, estatus
-      FROM prestadores
-      WHERE id = $1
-      `,
-      [prestador_id]
-    );
+    const validacionPrestador = await validarPrestadorParaRegistroHoras(prestador_id);
 
-    if (prestadorResultado.rows.length === 0) {
-      return res.status(404).json({
-        mensaje: "Prestador no encontrado."
+    if (!validacionPrestador.puedeRegistrar) {
+      return res.status(validacionPrestador.status).json({
+        mensaje: validacionPrestador.mensaje
       });
     }
 
-    const prestador = prestadorResultado.rows[0];
+    const prestador = validacionPrestador.prestador;
+
     const horaEntrada = ajustarHoraEntradaPorHorario(
       horaEntradaReal,
       prestador.horario
     );
-
-    if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
-      return res.status(403).json({
-        mensaje: "No puedes registrar entrada porque este prestador ya no se encuentra activo."
-      });
-    }
 
     const abiertoResultado = await pool.query(
       `
@@ -708,32 +756,20 @@ app.post("/api/salida", async (req, res) => {
 
     const horaSalidaReal = obtenerHoraActual();
 
-    const prestadorResultado = await pool.query(
-      `
-      SELECT id, nombre, horario, estatus
-      FROM prestadores
-      WHERE id = $1
-      `,
-      [prestador_id]
-    );
+    const validacionPrestador = await validarPrestadorParaRegistroHoras(prestador_id);
 
-    if (prestadorResultado.rows.length === 0) {
-      return res.status(404).json({
-        mensaje: "Prestador no encontrado."
+    if (!validacionPrestador.puedeRegistrar) {
+      return res.status(validacionPrestador.status).json({
+        mensaje: validacionPrestador.mensaje
       });
     }
 
-    const prestador = prestadorResultado.rows[0];
+    const prestador = validacionPrestador.prestador;
+
     const horaSalida = ajustarHoraSalidaPorHorario(
       horaSalidaReal,
       prestador.horario
     );
-
-    if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
-      return res.status(403).json({
-        mensaje: "No puedes registrar salida porque este prestador ya no se encuentra activo."
-      });
-    }
 
     const registroResultado = await pool.query(
       `
@@ -823,26 +859,11 @@ app.post("/api/registro-manual", async (req, res) => {
       });
     }
 
-    const prestadorResultado = await pool.query(
-      `
-      SELECT id, nombre, estatus
-      FROM prestadores
-      WHERE id = $1
-      `,
-      [prestador_id]
-    );
+    const validacionPrestador = await validarPrestadorParaRegistroHoras(prestador_id);
 
-    if (prestadorResultado.rows.length === 0) {
-      return res.status(404).json({
-        mensaje: "Prestador no encontrado."
-      });
-    }
-
-    const prestador = prestadorResultado.rows[0];
-
-    if (prestador.estatus === "finalizado" || prestador.estatus === "archivado") {
-      return res.status(403).json({
-        mensaje: "No puedes agregar horas porque este prestador ya no se encuentra activo."
+    if (!validacionPrestador.puedeRegistrar) {
+      return res.status(validacionPrestador.status).json({
+        mensaje: validacionPrestador.mensaje
       });
     }
 

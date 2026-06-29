@@ -994,41 +994,44 @@ button:disabled:hover {
 }
 
 
+/* CONTROL DE PERIODO DEL RESPONSABLE */
+
 .periodo-card {
-  margin: 18px auto 20px;
-  padding: 16px 18px;
+  width: 100%;
+  margin: 18px auto 22px;
+  padding: 18px;
   border: 1px solid #dbeafe;
   border-radius: 18px;
   background: linear-gradient(135deg, #f8fbff, #eef6ff);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  flex-wrap: wrap;
-  width: 100%;
   box-shadow: 0 8px 22px rgba(15, 47, 110, 0.06);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  align-items: center;
 }
 
 .periodo-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .periodo-info span {
-  font-size: 13px;
   color: #64748b;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .periodo-info strong {
-  color: #0f2f6e;
-  font-size: 20px;
+  color: var(--azul-texto);
+  font-size: 22px;
+  font-weight: 900;
 }
 
 .periodo-controles {
   display: flex;
   align-items: end;
+  justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -1036,46 +1039,65 @@ button:disabled:hover {
 .periodo-controles label {
   display: block;
   margin-bottom: 6px;
-  color: #0f2f6e;
+  color: var(--azul-texto);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .periodo-controles select {
-  min-width: 170px;
-  height: 42px;
-  border-radius: 12px;
+  min-width: 175px;
+  height: 44px;
+  padding: 0 13px;
   border: 1px solid #cbd5e1;
-  padding: 0 12px;
-  background: white;
+  border-radius: 12px;
+  background: var(--blanco);
   color: #0f172a;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .small-action-btn {
-  height: 42px;
+  height: 44px;
   padding: 0 16px;
   border-radius: 12px;
   font-size: 13px;
   white-space: nowrap;
 }
 
-@media (max-width: 700px) {
-  .periodo-card {
-    align-items: stretch;
-  }
+/* PERIODO DE SERVICIO EN FORMULARIOS */
 
-  .periodo-controles {
-    width: 100%;
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .periodo-controles select,
-  .small-action-btn {
-    width: 100%;
-  }
+.label-seccion {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  font-weight: 800;
+  color: var(--azul-texto);
 }
+
+.periodo-servicio-grid {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 8px;
+}
+
+.periodo-servicio-grid label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--azul-texto);
+}
+
+.periodo-servicio-grid select,
+.periodo-servicio-grid input {
+  width: 100%;
+}
+
+.campo-anio input {
+  text-align: center;
+}
+
 
 /* RESPONSIVE */
 
@@ -1149,6 +1171,32 @@ button:disabled:hover {
   .dias-grid,
   .horario-grid {
     grid-template-columns: 1fr;
+  }
+
+
+
+  .periodo-card {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .periodo-controles {
+    width: 100%;
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .periodo-controles select,
+  .small-action-btn {
+    width: 100%;
+  }
+
+  .periodo-servicio-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-anio input {
+    text-align: left;
   }
 
   .menu-mas-opciones {

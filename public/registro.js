@@ -19,9 +19,43 @@ if (anioPeriodoServicio) {
   anioPeriodoServicio.value = anioActual;
 }
 
-if (periodoServicio) {
-  periodoServicio.value = "Verano";
+async function cargarPeriodoActualEnRegistro() {
+  try {
+    const respuesta = await fetch("/api/periodos/actual");
+    const periodoActual = await respuesta.json();
+
+    if (!respuesta.ok) {
+      if (periodoServicio) {
+        periodoServicio.value = "Verano";
+      }
+
+      if (anioPeriodoServicio) {
+        anioPeriodoServicio.value = anioActual;
+      }
+
+      return;
+    }
+
+    if (periodoServicio) {
+      periodoServicio.value = periodoActual.nombre;
+    }
+
+    if (anioPeriodoServicio) {
+      anioPeriodoServicio.value = periodoActual.anio;
+    }
+
+  } catch (error) {
+    if (periodoServicio) {
+      periodoServicio.value = "Verano";
+    }
+
+    if (anioPeriodoServicio) {
+      anioPeriodoServicio.value = anioActual;
+    }
+  }
 }
+
+cargarPeriodoActualEnRegistro();
 
 const parametros = new URLSearchParams(window.location.search);
 const origen = parametros.get("origen");
@@ -183,13 +217,13 @@ formRegistro.addEventListener("submit", async (e) => {
   );
 
   const datos = {
-  nombre: document.getElementById("nombre").value.trim(),
-  matricula: document.getElementById("matricula").value.trim(),
-  carrera: document.getElementById("carrera").value.trim(),
-  horario: horarioArmado,
-  periodo: periodoServicio.value,
-  anio_periodo: Number(anioPeriodoServicio.value),
-  horas_requeridas: Number(document.getElementById("horas_requeridas").value)
+    nombre: document.getElementById("nombre").value.trim(),
+    matricula: document.getElementById("matricula").value.trim(),
+    carrera: document.getElementById("carrera").value.trim(),
+    horario: horarioArmado,
+    periodo: periodoServicio ? periodoServicio.value : "Verano",
+    anio_periodo: anioPeriodoServicio ? Number(anioPeriodoServicio.value) : anioActual,
+    horas_requeridas: Number(document.getElementById("horas_requeridas").value)
   };
 
   const errorValidacion = validarRegistroPrestador(datos);
@@ -221,13 +255,7 @@ formRegistro.addEventListener("submit", async (e) => {
     document.getElementById("horas_requeridas").value = 480;
     document.getElementById("carrera").value = "";
 
-    if (periodoServicio) {
-      periodoServicio.value = "Verano";
-    }
-
-    if (anioPeriodoServicio) {
-      anioPeriodoServicio.value = anioActual;
-    }
+    await cargarPeriodoActualEnRegistro();
 
     setTimeout(() => {
       if (

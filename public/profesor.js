@@ -96,18 +96,39 @@ async function cargarPeriodosResponsable() {
       return;
     }
 
-    periodos.forEach((periodo) => {
-      const option = document.createElement("option");
+    periodos
+      .sort((a, b) => {
+        if (a.es_actual) return -1;
+        if (b.es_actual) return 1;
 
-      option.value = periodo.id;
-      option.textContent = `${periodo.nombre} ${periodo.anio}`;
+        if (a.estatus !== "archivado" && b.estatus === "archivado") return -1;
+        if (a.estatus === "archivado" && b.estatus !== "archivado") return 1;
 
-      if (periodo.id === periodoActual.id) {
-        option.selected = true;
-      }
+        return b.anio - a.anio;
+      })
+      .forEach((periodo) => {
+        const option = document.createElement("option");
 
-      selectorPeriodoResponsable.appendChild(option);
-    });
+        option.value = periodo.id;
+
+        let textoPeriodo = `${periodo.nombre} ${periodo.anio}`;
+
+        if (periodo.es_actual) {
+          textoPeriodo += " · Actual";
+        }
+
+        if (periodo.estatus === "archivado") {
+          textoPeriodo += " · Cerrado";
+        }
+
+        option.textContent = textoPeriodo;
+
+        if (periodo.id === periodoActual.id) {
+          option.selected = true;
+        }
+
+        selectorPeriodoResponsable.appendChild(option);
+      });
 
     await cargarResumenProfesor();
 
@@ -251,8 +272,8 @@ async function cargarResumenProfesor() {
 async function cargarPrestadoresArchivados() {
   try {
     const url = periodoSeleccionadoId
-    ? `/api/profesor/archivados?periodo_id=${periodoSeleccionadoId}`
-    : "/api/profesor/archivados";
+      ? `/api/profesor/archivados?periodo_id=${periodoSeleccionadoId}`
+      : "/api/profesor/archivados";
 
     const respuesta = await fetch(url);
     const datos = await respuesta.json();
@@ -316,8 +337,8 @@ async function cargarPrestadoresArchivados() {
 async function cargarPrestadoresParaReportes() {
   try {
     const url = periodoSeleccionadoId
-    ? `/api/reportes/prestadores?periodo_id=${periodoSeleccionadoId}`
-    : "/api/reportes/prestadores";
+      ? `/api/reportes/prestadores?periodo_id=${periodoSeleccionadoId}`
+      : "/api/reportes/prestadores";
 
     const respuesta = await fetch(url);
     const datos = await respuesta.json();
@@ -402,8 +423,8 @@ function calcularHorasDeRegistros(registros) {
 async function obtenerReporteGeneralCompleto() {
   try {
     const url = periodoSeleccionadoId
-    ? `/api/profesor/resumen?periodo_id=${periodoSeleccionadoId}`
-    : "/api/profesor/resumen";
+      ? `/api/profesor/resumen?periodo_id=${periodoSeleccionadoId}`
+      : "/api/profesor/resumen";
 
     const respuesta = await fetch(url);
     const datos = await respuesta.json();
@@ -573,23 +594,48 @@ function obtenerDatosHorario(horario) {
     return { dias, horaEntrada, horaSalida };
   }
 
+  const ordenDias = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo"
+  ];
+
   const partes = horario.split(" de ");
 
   if (partes.length === 2) {
-    const diasTexto = partes[0];
-    const horasTexto = partes[1];
+    const diasTexto = partes[0].trim();
+    const horasTexto = partes[1].trim();
 
-    ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].forEach((dia) => {
-      if (diasTexto.includes(dia)) {
-        dias.push(dia);
+    if (diasTexto.includes(" a ")) {
+      const partesDias = diasTexto.split(" a ");
+      const diaInicio = partesDias[0].trim();
+      const diaFin = partesDias[1].trim();
+
+      const indiceInicio = ordenDias.indexOf(diaInicio);
+      const indiceFin = ordenDias.indexOf(diaFin);
+
+      if (indiceInicio !== -1 && indiceFin !== -1 && indiceInicio <= indiceFin) {
+        for (let i = indiceInicio; i <= indiceFin; i++) {
+          dias.push(ordenDias[i]);
+        }
       }
-    });
+    } else {
+      ordenDias.forEach((dia) => {
+        if (diasTexto.includes(dia)) {
+          dias.push(dia);
+        }
+      });
+    }
 
     const horas = horasTexto.split(" a ");
 
     if (horas.length === 2) {
-      horaEntrada = horas[0];
-      horaSalida = horas[1];
+      horaEntrada = horas[0].trim();
+      horaSalida = horas[1].trim();
     }
   }
 
@@ -698,69 +744,87 @@ async function verHistorial(id, nombre) {
 
   <label>Días de servicio</label>
 
-  <div class="dias-grid">
-    <label class="check-option">
-      <input type="checkbox" name="editarDiasServicio" value="Lunes">
-      Lunes
-    </label>
+    <div class="dias-grid">
+      <label class="check-option">
+        <input type="checkbox" name="editarDiasServicio" value="Lunes">
+        Lunes
+      </label>
 
-    <label class="check-option">
-      <input type="checkbox" name="editarDiasServicio" value="Martes">
-      Martes
-    </label>
+      <label class="check-option">
+        <input type="checkbox" name="editarDiasServicio" value="Martes">
+        Martes
+      </label>
 
-    <label class="check-option">
-      <input type="checkbox" name="editarDiasServicio" value="Miércoles">
-      Miércoles
-    </label>
+      <label class="check-option">
+        <input type="checkbox" name="editarDiasServicio" value="Miércoles">
+        Miércoles
+      </label>
 
-    <label class="check-option">
-      <input type="checkbox" name="editarDiasServicio" value="Jueves">
-      Jueves
-    </label>
+      <label class="check-option">
+        <input type="checkbox" name="editarDiasServicio" value="Jueves">
+        Jueves
+      </label>
 
-    <label class="check-option">
-      <input type="checkbox" name="editarDiasServicio" value="Viernes">
-      Viernes
-    </label>
+      <label class="check-option">
+        <input type="checkbox" name="editarDiasServicio" value="Viernes">
+        Viernes
+      </label>
 
-    <label class="check-option">
-      <input type="checkbox" name="editarDiasServicio" value="Sábado">
-      Sábado
-    </label>
+      <label class="check-option">
+        <input type="checkbox" name="editarDiasServicio" value="Sábado">
+        Sábado
+      </label>
 
-    <label class="check-option">
-      <input type="checkbox" name="editarDiasServicio" value="Domingo">
-      Domingo
-    </label>
-  </div>
-
-  <div class="horario-grid">
-    <div>
-      <label for="editarHoraEntradaServicio">Hora de entrada</label>
-      <input type="time" id="editarHoraEntradaServicio" value="${datosHorario.horaEntrada}">
+      <label class="check-option">
+        <input type="checkbox" name="editarDiasServicio" value="Domingo">
+        Domingo
+      </label>
     </div>
 
-    <div>
-      <label for="editarHoraSalidaServicio">Hora de salida</label>
-      <input type="time" id="editarHoraSalidaServicio" value="${datosHorario.horaSalida}">
+    <div class="horario-grid">
+      <div>
+        <label for="editarHoraEntradaServicio">Hora de entrada</label>
+        <input type="time" id="editarHoraEntradaServicio" value="${datosHorario.horaEntrada}">
+      </div>
+
+      <div>
+        <label for="editarHoraSalidaServicio">Hora de salida</label>
+        <input type="time" id="editarHoraSalidaServicio" value="${datosHorario.horaSalida}">
+      </div>
     </div>
-  </div>
 
-  <label for="editarHorasRequeridasPrestador">Horas requeridas</label>
-  <input type="number" id="editarHorasRequeridasPrestador" value="${Number(resumen.horas_requeridas)}">
+    <label class="label-seccion">Periodo de servicio social</label>
 
-  <div class="buttons">
-    <button type="button" id="btnGuardarPrestadorEditado">
-      Guardar cambios
-    </button>
+      <div class="periodo-servicio-grid">
+        <div class="campo-periodo">
+          <label for="editarPeriodoServicio">Periodo</label>
+          <select id="editarPeriodoServicio">
+            <option value="Primavera">Primavera</option>
+            <option value="Verano">Verano</option>
+            <option value="Otoño">Otoño</option>
+          </select>
+        </div>
 
-    <button type="button" id="btnCancelarPrestadorEditado" class="secondary-btn">
-      Cancelar
-    </button>
-  </div>
-</div>
-    `;
+        <div class="campo-anio">
+          <label for="editarAnioPeriodoServicio">Año</label>
+          <input type="number" id="editarAnioPeriodoServicio">
+        </div>
+      </div>
+
+      <label for="editarHorasRequeridasPrestador">Horas requeridas</label>
+      <input type="number" id="editarHorasRequeridasPrestador" value="${Number(resumen.horas_requeridas)}">
+
+      <div class="buttons">
+        <button type="button" id="btnGuardarPrestadorEditado">
+          Guardar cambios
+        </button>
+
+        <button type="button" id="btnCancelarPrestadorEditado" class="secondary-btn">
+          Cancelar
+        </button>
+      </div>
+    </div>
+        `;
 
     document.querySelector(".btn-finalizar-detalle").addEventListener("click", () => {
       finalizarPrestador(id);
@@ -849,6 +913,18 @@ function mostrarFormularioEditarPrestador(resumen) {
   document.getElementById("editarMatriculaPrestador").value = resumen.matricula;
   document.getElementById("editarCarreraPrestador").value = resumen.carrera;
   document.getElementById("editarHorasRequeridasPrestador").value = Number(resumen.horas_requeridas);
+  const editarPeriodoServicio = document.getElementById("editarPeriodoServicio");
+  const editarAnioPeriodoServicio = document.getElementById("editarAnioPeriodoServicio");
+
+  const anioActualEditar = new Date().getFullYear();
+  const anioMinimoEditar = 2020;
+  const anioMaximoEditar = anioActualEditar + 30;
+
+  editarAnioPeriodoServicio.min = anioMinimoEditar;
+  editarAnioPeriodoServicio.max = anioMaximoEditar;
+
+  editarPeriodoServicio.value = resumen.periodo || "Verano";
+  editarAnioPeriodoServicio.value = resumen.anio_periodo || anioActualEditar;
 
   const datosHorario = obtenerDatosHorario(resumen.horario);
 
@@ -902,6 +978,8 @@ async function guardarDatosPrestadorEditado(id) {
     matricula: document.getElementById("editarMatriculaPrestador").value.trim(),
     carrera: document.getElementById("editarCarreraPrestador").value.trim(),
     horario: horarioArmado,
+    periodo: document.getElementById("editarPeriodoServicio").value,
+    anio_periodo: Number(document.getElementById("editarAnioPeriodoServicio").value),
     horas_requeridas: Number(document.getElementById("editarHorasRequeridasPrestador").value)
   };
 
@@ -917,6 +995,24 @@ async function guardarDatosPrestadorEditado(id) {
 
   if (!datos.carrera) {
     alert("La carrera es obligatoria.");
+    return;
+  }
+
+  const anioActual = new Date().getFullYear();
+  const anioMinimo = 2020;
+  const anioMaximo = anioActual + 30;
+
+  if (!datos.periodo) {
+    alert("El periodo de servicio social es obligatorio.");
+    return;
+  }
+
+  if (
+    !Number.isInteger(datos.anio_periodo) ||
+    datos.anio_periodo < anioMinimo ||
+    datos.anio_periodo > anioMaximo
+  ) {
+    alert(`El año del periodo debe estar entre ${anioMinimo} y ${anioMaximo}.`);
     return;
   }
 
@@ -947,8 +1043,35 @@ async function guardarDatosPrestadorEditado(id) {
 
     prestadorResponsableEditandoNombre.value = datos.nombre;
 
+    /*
+      Recargamos los periodos para que aparezca el nuevo periodo
+      sin tener que refrescar la página.
+    */
+    await cargarPeriodosResponsable();
+
+    const opcionPeriodoEditado = Array.from(selectorPeriodoResponsable.options).find((option) => {
+      return option.textContent.trim() === `${datos.periodo} ${datos.anio_periodo}`;
+    });
+
+    if (opcionPeriodoEditado) {
+      periodoSeleccionadoId = opcionPeriodoEditado.value;
+      selectorPeriodoResponsable.value = opcionPeriodoEditado.value;
+    }
+
+    /*
+      Cerramos el historial para que después de guardar no se quede abierto.
+    */
+    detallePrestador.classList.add("hidden");
+    formEditarRegistroResponsable.classList.add("hidden");
+    tablaHistorial.innerHTML = "";
+    nombreDetalle.innerHTML = "";
+
+    prestadorResponsableEditandoId.value = "";
+    prestadorResponsableEditandoNombre.value = "";
+
+    limpiarFormularioEdicionResponsable();
+
     await cargarResumenProfesor();
-    await verHistorial(id, datos.nombre);
 
   } catch (error) {
     alert("Error al conectar con el servidor.");
@@ -1003,8 +1126,8 @@ async function obtenerReporteMensualGeneral() {
 
   try {
     const url = periodoSeleccionadoId
-    ? `/api/reportes/mensual-general?mes=${mes}&periodo_id=${periodoSeleccionadoId}`
-    : `/api/reportes/mensual-general?mes=${mes}`;
+      ? `/api/reportes/mensual-general?mes=${mes}&periodo_id=${periodoSeleccionadoId}`
+      : `/api/reportes/mensual-general?mes=${mes}`;
 
     const respuesta = await fetch(url);
     const datos = await respuesta.json();
@@ -1047,13 +1170,13 @@ function exportarReporteGeneralExcelDesdeDatos(datos, titulo, nombreArchivo) {
   }
 
   const datosExcel = [
-  ["BUAP"],
-  ["Facultad de Administración"],
-  [`Periodo de servicio social: ${obtenerTextoPeriodoSeleccionado()}`],
-  [titulo],
-  [],
-  ["Nombre", "Matrícula", "Carrera", "Horario", "Horas del periodo", "Horas acumuladas", "Horas faltantes", "Estatus"]
-];
+    ["BUAP"],
+    ["Facultad de Administración"],
+    [`Periodo de servicio social: ${obtenerTextoPeriodoSeleccionado()}`],
+    [titulo],
+    [],
+    ["Nombre", "Matrícula", "Carrera", "Horario", "Horas del periodo", "Horas acumuladas", "Horas faltantes", "Estatus"]
+  ];
 
   datos.forEach((p) => {
     datosExcel.push([
@@ -1082,11 +1205,11 @@ function exportarReporteGeneralExcelDesdeDatos(datos, titulo, nombreArchivo) {
   ];
 
   hoja["!merges"] = [
-  { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
-  { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
-  { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
-  { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } }
-];
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
+    { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
+    { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } }
+  ];
 
   const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, hoja, "Reporte general");
@@ -1335,13 +1458,13 @@ function exportarHistorialExcel(
     { wch: 45 }
   ];
 
- hoja["!merges"] = [
-  { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
-  { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
-  { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } },
-  { s: { r: 3, c: 0 }, e: { r: 3, c: 4 } },
-  { s: { r: 4, c: 0 }, e: { r: 4, c: 4 } }
-];
+  hoja["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
+    { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } },
+    { s: { r: 3, c: 0 }, e: { r: 3, c: 4 } },
+    { s: { r: 4, c: 0 }, e: { r: 4, c: 4 } }
+  ];
 
   const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, hoja, "Historial");
@@ -1805,6 +1928,79 @@ function limpiarFormularioEdicionResponsable() {
   formEditarRegistroResponsable.classList.add("hidden");
 }
 
+async function cerrarPeriodoActual() {
+  if (!periodoActualGlobal || !periodoActualGlobal.id) {
+    alert("No hay un periodo actual cargado.");
+    return;
+  }
+
+  const siguientePeriodo = prompt(
+    "¿A qué periodo deseas pasar ahora?\n\n" +
+    "Opciones válidas: Primavera, Verano u Otoño",
+    "Otoño"
+  );
+
+  if (!siguientePeriodo) {
+    return;
+  }
+
+  const siguienteAnioTexto = prompt(
+    "¿Qué año tendrá el siguiente periodo?",
+    new Date().getFullYear()
+  );
+
+  if (!siguienteAnioTexto) {
+    return;
+  }
+
+  const siguienteAnio = Number(siguienteAnioTexto);
+
+  if (!Number.isInteger(siguienteAnio)) {
+    alert("El año debe ser un número válido.");
+    return;
+  }
+
+  const confirmar = confirm(
+    `Vas a cerrar el periodo ${periodoActualGlobal.nombre} ${periodoActualGlobal.anio}.\n\n` +
+    "Esto archivará a todos los prestadores de ese periodo.\n" +
+    "Sus registros e historial NO se eliminarán.\n\n" +
+    `Después el periodo actual será: ${siguientePeriodo} ${siguienteAnio}.\n\n` +
+    "¿Deseas continuar?"
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`/api/periodos/${periodoActualGlobal.id}/cerrar`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        siguiente_periodo: siguientePeriodo,
+        siguiente_anio: siguienteAnio
+      })
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(resultado.mensaje || "No se pudo cerrar el periodo.");
+      return;
+    }
+
+    alert(resultado.mensaje);
+
+    ocultarSeccionesResponsable();
+    await cargarPeriodosResponsable();
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
+  }
+}
+
 btnGuardarEdicionResponsable.addEventListener("click", guardarEdicionResponsable);
 btnCancelarEdicionResponsable.addEventListener("click", limpiarFormularioEdicionResponsable);
 tipoReporte.addEventListener("change", actualizarFormularioReportes);
@@ -1834,6 +2030,7 @@ selectorPeriodoResponsable.addEventListener("change", async () => {
   ocultarSeccionesResponsable();
   await cargarResumenProfesor();
 });
+btnCerrarPeriodoActual.addEventListener("click", cerrarPeriodoActual);
 
 btnCerrarReportes.addEventListener("click", () => {
   seccionReportesResponsable.classList.add("hidden");
