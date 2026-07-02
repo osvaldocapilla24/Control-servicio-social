@@ -67,7 +67,7 @@ function calcularHoras(horaEntrada, horaSalida) {
   return diferenciaMinutos / 60;
 }
 
-const TOLERANCIA_MINUTOS = 10;
+const TOLERANCIA_MINUTOS = 15;
 
 function convertirHoraAMinutos(hora) {
   if (!hora) {
@@ -746,7 +746,7 @@ app.post("/api/entrada", async (req, res) => {
 
 app.post("/api/salida", async (req, res) => {
   try {
-    const { prestador_id } = req.body;
+    const { prestador_id, actividad } = req.body;
 
     if (!prestador_id) {
       return res.status(400).json({
@@ -773,7 +773,7 @@ app.post("/api/salida", async (req, res) => {
 
     const registroResultado = await pool.query(
       `
-      SELECT id, hora_entrada
+      SELECT id, hora_entrada,  actividad
       FROM registros
       WHERE prestador_id = $1
       AND hora_salida IS NULL
@@ -792,6 +792,17 @@ app.post("/api/salida", async (req, res) => {
     const registro = registroResultado.rows[0];
     const horas = calcularHoras(registro.hora_entrada, horaSalida);
 
+    let actividadFinal = registro.actividad || "";
+    const actividadSalida = actividad ? actividad.trim() : "";
+
+    if (actividadSalida) {
+      if (actividadFinal) {
+        actividadFinal = `${actividadFinal}\n${actividadSalida}`;
+      } else {
+        actividadFinal = actividadSalida;
+      }
+    }
+
     if (horas <= 0) {
       return res.status(400).json({
         mensaje: "La hora de salida debe ser mayor que la hora de entrada."
@@ -801,10 +812,12 @@ app.post("/api/salida", async (req, res) => {
     await pool.query(
       `
       UPDATE registros
-      SET hora_salida = $1, horas = $2
-      WHERE id = $3
+      SET hora_salida = $1,
+          horas = $2,
+          actividad = $3
+      WHERE id = $4
       `,
-      [horaSalida, horas, registro.id]
+      [horaSalida, horas, actividadFinal, registro.id]
     );
 
     res.json({

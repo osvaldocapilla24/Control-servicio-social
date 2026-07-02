@@ -1103,10 +1103,8 @@ button:disabled:hover {
 .login-page {
   min-height: 100vh;
   background:
-    linear-gradient(
-      rgba(7, 35, 87, 0.50),
-      rgba(7, 35, 87, 0.50)
-    ),
+    linear-gradient(rgba(7, 35, 87, 0.50),
+      rgba(7, 35, 87, 0.50)),
     url("img/fondo.png");
   background-size: cover;
   background-position: center;
@@ -1120,6 +1118,38 @@ button:disabled:hover {
 .login-page .card {
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(6px);
+}
+
+/* ENCABEZADO PANEL PRESTADOR */
+
+.panel-header-top {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.panel-header-info {
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.link-cambiar-usuario {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  color: var(--rojo);
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: auto;
+  min-width: auto;
+  box-shadow: none;
+}
+
+.link-cambiar-usuario:hover {
+  text-decoration: underline;
 }
 
 /* RESPONSIVE */
@@ -1196,8 +1226,6 @@ button:disabled:hover {
     grid-template-columns: 1fr;
   }
 
-
-
   .periodo-card {
     grid-template-columns: 1fr;
     align-items: stretch;
@@ -1234,5 +1262,15 @@ button:disabled:hover {
     position: static;
     margin-top: 8px;
     box-shadow: none;
+  }
+
+  .panel-header-top {
+    text-align: center;
+  }
+
+  .link-cambiar-usuario {
+    position: static;
+    display: inline-block;
+    margin-top: 10px;
   }
 }
