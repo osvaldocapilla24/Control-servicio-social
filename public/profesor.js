@@ -1,5 +1,3 @@
-const PIN_RESPONSABLE = "1234";
-
 const pinSection = document.getElementById("pinSection");
 const panelResponsable = document.getElementById("panelResponsable");
 const formPin = document.getElementById("formPin");
@@ -177,15 +175,42 @@ async function mostrarSeccionArchivados() {
   cerrarMenuResponsable();
 }
 
-formPin.addEventListener("submit", (e) => {
+formPin.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  if (pinResponsable.value === PIN_RESPONSABLE) {
+  const pin = pinResponsable.value.trim();
+
+  if (!pin) {
+    mensajePin.textContent = "Debes ingresar la contraseña.";
+    mensajePin.className = "mensaje error";
+    return;
+  }
+
+  try {
+    const respuesta = await fetch("/api/responsable/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ pin })
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      mensajePin.textContent = resultado.mensaje || "Contraseña incorrecta.";
+      mensajePin.className = "mensaje error";
+      return;
+    }
+
     sessionStorage.setItem("responsable_autorizado", "true");
     mensajePin.textContent = "";
+    pinResponsable.value = "";
+
     mostrarPanelResponsable();
-  } else {
-    mensajePin.textContent = "PIN incorrecto. Inténtalo nuevamente.";
+
+  } catch (error) {
+    mensajePin.textContent = "Error al conectar con el servidor.";
     mensajePin.className = "mensaje error";
   }
 });

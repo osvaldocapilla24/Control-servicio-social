@@ -286,6 +286,34 @@ async function validarPrestadorParaRegistroHoras(prestadorId) {
   };
 }
 
+/* LOGIN RESPONSABLE */
+
+app.post("/api/responsable/login", (req, res) => {
+  const { pin } = req.body;
+
+  if (!pin) {
+    return res.status(400).json({
+      mensaje: "Debes ingresar la contraseña."
+    });
+  }
+
+  if (!process.env.PIN_RESPONSABLE) {
+    return res.status(500).json({
+      mensaje: "No hay contraseña del responsable configurada en el servidor."
+    });
+  }
+
+  if (pin !== process.env.PIN_RESPONSABLE) {
+    return res.status(401).json({
+      mensaje: "Contraseña incorrecta. Inténtalo nuevamente."
+    });
+  }
+
+  res.json({
+    mensaje: "Acceso autorizado."
+  });
+});
+
 
 /* PERIODOS */
 
