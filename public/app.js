@@ -58,7 +58,7 @@ async function cargarResumen() {
   horasAcumuladas.textContent = Number(data.resumen.horas_acumuladas).toFixed(2);
   horasFaltantes.textContent = Number(data.resumen.horas_faltantes).toFixed(2);
   horarioTexto.textContent = data.resumen.horario;
- 
+
   aplicarVistaPorEstatus(data.resumen.estatus);
 
   tablaRegistros.innerHTML = "";
@@ -216,6 +216,7 @@ function activarBotonesRegistros() {
       editarSalida.value = boton.dataset.salida;
       editarActividad.value = boton.dataset.actividad;
 
+      bloqueRegistroManual.classList.add("hidden");
       formEditarRegistro.classList.remove("hidden");
       formEditarRegistro.scrollIntoView({ behavior: "smooth" });
     });
@@ -425,6 +426,7 @@ function limpiarFormularioEdicion() {
   editarSalida.value = "";
   editarActividad.value = "";
   formEditarRegistro.classList.add("hidden");
+  bloqueRegistroManual.classList.remove("hidden");
 }
 
 let temporizadorMensaje;

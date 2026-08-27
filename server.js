@@ -136,7 +136,10 @@ function ajustarHoraEntradaPorHorario(horaReal, horario) {
     return horaReal;
   }
 
-  if (minutosReales <= minutosEntradaOficial + TOLERANCIA_MINUTOS) {
+  const limiteInferior = minutosEntradaOficial - TOLERANCIA_MINUTOS;
+  const limiteSuperior = minutosEntradaOficial + TOLERANCIA_MINUTOS;
+
+  if (minutosReales >= limiteInferior && minutosReales <= limiteSuperior) {
     return convertirMinutosAHora(minutosEntradaOficial);
   }
 
@@ -157,7 +160,10 @@ function ajustarHoraSalidaPorHorario(horaReal, horario) {
     return horaReal;
   }
 
-  if (minutosReales >= minutosSalidaOficial - TOLERANCIA_MINUTOS) {
+  const limiteInferior = minutosSalidaOficial - TOLERANCIA_MINUTOS;
+  const limiteSuperior = minutosSalidaOficial + TOLERANCIA_MINUTOS;
+
+  if (minutosReales >= limiteInferior && minutosReales <= limiteSuperior) {
     return convertirMinutosAHora(minutosSalidaOficial);
   }
 
