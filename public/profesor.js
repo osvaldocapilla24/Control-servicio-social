@@ -16,30 +16,62 @@ const periodoReporte = document.getElementById("periodoReporte");
 const campoMesReporte = document.getElementById("campoMesReporte");
 const mesReporteGeneral = document.getElementById("mesReporteGeneral");
 const btnGenerarReportePDF = document.getElementById("btnGenerarReportePDF");
-const btnGenerarReporteExcel = document.getElementById("btnGenerarReporteExcel");
+const btnGenerarReporteExcel = document.getElementById(
+  "btnGenerarReporteExcel",
+);
 
-const formEditarRegistroResponsable = document.getElementById("formEditarRegistroResponsable");
-const registroResponsableEditandoId = document.getElementById("registroResponsableEditandoId");
-const prestadorResponsableEditandoId = document.getElementById("prestadorResponsableEditandoId");
-const prestadorResponsableEditandoNombre = document.getElementById("prestadorResponsableEditandoNombre");
-const editarFechaResponsable = document.getElementById("editarFechaResponsable");
-const editarEntradaResponsable = document.getElementById("editarEntradaResponsable");
-const editarSalidaResponsable = document.getElementById("editarSalidaResponsable");
-const editarActividadResponsable = document.getElementById("editarActividadResponsable");
-const btnGuardarEdicionResponsable = document.getElementById("btnGuardarEdicionResponsable");
-const btnCancelarEdicionResponsable = document.getElementById("btnCancelarEdicionResponsable");
+const formEditarRegistroResponsable = document.getElementById(
+  "formEditarRegistroResponsable",
+);
+const registroResponsableEditandoId = document.getElementById(
+  "registroResponsableEditandoId",
+);
+const prestadorResponsableEditandoId = document.getElementById(
+  "prestadorResponsableEditandoId",
+);
+const prestadorResponsableEditandoNombre = document.getElementById(
+  "prestadorResponsableEditandoNombre",
+);
+const editarFechaResponsable = document.getElementById(
+  "editarFechaResponsable",
+);
+const editarEntradaResponsable = document.getElementById(
+  "editarEntradaResponsable",
+);
+const editarSalidaResponsable = document.getElementById(
+  "editarSalidaResponsable",
+);
+const editarActividadResponsable = document.getElementById(
+  "editarActividadResponsable",
+);
+const btnGuardarEdicionResponsable = document.getElementById(
+  "btnGuardarEdicionResponsable",
+);
+const btnCancelarEdicionResponsable = document.getElementById(
+  "btnCancelarEdicionResponsable",
+);
 const btnMenuResponsable = document.getElementById("btnMenuResponsable");
-const menuResponsableOpciones = document.getElementById("menuResponsableOpciones");
+const menuResponsableOpciones = document.getElementById(
+  "menuResponsableOpciones",
+);
 const btnMostrarReportes = document.getElementById("btnMostrarReportes");
 const btnMostrarArchivados = document.getElementById("btnMostrarArchivados");
 const btnCerrarReportes = document.getElementById("btnCerrarReportes");
 const btnCerrarArchivados = document.getElementById("btnCerrarArchivados");
-const seccionReportesResponsable = document.getElementById("seccionReportesResponsable");
-const seccionArchivadosResponsable = document.getElementById("seccionArchivadosResponsable");
+const seccionReportesResponsable = document.getElementById(
+  "seccionReportesResponsable",
+);
+const seccionArchivadosResponsable = document.getElementById(
+  "seccionArchivadosResponsable",
+);
 const tablaArchivados = document.getElementById("tablaArchivados");
 const textoPeriodoActual = document.getElementById("textoPeriodoActual");
-const selectorPeriodoResponsable = document.getElementById("selectorPeriodoResponsable");
-const btnCerrarPeriodoActual = document.getElementById("btnCerrarPeriodoActual");
+const selectorPeriodoResponsable = document.getElementById(
+  "selectorPeriodoResponsable",
+);
+const btnCerrarPeriodoActual = document.getElementById(
+  "btnCerrarPeriodoActual",
+);
 
 let periodoActualGlobal = null;
 let periodoSeleccionadoId = null;
@@ -68,7 +100,8 @@ async function cargarPeriodosResponsable() {
     const periodoActual = await respuestaActual.json();
 
     if (!respuestaActual.ok) {
-      textoPeriodoActual.textContent = periodoActual.mensaje || "No hay periodo actual";
+      textoPeriodoActual.textContent =
+        periodoActual.mensaje || "No hay periodo actual";
       selectorPeriodoResponsable.innerHTML = `
         <option value="">Sin periodos</option>
       `;
@@ -129,7 +162,6 @@ async function cargarPeriodosResponsable() {
       });
 
     await cargarResumenProfesor();
-
   } catch (error) {
     textoPeriodoActual.textContent = "Error al cargar periodo";
     selectorPeriodoResponsable.innerHTML = `
@@ -150,7 +182,7 @@ async function mostrarSeccionReportes() {
     seccionReportesResponsable.classList.remove("hidden");
     seccionReportesResponsable.scrollIntoView({
       behavior: "smooth",
-      block: "start"
+      block: "start",
     });
   }
 
@@ -158,7 +190,8 @@ async function mostrarSeccionReportes() {
 }
 
 async function mostrarSeccionArchivados() {
-  const estaVisible = !seccionArchivadosResponsable.classList.contains("hidden");
+  const estaVisible =
+    !seccionArchivadosResponsable.classList.contains("hidden");
 
   ocultarSeccionesResponsable();
 
@@ -168,7 +201,7 @@ async function mostrarSeccionArchivados() {
     seccionArchivadosResponsable.classList.remove("hidden");
     seccionArchivadosResponsable.scrollIntoView({
       behavior: "smooth",
-      block: "start"
+      block: "start",
     });
   }
 
@@ -190,9 +223,9 @@ formPin.addEventListener("submit", async (e) => {
     const respuesta = await fetch("/api/responsable/login", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ pin })
+      body: JSON.stringify({ pin }),
     });
 
     const resultado = await respuesta.json();
@@ -208,7 +241,6 @@ formPin.addEventListener("submit", async (e) => {
     pinResponsable.value = "";
 
     mostrarPanelResponsable();
-
   } catch (error) {
     mensajePin.textContent = "Error al conectar con el servidor.";
     mensajePin.className = "mensaje error";
@@ -349,7 +381,6 @@ async function cargarPrestadoresArchivados() {
         restaurarPrestadorArchivado(boton.dataset.id);
       });
     });
-
   } catch (error) {
     tablaArchivados.innerHTML = `
       <tr>
@@ -387,7 +418,6 @@ async function cargarPrestadoresParaReportes() {
 
       prestadorReporte.appendChild(option);
     });
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
   }
@@ -460,9 +490,8 @@ async function obtenerReporteGeneralCompleto() {
     }
 
     return {
-      datos: datos.prestadores || []
+      datos: datos.prestadores || [],
     };
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
     return null;
@@ -504,7 +533,9 @@ async function generarReportePDF() {
     }
 
     const registrosFinales =
-      periodo === "mensual" ? filtrarRegistrosPorMes(registros, mes) : registros;
+      periodo === "mensual"
+        ? filtrarRegistrosPorMes(registros, mes)
+        : registros;
 
     const nombrePeriodo =
       periodo === "mensual" ? obtenerNombreMes(mes) : "Reporte completo";
@@ -513,7 +544,7 @@ async function generarReportePDF() {
       resumen,
       registrosFinales,
       nombrePeriodo,
-      periodo === "mensual"
+      periodo === "mensual",
     );
   }
 }
@@ -553,7 +584,9 @@ async function generarReporteExcel() {
     }
 
     const registrosFinales =
-      periodo === "mensual" ? filtrarRegistrosPorMes(registros, mes) : registros;
+      periodo === "mensual"
+        ? filtrarRegistrosPorMes(registros, mes)
+        : registros;
 
     const nombrePeriodo =
       periodo === "mensual" ? obtenerNombreMes(mes) : "Reporte completo";
@@ -562,7 +595,7 @@ async function generarReporteExcel() {
       resumen,
       registrosFinales,
       nombrePeriodo,
-      periodo === "mensual"
+      periodo === "mensual",
     );
   }
 }
@@ -572,7 +605,15 @@ function unirDias(dias) {
     return "";
   }
 
-  const ordenDias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+  const ordenDias = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo",
+  ];
 
   const indices = dias
     .map((dia) => ordenDias.indexOf(dia))
@@ -626,7 +667,7 @@ function obtenerDatosHorario(horario) {
     "Jueves",
     "Viernes",
     "Sábado",
-    "Domingo"
+    "Domingo",
   ];
 
   const partes = horario.split(" de ");
@@ -643,7 +684,11 @@ function obtenerDatosHorario(horario) {
       const indiceInicio = ordenDias.indexOf(diaInicio);
       const indiceFin = ordenDias.indexOf(diaFin);
 
-      if (indiceInicio !== -1 && indiceFin !== -1 && indiceInicio <= indiceFin) {
+      if (
+        indiceInicio !== -1 &&
+        indiceFin !== -1 &&
+        indiceInicio <= indiceFin
+      ) {
         for (let i = indiceInicio; i <= indiceFin; i++) {
           dias.push(ordenDias[i]);
         }
@@ -669,7 +714,9 @@ function obtenerDatosHorario(horario) {
 
 async function verHistorial(id, nombre) {
   try {
-    const respuestaHistorial = await fetch(`/api/profesor/prestador/${id}/registros`);
+    const respuestaHistorial = await fetch(
+      `/api/profesor/prestador/${id}/registros`,
+    );
     const registros = await respuestaHistorial.json();
 
     const respuestaResumen = await fetch(`/api/resumen/${id}`);
@@ -683,7 +730,7 @@ async function verHistorial(id, nombre) {
     setTimeout(() => {
       detallePrestador.scrollIntoView({
         behavior: "smooth",
-        block: "start"
+        block: "start",
       });
     }, 100);
 
@@ -851,33 +898,47 @@ async function verHistorial(id, nombre) {
     </div>
         `;
 
-    document.querySelector(".btn-finalizar-detalle").addEventListener("click", () => {
-      finalizarPrestador(id);
-    });
+    document
+      .querySelector(".btn-finalizar-detalle")
+      .addEventListener("click", () => {
+        finalizarPrestador(id);
+      });
 
-    document.querySelector(".btn-activar-detalle").addEventListener("click", () => {
-      activarPrestador(id);
-    });
+    document
+      .querySelector(".btn-activar-detalle")
+      .addEventListener("click", () => {
+        activarPrestador(id);
+      });
 
-    document.querySelector(".btn-archivar-detalle").addEventListener("click", () => {
-      archivarPrestador(id, nombre);
-    });
+    document
+      .querySelector(".btn-archivar-detalle")
+      .addEventListener("click", () => {
+        archivarPrestador(id, nombre);
+      });
 
-    document.querySelector(".btn-editar-prestador-detalle").addEventListener("click", () => {
-      mostrarFormularioEditarPrestador(resumen);
-    });
+    document
+      .querySelector(".btn-editar-prestador-detalle")
+      .addEventListener("click", () => {
+        mostrarFormularioEditarPrestador(resumen);
+      });
 
-    document.querySelector(".btn-ocultar-historial-detalle").addEventListener("click", () => {
-      ocultarHistorialResponsable();
-    });
+    document
+      .querySelector(".btn-ocultar-historial-detalle")
+      .addEventListener("click", () => {
+        ocultarHistorialResponsable();
+      });
 
-    document.getElementById("btnGuardarPrestadorEditado").addEventListener("click", () => {
-      guardarDatosPrestadorEditado(id);
-    });
+    document
+      .getElementById("btnGuardarPrestadorEditado")
+      .addEventListener("click", () => {
+        guardarDatosPrestadorEditado(id);
+      });
 
-    document.getElementById("btnCancelarPrestadorEditado").addEventListener("click", () => {
-      document.getElementById("formEditarPrestador").classList.add("hidden");
-    });
+    document
+      .getElementById("btnCancelarPrestadorEditado")
+      .addEventListener("click", () => {
+        document.getElementById("formEditarPrestador").classList.add("hidden");
+      });
 
     prestadorResponsableEditandoId.value = id;
     prestadorResponsableEditandoNombre.value = nombre;
@@ -914,6 +975,13 @@ async function verHistorial(id, nombre) {
             >
             ✏️
           </button>
+          <button
+            class="icon-btn danger-icon btn-eliminar-responsable"
+            title="Eliminar registro"
+            data-id="${r.id}"
+            >
+            🗑️
+          </button>
         </td>
       `;
 
@@ -921,7 +989,6 @@ async function verHistorial(id, nombre) {
     });
 
     activarBotonesHistorialResponsable();
-
   } catch (error) {
     tablaHistorial.innerHTML = `
       <tr>
@@ -937,9 +1004,15 @@ function mostrarFormularioEditarPrestador(resumen) {
   document.getElementById("editarNombrePrestador").value = resumen.nombre;
   document.getElementById("editarMatriculaPrestador").value = resumen.matricula;
   document.getElementById("editarCarreraPrestador").value = resumen.carrera;
-  document.getElementById("editarHorasRequeridasPrestador").value = Number(resumen.horas_requeridas);
-  const editarPeriodoServicio = document.getElementById("editarPeriodoServicio");
-  const editarAnioPeriodoServicio = document.getElementById("editarAnioPeriodoServicio");
+  document.getElementById("editarHorasRequeridasPrestador").value = Number(
+    resumen.horas_requeridas,
+  );
+  const editarPeriodoServicio = document.getElementById(
+    "editarPeriodoServicio",
+  );
+  const editarAnioPeriodoServicio = document.getElementById(
+    "editarAnioPeriodoServicio",
+  );
 
   const anioActualEditar = new Date().getFullYear();
   const anioMinimoEditar = 2020;
@@ -953,12 +1026,16 @@ function mostrarFormularioEditarPrestador(resumen) {
 
   const datosHorario = obtenerDatosHorario(resumen.horario);
 
-  document.querySelectorAll("input[name='editarDiasServicio']").forEach((checkbox) => {
-    checkbox.checked = datosHorario.dias.includes(checkbox.value);
-  });
+  document
+    .querySelectorAll("input[name='editarDiasServicio']")
+    .forEach((checkbox) => {
+      checkbox.checked = datosHorario.dias.includes(checkbox.value);
+    });
 
-  document.getElementById("editarHoraEntradaServicio").value = datosHorario.horaEntrada;
-  document.getElementById("editarHoraSalidaServicio").value = datosHorario.horaSalida;
+  document.getElementById("editarHoraEntradaServicio").value =
+    datosHorario.horaEntrada;
+  document.getElementById("editarHoraSalidaServicio").value =
+    datosHorario.horaSalida;
 
   formEditarPrestador.classList.remove("hidden");
   formEditarPrestador.scrollIntoView({ behavior: "smooth" });
@@ -966,11 +1043,15 @@ function mostrarFormularioEditarPrestador(resumen) {
 
 async function guardarDatosPrestadorEditado(id) {
   const diasSeleccionados = Array.from(
-    document.querySelectorAll("input[name='editarDiasServicio']:checked")
+    document.querySelectorAll("input[name='editarDiasServicio']:checked"),
   ).map((dia) => dia.value);
 
-  const horaEntradaServicio = document.getElementById("editarHoraEntradaServicio").value;
-  const horaSalidaServicio = document.getElementById("editarHoraSalidaServicio").value;
+  const horaEntradaServicio = document.getElementById(
+    "editarHoraEntradaServicio",
+  ).value;
+  const horaSalidaServicio = document.getElementById(
+    "editarHoraSalidaServicio",
+  ).value;
 
   if (diasSeleccionados.length === 0) {
     alert("Selecciona al menos un día de servicio.");
@@ -995,7 +1076,7 @@ async function guardarDatosPrestadorEditado(id) {
   const horarioArmado = armarHorario(
     diasSeleccionados,
     horaEntradaServicio,
-    horaSalidaServicio
+    horaSalidaServicio,
   );
 
   const datos = {
@@ -1004,8 +1085,12 @@ async function guardarDatosPrestadorEditado(id) {
     carrera: document.getElementById("editarCarreraPrestador").value.trim(),
     horario: horarioArmado,
     periodo: document.getElementById("editarPeriodoServicio").value,
-    anio_periodo: Number(document.getElementById("editarAnioPeriodoServicio").value),
-    horas_requeridas: Number(document.getElementById("editarHorasRequeridasPrestador").value)
+    anio_periodo: Number(
+      document.getElementById("editarAnioPeriodoServicio").value,
+    ),
+    horas_requeridas: Number(
+      document.getElementById("editarHorasRequeridasPrestador").value,
+    ),
   };
 
   if (!datos.nombre) {
@@ -1050,9 +1135,9 @@ async function guardarDatosPrestadorEditado(id) {
     const respuesta = await fetch(`/api/prestadores/${id}`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(datos)
+      body: JSON.stringify(datos),
     });
 
     const resultado = await respuesta.json();
@@ -1074,8 +1159,12 @@ async function guardarDatosPrestadorEditado(id) {
     */
     await cargarPeriodosResponsable();
 
-    const opcionPeriodoEditado = Array.from(selectorPeriodoResponsable.options).find((option) => {
-      return option.textContent.trim() === `${datos.periodo} ${datos.anio_periodo}`;
+    const opcionPeriodoEditado = Array.from(
+      selectorPeriodoResponsable.options,
+    ).find((option) => {
+      return (
+        option.textContent.trim() === `${datos.periodo} ${datos.anio_periodo}`
+      );
     });
 
     if (opcionPeriodoEditado) {
@@ -1097,7 +1186,6 @@ async function guardarDatosPrestadorEditado(id) {
     limpiarFormularioEdicionResponsable();
 
     await cargarResumenProfesor();
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
   }
@@ -1117,19 +1205,22 @@ function obtenerTextoPeriodoSeleccionado() {
   }
 
   const opcionSeleccionada =
-    selectorPeriodoResponsable.options[selectorPeriodoResponsable.selectedIndex];
+    selectorPeriodoResponsable.options[
+      selectorPeriodoResponsable.selectedIndex
+    ];
 
-  return opcionSeleccionada ? opcionSeleccionada.textContent : "Periodo no seleccionado";
+  return opcionSeleccionada
+    ? opcionSeleccionada.textContent
+    : "Periodo no seleccionado";
 }
 
 function calcularTotalesExportacion(resumen) {
   return {
     horasAcumuladas: Number(resumen.horas_acumuladas || 0).toFixed(2),
     horasFaltantes: Number(resumen.horas_faltantes || 0).toFixed(2),
-    horasRequeridas: Number(resumen.horas_requeridas || 0).toFixed(2)
+    horasRequeridas: Number(resumen.horas_requeridas || 0).toFixed(2),
   };
 }
-
 
 function obtenerNombreMes(mes) {
   const [anio, numeroMes] = mes.split("-");
@@ -1137,7 +1228,7 @@ function obtenerNombreMes(mes) {
 
   return fecha.toLocaleDateString("es-MX", {
     month: "long",
-    year: "numeric"
+    year: "numeric",
   });
 }
 
@@ -1165,9 +1256,8 @@ async function obtenerReporteMensualGeneral() {
     return {
       mes,
       nombreMes: obtenerNombreMes(mes),
-      datos: datos.reporte || []
+      datos: datos.reporte || [],
     };
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
     return null;
@@ -1184,7 +1274,7 @@ async function exportarReporteGeneralExcel() {
   exportarReporteGeneralExcelDesdeDatos(
     reporte.datos,
     `Reporte mensual general - ${reporte.nombreMes}`,
-    `reporte_mensual_general_${reporte.mes}.xlsx`
+    `reporte_mensual_general_${reporte.mes}.xlsx`,
   );
 }
 
@@ -1200,7 +1290,16 @@ function exportarReporteGeneralExcelDesdeDatos(datos, titulo, nombreArchivo) {
     [`Periodo de servicio social: ${obtenerTextoPeriodoSeleccionado()}`],
     [titulo],
     [],
-    ["Nombre", "Matrícula", "Carrera", "Horario", "Horas del periodo", "Horas acumuladas", "Horas faltantes", "Estatus"]
+    [
+      "Nombre",
+      "Matrícula",
+      "Carrera",
+      "Horario",
+      "Horas del periodo",
+      "Horas acumuladas",
+      "Horas faltantes",
+      "Estatus",
+    ],
   ];
 
   datos.forEach((p) => {
@@ -1212,7 +1311,7 @@ function exportarReporteGeneralExcelDesdeDatos(datos, titulo, nombreArchivo) {
       Number(p.horas_mes ?? p.horas_acumuladas ?? 0),
       Number(p.horas_acumuladas || 0),
       Number(p.horas_faltantes || 0),
-      p.estatus || "activo"
+      p.estatus || "activo",
     ]);
   });
 
@@ -1226,14 +1325,14 @@ function exportarReporteGeneralExcelDesdeDatos(datos, titulo, nombreArchivo) {
     { wch: 18 },
     { wch: 18 },
     { wch: 18 },
-    { wch: 14 }
+    { wch: 14 },
   ];
 
   hoja["!merges"] = [
     { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
     { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
     { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
-    { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } }
+    { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } },
   ];
 
   const libro = XLSX.utils.book_new();
@@ -1252,7 +1351,7 @@ async function exportarReporteGeneralCompletoExcel() {
   exportarReporteGeneralExcelDesdeDatos(
     reporte.datos,
     "Reporte general completo",
-    "reporte_general_completo.xlsx"
+    "reporte_general_completo.xlsx",
   );
 }
 
@@ -1266,12 +1365,14 @@ async function exportarReporteGeneralPDF() {
   exportarReporteGeneralPDFDesdeDatos(
     reporte.datos,
     "Reporte mensual general",
-    reporte.nombreMes
+    reporte.nombreMes,
   );
 }
 
 function exportarReporteGeneralPDFDesdeDatos(datos, titulo, subtitulo) {
-  const filas = datos.map((p) => `
+  const filas = datos
+    .map(
+      (p) => `
     <tr>
       <td>${p.nombre || ""}</td>
       <td>${p.matricula || ""}</td>
@@ -1282,7 +1383,9 @@ function exportarReporteGeneralPDFDesdeDatos(datos, titulo, subtitulo) {
       <td>${Number(p.horas_faltantes || 0).toFixed(2)}</td>
       <td>${p.estatus || "activo"}</td>
     </tr>
-  `).join("");
+  `,
+    )
+    .join("");
 
   const ventana = window.open("", "_blank");
 
@@ -1412,16 +1515,15 @@ async function exportarReporteGeneralCompletoPDF() {
   exportarReporteGeneralPDFDesdeDatos(
     reporte.datos,
     "Reporte general completo",
-    "Todos los prestadores activos y finalizados"
+    "Todos los prestadores activos y finalizados",
   );
 }
-
 
 function exportarHistorialExcel(
   resumen,
   registros,
   nombrePeriodo = "Reporte completo",
-  mostrarHorasPeriodo = false
+  mostrarHorasPeriodo = false,
 ) {
   if (!registros || registros.length === 0) {
     alert("Este prestador no tiene registros para exportar.");
@@ -1429,7 +1531,9 @@ function exportarHistorialExcel(
   }
 
   if (typeof XLSX === "undefined") {
-    alert("No se pudo cargar la librería para generar Excel. Revisa tu conexión a internet.");
+    alert(
+      "No se pudo cargar la librería para generar Excel. Revisa tu conexión a internet.",
+    );
     return;
   }
 
@@ -1448,7 +1552,7 @@ function exportarHistorialExcel(
     ["Carrera", resumen.carrera || ""],
     ["Horario", resumen.horario || ""],
     ["Estatus", resumen.estatus || "activo"],
-    []
+    [],
   ];
 
   if (mostrarHorasPeriodo) {
@@ -1460,7 +1564,7 @@ function exportarHistorialExcel(
     ["Horas faltantes", totales.horasFaltantes],
     ["Horas requeridas", totales.horasRequeridas],
     [],
-    ["Fecha", "Entrada", "Salida", "Horas", "Actividad"]
+    ["Fecha", "Entrada", "Salida", "Horas", "Actividad"],
   );
 
   registros.forEach((registro) => {
@@ -1469,7 +1573,7 @@ function exportarHistorialExcel(
       registro.hora_entrada || "-",
       registro.hora_salida || "-",
       Number(registro.horas || 0),
-      registro.actividad || "-"
+      registro.actividad || "-",
     ]);
   });
 
@@ -1480,7 +1584,7 @@ function exportarHistorialExcel(
     { wch: 18 },
     { wch: 18 },
     { wch: 12 },
-    { wch: 45 }
+    { wch: 45 },
   ];
 
   hoja["!merges"] = [
@@ -1488,7 +1592,7 @@ function exportarHistorialExcel(
     { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
     { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } },
     { s: { r: 3, c: 0 }, e: { r: 3, c: 4 } },
-    { s: { r: 4, c: 0 }, e: { r: 4, c: 4 } }
+    { s: { r: 4, c: 0 }, e: { r: 4, c: 4 } },
   ];
 
   const libro = XLSX.utils.book_new();
@@ -1503,7 +1607,7 @@ function exportarHistorialPDF(
   resumen,
   registros,
   nombrePeriodo = "Reporte completo",
-  mostrarHorasPeriodo = false
+  mostrarHorasPeriodo = false,
 ) {
   if (!registros || registros.length === 0) {
     alert("Este prestador no tiene registros para exportar.");
@@ -1522,9 +1626,13 @@ function exportarHistorialPDF(
       `
     : "";
 
-  const columnasResumen = mostrarHorasPeriodo ? "repeat(4, 1fr)" : "repeat(3, 1fr)";
+  const columnasResumen = mostrarHorasPeriodo
+    ? "repeat(4, 1fr)"
+    : "repeat(3, 1fr)";
 
-  const filas = registros.map((registro) => `
+  const filas = registros
+    .map(
+      (registro) => `
     <tr>
       <td>${registro.fecha || ""}</td>
       <td>${registro.hora_entrada || "-"}</td>
@@ -1532,7 +1640,9 @@ function exportarHistorialPDF(
       <td>${Number(registro.horas || 0).toFixed(2)}</td>
       <td>${registro.actividad || "-"}</td>
     </tr>
-  `).join("");
+  `,
+    )
+    .join("");
 
   const ventana = window.open("", "_blank");
 
@@ -1723,8 +1833,46 @@ function exportarHistorialPDF(
   ventana.document.close();
 }
 
+async function eliminarRegistroResponsable(id) {
+  const confirmar = confirm(
+    "¿Seguro que deseas eliminar este registro? Esta acción no se puede deshacer."
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`/api/registros/${id}`, {
+      method: "DELETE"
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(resultado.mensaje || "Error al eliminar el registro.");
+      return;
+    }
+
+    alert(resultado.mensaje || "Registro eliminado correctamente.");
+
+    const prestadorId = prestadorResponsableEditandoId.value;
+    const prestadorNombre = prestadorResponsableEditandoNombre.value;
+
+    if (prestadorId && prestadorNombre) {
+      await verHistorial(prestadorId, prestadorNombre);
+    }
+
+    await cargarResumenProfesor();
+
+  } catch (error) {
+    alert("Error al conectar con el servidor.");
+  }
+}
+
 function activarBotonesHistorialResponsable() {
   const botonesEditar = document.querySelectorAll(".btn-editar-responsable");
+  const botonesEliminar = document.querySelectorAll(".btn-eliminar-responsable");
 
   botonesEditar.forEach((boton) => {
     boton.addEventListener("click", () => {
@@ -1738,6 +1886,12 @@ function activarBotonesHistorialResponsable() {
       formEditarRegistroResponsable.scrollIntoView({ behavior: "smooth" });
     });
   });
+
+  botonesEliminar.forEach((boton) => {
+    boton.addEventListener("click", () => {
+      eliminarRegistroResponsable(boton.dataset.id);
+    });
+  });
 }
 
 async function guardarEdicionResponsable() {
@@ -1748,7 +1902,11 @@ async function guardarEdicionResponsable() {
     return;
   }
 
-  if (!editarFechaResponsable.value || !editarEntradaResponsable.value || !editarSalidaResponsable.value) {
+  if (
+    !editarFechaResponsable.value ||
+    !editarEntradaResponsable.value ||
+    !editarSalidaResponsable.value
+  ) {
     alert("Completa fecha, hora de entrada y hora de salida.");
     return;
   }
@@ -1756,14 +1914,14 @@ async function guardarEdicionResponsable() {
   const respuesta = await fetch(`/api/registros/${id}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       fecha: editarFechaResponsable.value,
       hora_entrada: editarEntradaResponsable.value,
       hora_salida: editarSalidaResponsable.value,
-      actividad: editarActividadResponsable.value.trim()
-    })
+      actividad: editarActividadResponsable.value.trim(),
+    }),
   });
 
   const resultado = await respuesta.json();
@@ -1784,7 +1942,9 @@ async function guardarEdicionResponsable() {
 }
 
 async function finalizarPrestador(id) {
-  const confirmar = confirm("¿Seguro que deseas marcar este prestador como finalizado?");
+  const confirmar = confirm(
+    "¿Seguro que deseas marcar este prestador como finalizado?",
+  );
 
   if (!confirmar) {
     return;
@@ -1792,7 +1952,7 @@ async function finalizarPrestador(id) {
 
   try {
     const respuesta = await fetch(`/api/prestadores/${id}/finalizar`, {
-      method: "PATCH"
+      method: "PATCH",
     });
 
     const resultado = await respuesta.json();
@@ -1812,7 +1972,6 @@ async function finalizarPrestador(id) {
     if (prestadorId && prestadorNombre) {
       await verHistorial(prestadorId, prestadorNombre);
     }
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
   }
@@ -1827,7 +1986,7 @@ async function activarPrestador(id) {
 
   try {
     const respuesta = await fetch(`/api/prestadores/${id}/activar`, {
-      method: "PATCH"
+      method: "PATCH",
     });
 
     const resultado = await respuesta.json();
@@ -1847,7 +2006,6 @@ async function activarPrestador(id) {
     if (prestadorId && prestadorNombre) {
       await verHistorial(prestadorId, prestadorNombre);
     }
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
   }
@@ -1856,9 +2014,9 @@ async function activarPrestador(id) {
 async function archivarPrestador(id, nombre) {
   const confirmar = confirm(
     `¿Seguro que deseas archivar a ${nombre}?\n\n` +
-    "El prestador dejará de aparecer en la tabla principal del responsable.\n" +
-    "Sus registros e historial NO se eliminarán.\n\n" +
-    "Podrás consultarlo y restaurarlo después desde la sección Ver archivados."
+      "El prestador dejará de aparecer en la tabla principal del responsable.\n" +
+      "Sus registros e historial NO se eliminarán.\n\n" +
+      "Podrás consultarlo y restaurarlo después desde la sección Ver archivados.",
   );
 
   if (!confirmar) {
@@ -1867,7 +2025,7 @@ async function archivarPrestador(id, nombre) {
 
   try {
     const respuesta = await fetch(`/api/prestadores/${id}/archivar`, {
-      method: "PATCH"
+      method: "PATCH",
     });
 
     const resultado = await respuesta.json();
@@ -1894,7 +2052,6 @@ async function archivarPrestador(id, nombre) {
     if (!seccionArchivadosResponsable.classList.contains("hidden")) {
       await cargarPrestadoresArchivados();
     }
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
   }
@@ -1903,7 +2060,7 @@ async function archivarPrestador(id, nombre) {
 async function restaurarPrestadorArchivado(id) {
   const confirmar = confirm(
     "¿Seguro que deseas restaurar este prestador?\n\n" +
-    "Volverá a aparecer en la tabla principal del responsable con estado activo."
+      "Volverá a aparecer en la tabla principal del responsable con estado activo.",
   );
 
   if (!confirmar) {
@@ -1912,7 +2069,7 @@ async function restaurarPrestadorArchivado(id) {
 
   try {
     const respuesta = await fetch(`/api/prestadores/${id}/activar`, {
-      method: "PATCH"
+      method: "PATCH",
     });
 
     const resultado = await respuesta.json();
@@ -1926,12 +2083,10 @@ async function restaurarPrestadorArchivado(id) {
 
     await cargarPrestadoresArchivados();
     await cargarResumenProfesor();
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
   }
 }
-
 
 function ocultarHistorialResponsable() {
   detallePrestador.classList.add("hidden");
@@ -1961,8 +2116,8 @@ async function cerrarPeriodoActual() {
 
   const siguientePeriodo = prompt(
     "¿A qué periodo deseas pasar ahora?\n\n" +
-    "Opciones válidas: Primavera, Verano u Otoño",
-    "Otoño"
+      "Opciones válidas: Primavera, Verano u Otoño",
+    "Otoño",
   );
 
   if (!siguientePeriodo) {
@@ -1971,7 +2126,7 @@ async function cerrarPeriodoActual() {
 
   const siguienteAnioTexto = prompt(
     "¿Qué año tendrá el siguiente periodo?",
-    new Date().getFullYear()
+    new Date().getFullYear(),
   );
 
   if (!siguienteAnioTexto) {
@@ -1987,10 +2142,10 @@ async function cerrarPeriodoActual() {
 
   const confirmar = confirm(
     `Vas a cerrar el periodo ${periodoActualGlobal.nombre} ${periodoActualGlobal.anio}.\n\n` +
-    "Esto archivará a todos los prestadores de ese periodo.\n" +
-    "Sus registros e historial NO se eliminarán.\n\n" +
-    `Después el periodo actual será: ${siguientePeriodo} ${siguienteAnio}.\n\n` +
-    "¿Deseas continuar?"
+      "Esto archivará a todos los prestadores de ese periodo.\n" +
+      "Sus registros e historial NO se eliminarán.\n\n" +
+      `Después el periodo actual será: ${siguientePeriodo} ${siguienteAnio}.\n\n` +
+      "¿Deseas continuar?",
   );
 
   if (!confirmar) {
@@ -1998,16 +2153,19 @@ async function cerrarPeriodoActual() {
   }
 
   try {
-    const respuesta = await fetch(`/api/periodos/${periodoActualGlobal.id}/cerrar`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
+    const respuesta = await fetch(
+      `/api/periodos/${periodoActualGlobal.id}/cerrar`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          siguiente_periodo: siguientePeriodo,
+          siguiente_anio: siguienteAnio,
+        }),
       },
-      body: JSON.stringify({
-        siguiente_periodo: siguientePeriodo,
-        siguiente_anio: siguienteAnio
-      })
-    });
+    );
 
     const resultado = await respuesta.json();
 
@@ -2020,14 +2178,19 @@ async function cerrarPeriodoActual() {
 
     ocultarSeccionesResponsable();
     await cargarPeriodosResponsable();
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
   }
 }
 
-btnGuardarEdicionResponsable.addEventListener("click", guardarEdicionResponsable);
-btnCancelarEdicionResponsable.addEventListener("click", limpiarFormularioEdicionResponsable);
+btnGuardarEdicionResponsable.addEventListener(
+  "click",
+  guardarEdicionResponsable,
+);
+btnCancelarEdicionResponsable.addEventListener(
+  "click",
+  limpiarFormularioEdicionResponsable,
+);
 tipoReporte.addEventListener("change", actualizarFormularioReportes);
 periodoReporte.addEventListener("change", actualizarFormularioReportes);
 

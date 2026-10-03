@@ -1,7 +1,8 @@
 (function () {
   const idsSelects = [
     "carrera",
-    "periodoServicio"
+    "periodoServicio",
+    "selectorPeriodoResponsable"
   ];
 
   let selectActivo = null;
