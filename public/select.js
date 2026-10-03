@@ -2,7 +2,7 @@
   const idsSelects = [
     "carrera",
     "periodoServicio",
-    "selectorPeriodoResponsable"
+    "selectorPeriodoResponsable",
   ];
 
   let selectActivo = null;
@@ -76,35 +76,48 @@
       modal.appendChild(botonOpcion);
     });
 
-    posicionarModal(boton);
-
     modal.hidden = false;
     boton.classList.add("activo");
+
+    posicionarModal(boton);
   }
 
   function posicionarModal(boton) {
     const rect = boton.getBoundingClientRect();
 
+    const margen = 8;
+    const margenPantalla = 16;
+
+    const anchoModal = modal.offsetWidth || 360;
+    const altoModal = modal.offsetHeight || modal.scrollHeight || 220;
+
     let left = rect.left;
-    let top = rect.bottom + 8;
+    let top = rect.bottom + margen;
 
-    const anchoModal = 360;
-    const altoEstimado = 320;
-
-    if (left + anchoModal > window.innerWidth - 16) {
-      left = window.innerWidth - anchoModal - 16;
+    if (left + anchoModal > window.innerWidth - margenPantalla) {
+      left = window.innerWidth - anchoModal - margenPantalla;
     }
 
-    if (left < 16) {
-      left = 16;
+    if (left < margenPantalla) {
+      left = margenPantalla;
     }
 
-    if (top + altoEstimado > window.innerHeight - 16) {
-      top = rect.top - altoEstimado - 8;
+    const espacioAbajo = window.innerHeight - rect.bottom;
+    const espacioArriba = rect.top;
+
+    if (
+      espacioAbajo < altoModal + margen &&
+      espacioArriba > altoModal + margen
+    ) {
+      top = rect.top - altoModal - margen;
     }
 
-    if (top < 16) {
-      top = 16;
+    if (top + altoModal > window.innerHeight - margenPantalla) {
+      top = window.innerHeight - altoModal - margenPantalla;
+    }
+
+    if (top < margenPantalla) {
+      top = margenPantalla;
     }
 
     modal.style.left = `${left}px`;
@@ -137,11 +150,15 @@
     }
   });
 
-  window.addEventListener("scroll", () => {
-    if (!modal.hidden && botonActivo) {
-      posicionarModal(botonActivo);
-    }
-  }, true);
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!modal.hidden && botonActivo) {
+        posicionarModal(botonActivo);
+      }
+    },
+    true,
+  );
 
   idsSelects.forEach((id) => {
     const select = document.getElementById(id);
