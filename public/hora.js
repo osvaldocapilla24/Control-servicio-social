@@ -360,27 +360,78 @@
   construirOpciones();
 
   idsInputsHora.forEach((id) => {
-    const input = document.getElementById(id);
+  const input = document.getElementById(id);
 
-    if (!input) {
+  if (!input) {
+    return;
+  }
+
+  /*
+    En iPhone, input type="time" abre el selector nativo.
+    Lo convertimos a text para usar solo nuestro selector personalizado.
+  */
+  input.type = "text";
+  input.inputMode = "numeric";
+  input.autocomplete = "off";
+  input.placeholder = "--:--";
+  input.classList.add("selector-hora-activo");
+
+  input.addEventListener("click", (event) => {
+    event.preventDefault();
+    abrirSelector(input);
+  });
+
+  input.addEventListener("focus", () => {
+    inputActivo = input;
+  });
+
+  input.addEventListener("input", () => {
+    let valor = input.value.replace(/[^0-9:]/g, "");
+
+    if (valor.length === 2 && !valor.includes(":")) {
+      valor = `${valor}:`;
+    }
+
+    if (valor.length > 5) {
+      valor = valor.slice(0, 5);
+    }
+
+    input.value = valor;
+
+    const valores = convertirInputASelector(input.value);
+
+    horaSeleccionada = valores.hora;
+    minutoSeleccionado = valores.minuto;
+  });
+
+  input.addEventListener("blur", () => {
+    if (!input.value) {
       return;
     }
 
-    input.classList.add("selector-hora-activo");
+    const partes = input.value.split(":");
 
-    input.addEventListener("click", () => {
-      abrirSelector(input);
-    });
+    if (partes.length !== 2) {
+      input.value = "";
+      return;
+    }
 
-    input.addEventListener("focus", () => {
-      inputActivo = input;
-    });
+    let hora = Number(partes[0]);
+    let minuto = Number(partes[1]);
 
-    input.addEventListener("input", () => {
-      const valores = convertirInputASelector(input.value);
+    if (
+      !Number.isInteger(hora) ||
+      !Number.isInteger(minuto) ||
+      hora < 0 ||
+      hora > 23 ||
+      minuto < 0 ||
+      minuto > 59
+    ) {
+      input.value = "";
+      return;
+    }
 
-      horaSeleccionada = valores.hora;
-      minutoSeleccionado = valores.minuto;
-    });
+    input.value = `${String(hora).padStart(2, "0")}:${String(minuto).padStart(2, "0")}`;
   });
+});
 })();
