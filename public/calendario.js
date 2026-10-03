@@ -294,7 +294,15 @@
   }
 
   camposFecha.forEach((campo) => {
+    /*
+    En iPhone, input type="date" abre el calendario nativo.
+    Lo convertimos a text para usar solo nuestro calendario personalizado.
+  */
+    campo.type = "text";
     campo.readOnly = true;
+    campo.inputMode = "none";
+    campo.autocomplete = "off";
+
     campo.setAttribute("aria-haspopup", "dialog");
     campo.setAttribute("aria-expanded", "false");
 
