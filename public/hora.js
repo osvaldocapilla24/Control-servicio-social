@@ -1,10 +1,12 @@
 (function () {
   const idsInputsHora = [
-    "entradaManual",
-    "salidaManual",
-    "editarEntrada",
-    "editarSalida"
-  ];
+  "entradaManual",
+  "salidaManual",
+  "editarEntrada",
+  "editarSalida",
+  "horaEntradaServicio",
+  "horaSalidaServicio"
+];
 
   const REPETICIONES_HORAS = 5;
   const REPETICIONES_MINUTOS = 3;
