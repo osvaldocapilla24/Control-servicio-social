@@ -1,22 +1,23 @@
 (function () {
-    const idsInputsHora = [
-        "entradaManual",
-        "salidaManual",
-        "editarEntrada",
-        "editarSalida",
-        "horaEntradaServicio",
-        "horaSalidaServicio",
-        "editarEntradaResponsable",
-        "editarSalidaResponsable"
-    ];
+  const idsInputsHora = [
+    "entradaManual",
+    "salidaManual",
+    "editarEntrada",
+    "editarSalida",
+    "horaEntradaServicio",
+    "horaSalidaServicio",
+    "editarEntradaResponsable",
+    "editarSalidaResponsable",
+    "editarHoraEntradaServicio",
+    "editarHoraSalidaServicio"
+  ];
 
-  const REPETICIONES_HORAS = 5;
+  const REPETICIONES_HORAS = 3;
   const REPETICIONES_MINUTOS = 3;
 
   let inputActivo = null;
-  let horaSeleccionada = 12;
+  let horaSeleccionada = 0;
   let minutoSeleccionado = 0;
-  let periodoSeleccionado = "PM";
 
   const selector = document.createElement("div");
   selector.className = "selector-hora";
@@ -43,6 +44,10 @@
   const btnRestablecer = selector.querySelector(".selector-hora-restablecer");
   const btnConfirmar = selector.querySelector(".selector-hora-confirmar");
 
+  function obtenerPeriodoDesdeHora(hora) {
+    return hora < 12 ? "AM" : "PM";
+  }
+
   function crearBoton(texto, valor, tipo, vuelta = 0) {
     const boton = document.createElement("button");
     boton.type = "button";
@@ -54,8 +59,7 @@
 
     boton.addEventListener("click", () => {
       if (tipo === "periodo") {
-        periodoSeleccionado = valor;
-        pintarPeriodo();
+        cambiarPeriodo(valor);
         return;
       }
 
@@ -71,8 +75,10 @@
     columnaPeriodo.innerHTML = "";
 
     for (let vuelta = 0; vuelta < REPETICIONES_HORAS; vuelta++) {
-      for (let h = 1; h <= 12; h++) {
-        columnaHoras.appendChild(crearBoton(String(h), h, "hora", vuelta));
+      for (let h = 0; h <= 23; h++) {
+        columnaHoras.appendChild(
+          crearBoton(String(h).padStart(2, "0"), h, "hora", vuelta)
+        );
       }
     }
 
@@ -88,8 +94,32 @@
     columnaPeriodo.appendChild(crearBoton("p.m.", "PM", "periodo"));
   }
 
+  function cambiarPeriodo(periodo) {
+    const periodoActual = obtenerPeriodoDesdeHora(horaSeleccionada);
+
+    if (periodo === periodoActual) {
+      pintarPeriodo();
+      return;
+    }
+
+    if (periodo === "PM" && horaSeleccionada < 12) {
+      horaSeleccionada += 12;
+    }
+
+    if (periodo === "AM" && horaSeleccionada >= 12) {
+      horaSeleccionada -= 12;
+    }
+
+    centrarValor(columnaHoras, "hora", horaSeleccionada);
+    pintarPeriodo();
+    actualizarSeleccion();
+  }
+
   function obtenerBotonCentral(columna) {
-    const botones = Array.from(columna.querySelectorAll(".selector-hora-opcion"));
+    const botones = Array.from(
+      columna.querySelectorAll(".selector-hora-opcion")
+    );
+
     const centroColumna = columna.scrollTop + columna.clientHeight / 2;
 
     let botonMasCercano = null;
@@ -122,22 +152,24 @@
     botonCentral.classList.add("seleccionada");
 
     const tipo = botonCentral.dataset.tipo;
-    const valor = botonCentral.dataset.valor;
+    const valor = Number(botonCentral.dataset.valor);
 
     if (tipo === "hora") {
-      horaSeleccionada = Number(valor);
+      horaSeleccionada = valor;
     }
 
     if (tipo === "minuto") {
-      minutoSeleccionado = Number(valor);
+      minutoSeleccionado = valor;
     }
   }
 
   function pintarPeriodo() {
+    const periodoActual = obtenerPeriodoDesdeHora(horaSeleccionada);
+
     columnaPeriodo.querySelectorAll(".selector-hora-opcion").forEach((boton) => {
       boton.classList.toggle(
         "seleccionada",
-        boton.dataset.valor === periodoSeleccionado
+        boton.dataset.valor === periodoActual
       );
     });
   }
@@ -152,9 +184,7 @@
     const columna = boton.parentElement;
 
     const posicion =
-      boton.offsetTop -
-      columna.clientHeight / 2 +
-      boton.offsetHeight / 2;
+      boton.offsetTop - columna.clientHeight / 2 + boton.offsetHeight / 2;
 
     columna.scrollTo({
       top: posicion,
@@ -186,9 +216,7 @@
     }
 
     const posicion =
-      boton.offsetTop -
-      columna.clientHeight / 2 +
-      boton.offsetHeight / 2;
+      boton.offsetTop - columna.clientHeight / 2 + boton.offsetHeight / 2;
 
     columna.scrollTop = posicion;
   }
@@ -196,53 +224,25 @@
   function convertirInputASelector(valor) {
     if (!valor) {
       const ahora = new Date();
-      let horas = ahora.getHours();
-      const minutos = ahora.getMinutes();
-
-      const periodo = horas >= 12 ? "PM" : "AM";
-      horas = horas % 12;
-
-      if (horas === 0) {
-        horas = 12;
-      }
 
       return {
-        hora: horas,
-        minuto: minutos,
-        periodo
+        hora: ahora.getHours(),
+        minuto: ahora.getMinutes()
       };
     }
 
     const partes = valor.split(":");
-    let horas24 = Number(partes[0]);
-    const minutos = Number(partes[1]);
-
-    const periodo = horas24 >= 12 ? "PM" : "AM";
-    let horas12 = horas24 % 12;
-
-    if (horas12 === 0) {
-      horas12 = 12;
-    }
 
     return {
-      hora: horas12,
-      minuto: minutos,
-      periodo
+      hora: Number(partes[0]) || 0,
+      minuto: Number(partes[1]) || 0
     };
   }
 
   function convertirSelectorAInput() {
-    let horas24 = horaSeleccionada;
-
-    if (periodoSeleccionado === "PM" && horas24 !== 12) {
-      horas24 += 12;
-    }
-
-    if (periodoSeleccionado === "AM" && horas24 === 12) {
-      horas24 = 0;
-    }
-
-    return `${String(horas24).padStart(2, "0")}:${String(minutoSeleccionado).padStart(2, "0")}`;
+    return `${String(horaSeleccionada).padStart(2, "0")}:${String(
+      minutoSeleccionado
+    ).padStart(2, "0")}`;
   }
 
   function posicionarSelector(input) {
@@ -271,7 +271,6 @@
 
     horaSeleccionada = valores.hora;
     minutoSeleccionado = valores.minuto;
-    periodoSeleccionado = valores.periodo;
 
     selector.hidden = false;
     posicionarSelector(input);
@@ -279,7 +278,6 @@
     setTimeout(() => {
       centrarValor(columnaHoras, "hora", horaSeleccionada);
       centrarValor(columnaMinutos, "minuto", minutoSeleccionado);
-      pintarPeriodo();
       actualizarSeleccion();
     }, 0);
   }
@@ -310,7 +308,9 @@
     actualizarSeleccion();
 
     inputActivo.value = convertirSelectorAInput();
+    inputActivo.dispatchEvent(new Event("input"));
     inputActivo.dispatchEvent(new Event("change"));
+
     cerrarSelector();
   });
 
@@ -320,12 +320,15 @@
     }
 
     inputActivo.value = "";
+    inputActivo.dispatchEvent(new Event("input"));
     inputActivo.dispatchEvent(new Event("change"));
+
     cerrarSelector();
   });
 
   document.addEventListener("click", (event) => {
     const dioClickDentroSelector = selector.contains(event.target);
+
     const dioClickEnInputHora = idsInputsHora.some((id) => {
       const input = document.getElementById(id);
       return input === event.target;
@@ -342,11 +345,15 @@
     }
   });
 
-  window.addEventListener("scroll", () => {
-    if (!selector.hidden && inputActivo) {
-      posicionarSelector(inputActivo);
-    }
-  }, true);
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!selector.hidden && inputActivo) {
+        posicionarSelector(inputActivo);
+      }
+    },
+    true
+  );
 
   construirOpciones();
 
@@ -359,17 +366,19 @@
 
     input.classList.add("selector-hora-activo");
 
-    input.addEventListener("click", (event) => {
-      event.preventDefault();
+    input.addEventListener("click", () => {
       abrirSelector(input);
     });
 
     input.addEventListener("focus", () => {
-      abrirSelector(input);
+      inputActivo = input;
     });
 
-    input.addEventListener("keydown", (event) => {
-      event.preventDefault();
+    input.addEventListener("input", () => {
+      const valores = convertirInputASelector(input.value);
+
+      horaSeleccionada = valores.hora;
+      minutoSeleccionado = valores.minuto;
     });
   });
 })();

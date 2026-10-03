@@ -33,6 +33,7 @@ input.selector-hora-activo::-webkit-calendar-picker-indicator {
   margin-bottom: 18px;
 }
 
+
 .selector-hora-columna {
   position: relative;
   height: 170px;
