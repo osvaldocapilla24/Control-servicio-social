@@ -93,14 +93,6 @@ async function cargarResumen() {
           >
           ✏️
         </button>
-
-        <button 
-          class="icon-btn danger-icon btn-eliminar-registro"
-          title="Eliminar registro"
-          data-id="${r.id}"
-        >
-          🗑️
-        </button>
       </td>
     `;
 
@@ -206,7 +198,6 @@ function ocultarHistorialCompleto() {
 
 function activarBotonesRegistros() {
   const botonesEditar = document.querySelectorAll(".btn-editar-registro");
-  const botonesEliminar = document.querySelectorAll(".btn-eliminar-registro");
 
   botonesEditar.forEach((boton) => {
     boton.addEventListener("click", () => {
@@ -219,12 +210,6 @@ function activarBotonesRegistros() {
       bloqueRegistroManual.classList.add("hidden");
       formEditarRegistro.classList.remove("hidden");
       formEditarRegistro.scrollIntoView({ behavior: "smooth" });
-    });
-  });
-
-  botonesEliminar.forEach((boton) => {
-    boton.addEventListener("click", () => {
-      eliminarRegistro(boton.dataset.id);
     });
   });
 }

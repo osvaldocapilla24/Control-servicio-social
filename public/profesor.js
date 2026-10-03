@@ -161,6 +161,8 @@ async function cargarPeriodosResponsable() {
         selectorPeriodoResponsable.appendChild(option);
       });
 
+      selectorPeriodoResponsable.dispatchEvent(new Event("change"));
+      
     await cargarResumenProfesor();
   } catch (error) {
     textoPeriodoActual.textContent = "Error al cargar periodo";
