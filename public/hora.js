@@ -9,7 +9,7 @@
     "editarEntradaResponsable",
     "editarSalidaResponsable",
     "editarHoraEntradaServicio",
-    "editarHoraSalidaServicio"
+    "editarHoraSalidaServicio",
   ];
 
   const REPETICIONES_HORAS = 3;
@@ -77,7 +77,7 @@
     for (let vuelta = 0; vuelta < REPETICIONES_HORAS; vuelta++) {
       for (let h = 0; h <= 23; h++) {
         columnaHoras.appendChild(
-          crearBoton(String(h).padStart(2, "0"), h, "hora", vuelta)
+          crearBoton(String(h).padStart(2, "0"), h, "hora", vuelta),
         );
       }
     }
@@ -85,7 +85,7 @@
     for (let vuelta = 0; vuelta < REPETICIONES_MINUTOS; vuelta++) {
       for (let m = 0; m <= 59; m++) {
         columnaMinutos.appendChild(
-          crearBoton(String(m).padStart(2, "0"), m, "minuto", vuelta)
+          crearBoton(String(m).padStart(2, "0"), m, "minuto", vuelta),
         );
       }
     }
@@ -117,7 +117,7 @@
 
   function obtenerBotonCentral(columna) {
     const botones = Array.from(
-      columna.querySelectorAll(".selector-hora-opcion")
+      columna.querySelectorAll(".selector-hora-opcion"),
     );
 
     const centroColumna = columna.scrollTop + columna.clientHeight / 2;
@@ -166,12 +166,14 @@
   function pintarPeriodo() {
     const periodoActual = obtenerPeriodoDesdeHora(horaSeleccionada);
 
-    columnaPeriodo.querySelectorAll(".selector-hora-opcion").forEach((boton) => {
-      boton.classList.toggle(
-        "seleccionada",
-        boton.dataset.valor === periodoActual
-      );
-    });
+    columnaPeriodo
+      .querySelectorAll(".selector-hora-opcion")
+      .forEach((boton) => {
+        boton.classList.toggle(
+          "seleccionada",
+          boton.dataset.valor === periodoActual,
+        );
+      });
   }
 
   function actualizarSeleccion() {
@@ -188,7 +190,7 @@
 
     columna.scrollTo({
       top: posicion,
-      behavior: "smooth"
+      behavior: "smooth",
     });
 
     setTimeout(actualizarSeleccion, 250);
@@ -196,7 +198,7 @@
 
   function centrarValor(columna, tipo, valor) {
     const botones = Array.from(
-      columna.querySelectorAll(`.selector-hora-opcion[data-tipo="${tipo}"]`)
+      columna.querySelectorAll(`.selector-hora-opcion[data-tipo="${tipo}"]`),
     );
 
     const vueltaCentral =
@@ -227,7 +229,7 @@
 
       return {
         hora: ahora.getHours(),
-        minuto: ahora.getMinutes()
+        minuto: ahora.getMinutes(),
       };
     }
 
@@ -235,13 +237,13 @@
 
     return {
       hora: Number(partes[0]) || 0,
-      minuto: Number(partes[1]) || 0
+      minuto: Number(partes[1]) || 0,
     };
   }
 
   function convertirSelectorAInput() {
     return `${String(horaSeleccionada).padStart(2, "0")}:${String(
-      minutoSeleccionado
+      minutoSeleccionado,
     ).padStart(2, "0")}`;
   }
 
@@ -352,7 +354,7 @@
         posicionarSelector(inputActivo);
       }
     },
-    true
+    true,
   );
 
   construirOpciones();
