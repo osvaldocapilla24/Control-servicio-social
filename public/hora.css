@@ -1,0 +1,110 @@
+/* SELECTOR PERSONALIZADO DE HORA */
+
+input.selector-hora-activo {
+  cursor: pointer;
+}
+
+input.selector-hora-activo::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.selector-hora {
+  position: fixed;
+  z-index: 10001;
+  width: 310px;
+  max-width: calc(100vw - 24px);
+  padding: 16px;
+  border-radius: 28px;
+  background: #555658;
+  color: white;
+  box-shadow: 0 12px 35px #0004;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.selector-hora[hidden] {
+  display: none;
+}
+
+.selector-hora-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.selector-hora-columna {
+  position: relative;
+  height: 170px;
+  overflow-y: auto;
+  scroll-snap-type: y proximity;
+  scrollbar-width: none;
+  border-radius: 22px;
+  padding-top: 66px;
+  padding-bottom: 66px;
+  box-sizing: border-box;
+}
+
+.selector-hora-columna::-webkit-scrollbar {
+  display: none;
+}
+
+.selector-hora-opcion {
+  width: 100%;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  scroll-snap-align: center;
+}
+
+.selector-hora-opcion.seleccionada {
+  color: white;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+}
+
+.selector-hora button {
+  margin: 0;
+  box-shadow: none;
+  font-family: inherit;
+}
+
+.selector-hora-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.selector-hora-restablecer {
+  width: auto;
+  padding: 10px 16px;
+  border: 1px solid #ffffff16;
+  border-radius: 22px;
+  background: #454648;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.selector-hora-confirmar {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #438fff;
+  color: white;
+  font-size: 28px;
+  line-height: 46px;
+  font-weight: 700;
+}
+
+.selector-hora-restablecer:hover,
+.selector-hora-confirmar:hover,
+.selector-hora-opcion:hover {
+  filter: brightness(1.08);
+}
