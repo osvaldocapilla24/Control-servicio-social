@@ -128,41 +128,36 @@
 
     if (mostrarSelectores) {
       const contenedor = document.createElement("div");
-      contenedor.className = "calendario-selectores";
+      contenedor.className = "calendario-selectores-personalizados";
 
-      const selectorMes = document.createElement("select");
-      const selectorAnio = document.createElement("select");
+      contenedor.innerHTML = `
+      <div class="calendario-menu-meses">
+        ${meses
+          .map(
+            (nombre, indice) => `
+              <button
+                type="button"
+                class="calendario-opcion-mes ${indice === mes ? "seleccionada" : ""}"
+                data-mes="${indice}"
+              >
+                <span class="marca"></span>
+                <span>${nombre}</span>
+              </button>
+            `,
+          )
+          .join("")}
+      </div>
+  `;
 
-      selectorMes.setAttribute("aria-label", "Mes");
-      selectorAnio.setAttribute("aria-label", "Año");
-
-      meses.forEach((nombre, indice) => {
-        selectorMes.add(new Option(nombre, indice, false, indice === mes));
-      });
-
-      const anioActual = new Date().getFullYear();
-      const primerAnio = Math.min(1900, anio);
-      const ultimoAnio = Math.max(anioActual + 100, anio);
-
-      for (let numero = primerAnio; numero <= ultimoAnio; numero++) {
-        selectorAnio.add(new Option(numero, numero, false, numero === anio));
-      }
-
-      function cambiarMesAnio() {
-        mesVisible = new Date(
-          Number(selectorAnio.value),
-          Number(selectorMes.value),
-          1,
-        );
-
-        dibujarCalendario();
-      }
-
-      selectorMes.addEventListener("change", cambiarMesAnio);
-      selectorAnio.addEventListener("change", cambiarMesAnio);
-
-      contenedor.append(selectorMes, selectorAnio);
       calendario.appendChild(contenedor);
+
+      contenedor.querySelectorAll(".calendario-opcion-mes").forEach((boton) => {
+        boton.addEventListener("click", () => {
+          mesVisible = new Date(anio, Number(boton.dataset.mes), 1);
+          mostrarSelectores = false;
+          dibujarCalendario();
+        });
+      });
     }
 
     const semana = document.createElement("div");
@@ -246,11 +241,12 @@
         mostrarSelectores = !mostrarSelectores;
         dibujarCalendario();
 
-        calendario
-          .querySelector(mostrarSelectores ? "select" : ".calendario-titulo")
-          .focus();
-      });
+        const focoSelector =
+          calendario.querySelector(".calendario-opcion-mes.seleccionada") ||
+          calendario.querySelector(".calendario-titulo");
 
+        focoSelector.focus();
+      });
     calendario.querySelectorAll("[data-paso]").forEach((boton) => {
       boton.addEventListener("click", () => {
         const paso = boton.dataset.paso;
@@ -339,7 +335,7 @@
 
     if (evento.key === "Tab") {
       const controles = [
-        ...calendario.querySelectorAll("button:not(:disabled), select"),
+        ...calendario.querySelectorAll("button:not(:disabled)"),
       ];
 
       const primero = controles[0];
