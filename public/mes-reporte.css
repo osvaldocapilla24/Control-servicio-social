@@ -91,6 +91,22 @@
   cursor: pointer;
 }
 
+.selector-mes-restablecer:hover,
+.selector-mes-restablecer:focus,
+.selector-mes-restablecer:active,
+.selector-mes-restablecer:focus-visible {
+  background: #454648 !important;
+  color: white !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.selector-mes-restablecer {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .selector-mes-confirmar {
   width: 62px;
   height: 62px;
