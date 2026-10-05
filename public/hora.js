@@ -32,7 +32,11 @@
 
     <div class="selector-hora-pie">
       <button type="button" class="selector-hora-restablecer">Restablecer</button>
-      <button type="button" class="selector-hora-confirmar">✓</button>
+      <button type="button" class="selector-hora-confirmar" aria-label="Confirmar hora">
+        <svg class="icono-paloma" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 12.8l3.6 3.8L18.2 8.2"></path>
+        </svg>
+      </button>
     </div>
   `;
 

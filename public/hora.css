@@ -92,16 +92,30 @@ input.selector-hora-activo::-webkit-calendar-picker-indicator {
 }
 
 .selector-hora-confirmar {
-  width: 46px;
-  height: 46px;
-  padding: 0;
+  width: 52px;
+  height: 52px;
   border: none;
   border-radius: 50%;
   background: #438fff;
-  color: white;
-  font-size: 28px;
-  line-height: 46px;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+
+.selector-hora-confirmar .icono-paloma {
+  width: 31px;
+  height: 31px;
+}
+
+.selector-hora-confirmar .icono-paloma path {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .selector-hora-restablecer:hover,
