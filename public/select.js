@@ -3,6 +3,9 @@
     "carrera",
     "periodoServicio",
     "selectorPeriodoResponsable",
+    "tipoReporte",
+    "prestadorReporte",
+    "periodoReporte",
   ];
 
   let selectActivo = null;
@@ -64,6 +67,10 @@
         <span class="texto">${opcion.textContent}</span>
       `;
 
+      botonOpcion.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+      });
+
       botonOpcion.addEventListener("click", () => {
         select.value = opcion.value;
         select.dispatchEvent(new Event("change"));
@@ -72,7 +79,6 @@
 
         cerrarModal();
       });
-
       modal.appendChild(botonOpcion);
     });
 
