@@ -215,10 +215,14 @@
             </button>
 
             <button
-                type="button"
-                class="calendario-confirmar"
-                aria-label="Confirmar fecha"
-            >✓</button>
+              type="button"
+              class="calendario-confirmar"
+              aria-label="Confirmar fecha"
+            >
+              <svg class="icono-paloma" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 12.8l3.6 3.8L18.2 8.2"></path>
+              </svg>
+            </button>
         `;
 
     calendario.appendChild(pie);
@@ -266,10 +270,14 @@
 
     fechaSeleccionada = campoFecha.value;
 
-    const fechaInicial = fechaSeleccionada
-      ? new Date(`${fechaSeleccionada}T12:00:00`)
-      : new Date();
+    const hoy = new Date();
+    const fechaHoy = convertirFecha(hoy);
 
+    if (!fechaSeleccionada) {
+      fechaSeleccionada = fechaHoy;
+    }
+
+    const fechaInicial = new Date(`${fechaSeleccionada}T12:00:00`);
     mesVisible = new Date(
       fechaInicial.getFullYear(),
       fechaInicial.getMonth(),
