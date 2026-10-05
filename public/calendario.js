@@ -1,5 +1,9 @@
 (() => {
-  const idsInputsFecha = ["fechaManual", "editarFechaResponsable"];
+  const idsInputsFecha = [
+    "fechaManual",
+    "editarFecha",
+    "editarFechaResponsable",
+  ];
 
   const camposFecha = idsInputsFecha
     .map((id) => document.getElementById(id))
