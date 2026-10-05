@@ -115,8 +115,8 @@
 .select-personalizado.activo {
   background: white !important;
   color: #0f172a !important;
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+  border-color: #d6e2f0 !important;
+  box-shadow: none !important;
   outline: none !important;
 }
 

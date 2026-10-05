@@ -192,3 +192,28 @@
   -webkit-user-select: none;
   user-select: none;
 }
+
+#mesReporteGeneral:focus,
+#mesReporteGeneral:active {
+  border-color: #d6e2f0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+#campoMesReporte {
+  width: 100%;
+}
+
+#mesReporteGeneral {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 18px;
+  border: 1px solid #d6e2f0;
+  border-radius: 14px;
+  background: white;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 400;
+  box-shadow: none;
+  cursor: pointer;
+}
