@@ -161,8 +161,8 @@ async function cargarPeriodosResponsable() {
         selectorPeriodoResponsable.appendChild(option);
       });
 
-      selectorPeriodoResponsable.dispatchEvent(new Event("change"));
-      
+    selectorPeriodoResponsable.dispatchEvent(new Event("change"));
+
     await cargarResumenProfesor();
   } catch (error) {
     textoPeriodoActual.textContent = "Error al cargar periodo";
@@ -1554,20 +1554,22 @@ function exportarHistorialExcel(
     ["Carrera", resumen.carrera || ""],
     ["Horario", resumen.horario || ""],
     ["Estatus", resumen.estatus || "activo"],
-    [],
   ];
 
   if (mostrarHorasPeriodo) {
-    datosExcel.push(["Horas del periodo", horasPeriodo]);
+    datosExcel.push(["Horas del periodo", Number(horasPeriodo)]);
   }
 
   datosExcel.push(
-    ["Horas acumuladas", totales.horasAcumuladas],
-    ["Horas faltantes", totales.horasFaltantes],
-    ["Horas requeridas", totales.horasRequeridas],
+    ["Horas acumuladas", Number(totales.horasAcumuladas)],
+    ["Horas faltantes", Number(totales.horasFaltantes)],
+    ["Horas requeridas", Number(totales.horasRequeridas)],
     [],
-    ["Fecha", "Entrada", "Salida", "Horas", "Actividad"],
   );
+
+  const filaEncabezadoTabla = datosExcel.length;
+
+  datosExcel.push(["Fecha", "Entrada", "Salida", "Horas", "Actividad"]);
 
   registros.forEach((registro) => {
     datosExcel.push([
@@ -1581,12 +1583,20 @@ function exportarHistorialExcel(
 
   const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
 
+  const totalFilasFondo = Math.max(datosExcel.length + 10, 70);
+  const totalColumnasFondo = 10;
+
   hoja["!cols"] = [
-    { wch: 18 },
-    { wch: 18 },
-    { wch: 18 },
+    { wch: 22 }, // Etiquetas / Fecha
+    { wch: 42 }, // Datos / Entrada
+    { wch: 18 }, // Salida
+    { wch: 12 }, // Horas
+    { wch: 78 }, // Actividad
     { wch: 12 },
-    { wch: 45 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
   ];
 
   hoja["!merges"] = [
@@ -1596,6 +1606,215 @@ function exportarHistorialExcel(
     { s: { r: 3, c: 0 }, e: { r: 3, c: 4 } },
     { s: { r: 4, c: 0 }, e: { r: 4, c: 4 } },
   ];
+
+  hoja["!autofilter"] = {
+    ref: `A${filaEncabezadoTabla + 1}:E${datosExcel.length}`,
+  };
+
+  hoja["!view"] = {
+    showGridLines: false,
+  };
+
+  const estiloFondoBlanco = {
+    fill: {
+      fgColor: { rgb: "FFFFFF" },
+    },
+  };
+
+  const estiloTitulo = {
+    font: {
+      bold: true,
+      sz: 18,
+      color: { rgb: "1E3A8A" },
+    },
+    alignment: {
+      horizontal: "center",
+      vertical: "center",
+    },
+    fill: {
+      fgColor: { rgb: "FFFFFF" },
+    },
+  };
+
+  const estiloSubtitulo = {
+    font: {
+      bold: true,
+      sz: 13,
+      color: { rgb: "1E3A8A" },
+    },
+    alignment: {
+      horizontal: "center",
+      vertical: "center",
+    },
+    fill: {
+      fgColor: { rgb: "FFFFFF" },
+    },
+  };
+
+  const estiloTextoCentro = {
+    font: {
+      sz: 12,
+      color: { rgb: "4B5563" },
+    },
+    alignment: {
+      horizontal: "center",
+      vertical: "center",
+    },
+    fill: {
+      fgColor: { rgb: "FFFFFF" },
+    },
+  };
+
+  const estiloDatoLabel = {
+    font: {
+      bold: true,
+      color: { rgb: "0F2F6E" },
+    },
+    fill: {
+      fgColor: { rgb: "FFFFFF" },
+    },
+    border: {
+      top: { style: "thin", color: { rgb: "222222" } },
+      bottom: { style: "thin", color: { rgb: "222222" } },
+      left: { style: "thin", color: { rgb: "222222" } },
+      right: { style: "thin", color: { rgb: "222222" } },
+    },
+    alignment: {
+      vertical: "center",
+      wrapText: true,
+    },
+  };
+
+  const estiloDatoValor = {
+    font: {
+      color: { rgb: "1F2937" },
+    },
+    fill: {
+      fgColor: { rgb: "FFFFFF" },
+    },
+    border: {
+      top: { style: "thin", color: { rgb: "222222" } },
+      bottom: { style: "thin", color: { rgb: "222222" } },
+      left: { style: "thin", color: { rgb: "222222" } },
+      right: { style: "thin", color: { rgb: "222222" } },
+    },
+    alignment: {
+      horizontal: "left",
+      vertical: "center",
+      wrapText: true,
+    },
+  };
+
+  const estiloEncabezadoTabla = {
+    font: {
+      bold: true,
+      color: { rgb: "FFFFFF" },
+    },
+    fill: {
+      fgColor: { rgb: "1F3F93" },
+    },
+    alignment: {
+      horizontal: "center",
+      vertical: "center",
+    },
+    border: {
+      top: { style: "thin", color: { rgb: "1F3F93" } },
+      bottom: { style: "thin", color: { rgb: "1F3F93" } },
+      left: { style: "thin", color: { rgb: "1F3F93" } },
+      right: { style: "thin", color: { rgb: "1F3F93" } },
+    },
+  };
+
+  const estiloCeldaTabla = {
+    fill: {
+      fgColor: { rgb: "FFFFFF" },
+    },
+    border: {
+      top: { style: "thin", color: { rgb: "222222" } },
+      bottom: { style: "thin", color: { rgb: "222222" } },
+      left: { style: "thin", color: { rgb: "222222" } },
+      right: { style: "thin", color: { rgb: "222222" } },
+    },
+    alignment: {
+      vertical: "center",
+      wrapText: true,
+    },
+  };
+
+  const estiloHoras = {
+    ...estiloCeldaTabla,
+    alignment: {
+      horizontal: "right",
+      vertical: "center",
+    },
+  };
+
+  function aplicarEstilo(celda, estilo) {
+    if (hoja[celda]) {
+      hoja[celda].s = estilo;
+    }
+  }
+
+  for (let fila = 0; fila < totalFilasFondo; fila++) {
+    for (let columna = 0; columna < totalColumnasFondo; columna++) {
+      const celda = XLSX.utils.encode_cell({ r: fila, c: columna });
+
+      if (!hoja[celda]) {
+        hoja[celda] = { t: "s", v: "" };
+      }
+
+      hoja[celda].s = estiloFondoBlanco;
+    }
+  }
+
+  aplicarEstilo("A1", estiloTitulo);
+  aplicarEstilo("A2", estiloSubtitulo);
+  aplicarEstilo("A3", estiloTitulo);
+  aplicarEstilo("A4", estiloTextoCentro);
+  aplicarEstilo("A5", estiloTextoCentro);
+
+  for (let fila = 6; fila < filaEncabezadoTabla - 1; fila++) {
+    const celdaLabel = XLSX.utils.encode_cell({ r: fila, c: 0 });
+    const celdaValor = XLSX.utils.encode_cell({ r: fila, c: 1 });
+
+    aplicarEstilo(celdaLabel, estiloDatoLabel);
+    aplicarEstilo(celdaValor, estiloDatoValor);
+  }
+
+  for (let columna = 0; columna <= 4; columna++) {
+    const celda = XLSX.utils.encode_cell({
+      r: filaEncabezadoTabla,
+      c: columna,
+    });
+
+    aplicarEstilo(celda, estiloEncabezadoTabla);
+  }
+
+  for (let fila = filaEncabezadoTabla + 1; fila < datosExcel.length; fila++) {
+    for (let columna = 0; columna <= 4; columna++) {
+      const celda = XLSX.utils.encode_cell({ r: fila, c: columna });
+
+      if (columna === 3) {
+        aplicarEstilo(celda, estiloHoras);
+
+        if (hoja[celda]) {
+          hoja[celda].z = "0.00";
+        }
+      } else {
+        aplicarEstilo(celda, estiloCeldaTabla);
+      }
+    }
+  }
+
+  hoja["!rows"] = [];
+
+  for (let i = 0; i < datosExcel.length; i++) {
+    hoja["!rows"][i] = { hpt: 22 };
+  }
+
+  hoja["!rows"][0] = { hpt: 24 };
+  hoja["!rows"][2] = { hpt: 26 };
+  hoja["!rows"][filaEncabezadoTabla] = { hpt: 26 };
 
   const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, hoja, "Historial");
@@ -1837,7 +2056,7 @@ function exportarHistorialPDF(
 
 async function eliminarRegistroResponsable(id) {
   const confirmar = confirm(
-    "¿Seguro que deseas eliminar este registro? Esta acción no se puede deshacer."
+    "¿Seguro que deseas eliminar este registro? Esta acción no se puede deshacer.",
   );
 
   if (!confirmar) {
@@ -1846,7 +2065,7 @@ async function eliminarRegistroResponsable(id) {
 
   try {
     const respuesta = await fetch(`/api/registros/${id}`, {
-      method: "DELETE"
+      method: "DELETE",
     });
 
     const resultado = await respuesta.json();
@@ -1866,7 +2085,6 @@ async function eliminarRegistroResponsable(id) {
     }
 
     await cargarResumenProfesor();
-
   } catch (error) {
     alert("Error al conectar con el servidor.");
   }
@@ -1874,7 +2092,9 @@ async function eliminarRegistroResponsable(id) {
 
 function activarBotonesHistorialResponsable() {
   const botonesEditar = document.querySelectorAll(".btn-editar-responsable");
-  const botonesEliminar = document.querySelectorAll(".btn-eliminar-responsable");
+  const botonesEliminar = document.querySelectorAll(
+    ".btn-eliminar-responsable",
+  );
 
   botonesEditar.forEach((boton) => {
     boton.addEventListener("click", () => {

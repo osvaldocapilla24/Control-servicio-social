@@ -76,9 +76,10 @@
       columnaMeses.appendChild(boton);
     });
 
-    const anioActual = new Date().getFullYear();
+    const anioInicio = 2026;
+    const anioFin = 2050;
 
-    for (let anio = anioActual - 5; anio <= anioActual + 5; anio++) {
+    for (let anio = anioInicio; anio <= anioFin; anio++) {
       const boton = document.createElement("button");
       boton.type = "button";
       boton.className = "selector-mes-opcion";
