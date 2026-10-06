@@ -4,7 +4,7 @@ const mensaje = document.getElementById("mensaje");
 const tituloRegistro = document.getElementById("tituloRegistro");
 const descripcionRegistro = document.getElementById("descripcionRegistro");
 const btnRegistrarPrestador = document.getElementById("btnRegistrarPrestador");
-const btnYaRegistrado = document.getElementById("btnYaRegistrado");
+const btnYaRegistrado = document.querySelector(".link-regresar-inicio");
 const btnVolverRegistro = document.getElementById("btnVolverRegistro");
 const periodoServicio = document.getElementById("periodoServicio");
 const anioPeriodoServicio = document.getElementById("anioPeriodoServicio");
@@ -68,17 +68,18 @@ if (origen === "responsable") {
     "Registra los datos del nuevo prestador para que pueda ingresar después con su matrícula.";
 
   btnRegistrarPrestador.textContent = "Registrar prestador";
-  btnYaRegistrado.classList.add("hidden");
+
+  if (btnYaRegistrado) {
+    btnYaRegistrado.classList.add("hidden");
+  }
+
   btnVolverRegistro.textContent = "Regresar al panel";
 } else {
   btnVolverRegistro.textContent = "Regresar al inicio";
 }
 
 btnVolverRegistro.addEventListener("click", () => {
-  if (
-    origen === "responsable" &&
-    sessionStorage.getItem("responsable_autorizado") === "true"
-  ) {
+  if (origen === "responsable") {
     window.location.href = "profesor.html";
   } else {
     window.location.href = "index.html";
@@ -273,3 +274,4 @@ formRegistro.addEventListener("submit", async (e) => {
     mostrarMensaje("Error al conectar con el servidor.", "error");
   }
 });
+
