@@ -1292,3 +1292,25 @@ button:disabled:hover {
     margin-top: 10px;
   }
 }
+
+.link-regresar-inicio {
+  display: block;
+  margin-top: 18px;
+  text-align: center;
+  color: var(--azul-texto);
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.link-regresar-inicio:hover {
+  color: var(--azul-principal);
+  text-decoration: underline;
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+}

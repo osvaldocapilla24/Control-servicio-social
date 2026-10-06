@@ -171,3 +171,44 @@
   background: transparent !important;
   color: inherit !important;
 }
+
+.select-modal-anio {
+  width: 190px;
+  max-width: 190px;
+}
+
+.select-modal-anio .select-opcion {
+  min-height: 44px;
+  padding: 9px 26px;
+  font-size: 17px;
+}
+
+/* SELECT DE AÑO ESTILO APPLE */
+
+.select-modal-anio {
+  width: 230px;
+  max-width: 230px;
+  max-height: 430px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 18px 0;
+}
+
+.select-modal-anio::-webkit-scrollbar {
+  display: none;
+}
+
+.select-modal-anio .select-opcion {
+  min-height: 42px;
+  padding: 8px 26px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .select-modal-anio {
+    width: 230px;
+    max-width: 230px;
+    max-height: 65vh;
+  }
+}

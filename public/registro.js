@@ -42,6 +42,7 @@ async function cargarPeriodoActualEnRegistro() {
 
     if (anioPeriodoServicio) {
       anioPeriodoServicio.value = periodoActual.anio;
+      anioPeriodoServicio.dispatchEvent(new Event("change"));
     }
 
   } catch (error) {

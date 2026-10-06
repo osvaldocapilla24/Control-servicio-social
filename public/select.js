@@ -2,6 +2,7 @@
   const idsSelects = [
     "carrera",
     "periodoServicio",
+    "anioPeriodoServicio",
     "selectorPeriodoResponsable",
     "tipoReporte",
     "prestadorReporte",
@@ -52,6 +53,12 @@
     botonActivo = boton;
 
     modal.innerHTML = "";
+
+    modal.classList.remove("select-modal-anio");
+
+    if (select.id === "anioPeriodoServicio") {
+      modal.classList.add("select-modal-anio");
+    }
 
     Array.from(select.options).forEach((opcion) => {
       const botonOpcion = document.createElement("button");
