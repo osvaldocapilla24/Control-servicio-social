@@ -62,3 +62,12 @@ formAcceso.addEventListener("submit", async (e) => {
     mostrarMensaje("Error al conectar con el servidor.", "error");
   }
 });
+
+if (busquedaPrestador) {
+  busquedaPrestador.addEventListener("input", () => {
+    busquedaPrestador.value = busquedaPrestador.value.replace(
+      /[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]/g,
+      ""
+    );
+  });
+}
