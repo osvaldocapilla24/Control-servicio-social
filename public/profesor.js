@@ -966,24 +966,31 @@ async function verHistorial(id, nombre) {
         <td>${Number(r.horas).toFixed(2)}</td>
         <td>${r.actividad || "-"}</td>
         <td>
-          <button 
-            class="icon-btn btn-editar-responsable"
-            title="Editar registro"
-            data-id="${r.id}"
-            data-fecha="${r.fecha}"
-            data-entrada="${r.hora_entrada || ""}"
-            data-salida="${r.hora_salida || ""}"
-            data-actividad="${r.actividad || ""}"
+          <div class="acciones-registro">
+            <button
+              class="icon-btn btn-editar-responsable"
+              type="button"
+              title="Editar registro"
+              aria-label="Editar registro"
+              data-id="${r.id}"
+              data-fecha="${r.fecha}"
+              data-entrada="${r.hora_entrada || ""}"
+              data-salida="${r.hora_salida || ""}"
+              data-actividad="${r.actividad || ""}"
             >
-            ✏️
-          </button>
-          <button
-            class="icon-btn danger-icon btn-eliminar-responsable"
-            title="Eliminar registro"
-            data-id="${r.id}"
+              <i data-lucide="pencil"></i>
+            </button>
+
+            <button
+              class="icon-btn btn-eliminar-responsable"
+              type="button"
+              title="Eliminar registro"
+              aria-label="Eliminar registro"
+              data-id="${r.id}"
             >
-            🗑️
-          </button>
+              <i data-lucide="trash-2"></i>
+            </button>
+          </div>
         </td>
       `;
 
@@ -991,6 +998,10 @@ async function verHistorial(id, nombre) {
     });
 
     activarBotonesHistorialResponsable();
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+
   } catch (error) {
     tablaHistorial.innerHTML = `
       <tr>
@@ -2452,4 +2463,9 @@ btnCerrarArchivados.addEventListener("click", () => {
 
 if (sessionStorage.getItem("responsable_autorizado") === "true") {
   mostrarPanelResponsable();
+}
+
+// Inicializar iconos Lucide
+if (window.lucide) {
+  lucide.createIcons();
 }

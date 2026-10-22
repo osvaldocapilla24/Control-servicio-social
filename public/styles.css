@@ -1314,3 +1314,46 @@ button:disabled:hover {
   transform: none;
   box-shadow: none;
 }
+/* Icono para editar registros */
+
+.btn-editar-responsable {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-editar-responsable svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+}
+
+/* Botones de acciones del historial */
+
+.acciones-registro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-eliminar-responsable {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff1f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btn-eliminar-responsable svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+}
+
+.btn-eliminar-responsable:hover {
+  background: #fee2e2;
+}
