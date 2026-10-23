@@ -714,7 +714,7 @@ function obtenerDatosHorario(horario) {
   return { dias, horaEntrada, horaSalida };
 }
 
-async function verHistorial(id, nombre) {
+async function verHistorial(id, nombre, desplazar = true) {
   try {
     const respuestaHistorial = await fetch(
       `/api/profesor/prestador/${id}/registros`,
@@ -729,12 +729,14 @@ async function verHistorial(id, nombre) {
 
     detallePrestador.classList.remove("hidden");
 
-    setTimeout(() => {
-      detallePrestador.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 100);
+    if (desplazar) {
+      setTimeout(() => {
+        detallePrestador.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+    }
 
     nombreDetalle.innerHTML = `
       <strong>Prestador:</strong> ${nombre}
@@ -1219,7 +1221,7 @@ function obtenerTextoPeriodoSeleccionado() {
 
   const opcionSeleccionada =
     selectorPeriodoResponsable.options[
-      selectorPeriodoResponsable.selectedIndex
+    selectorPeriodoResponsable.selectedIndex
     ];
 
   return opcionSeleccionada
@@ -2092,7 +2094,7 @@ async function eliminarRegistroResponsable(id) {
     const prestadorNombre = prestadorResponsableEditandoNombre.value;
 
     if (prestadorId && prestadorNombre) {
-      await verHistorial(prestadorId, prestadorNombre);
+      await verHistorial(prestadorId, prestadorNombre, false);
     }
 
     await cargarResumenProfesor();
@@ -2101,6 +2103,62 @@ async function eliminarRegistroResponsable(id) {
   }
 }
 
+const btnCerrarModalEdicion = document.getElementById(
+  "btnCerrarModalEdicion"
+);
+
+let botonEdicionAnterior = null;
+
+function abrirModalEdicionRegistro(boton) {
+  botonEdicionAnterior = boton;
+
+  registroResponsableEditandoId.value = boton.dataset.id;
+  editarFechaResponsable.value = boton.dataset.fecha;
+  editarEntradaResponsable.value = boton.dataset.entrada;
+  editarSalidaResponsable.value = boton.dataset.salida;
+  editarActividadResponsable.value = boton.dataset.actividad;
+
+  formEditarRegistroResponsable.classList.remove("hidden");
+  document.body.classList.add("modal-registro-abierto");
+
+  btnCerrarModalEdicion.focus();
+}
+
+function cerrarModalEdicionRegistro() {
+  const estabaAbierto = !formEditarRegistroResponsable.classList.contains("hidden");
+
+  formEditarRegistroResponsable.classList.add("hidden");
+  document.body.classList.remove("modal-registro-abierto");
+
+  registroResponsableEditandoId.value = "";
+  editarFechaResponsable.value = "";
+  editarEntradaResponsable.value = "";
+  editarSalidaResponsable.value = "";
+  editarActividadResponsable.value = "";
+
+  if (estabaAbierto && botonEdicionAnterior?.isConnected) {
+    botonEdicionAnterior.focus({ preventScroll: true });
+  }
+
+  botonEdicionAnterior = null;
+}
+
+btnCerrarModalEdicion.addEventListener("click", cerrarModalEdicionRegistro);
+
+document.addEventListener("keydown", (e) => {
+  if (
+    e.key === "Escape" &&
+    !formEditarRegistroResponsable.classList.contains("hidden")
+  ) {
+    cerrarModalEdicionRegistro();
+  }
+});
+
+formEditarRegistroResponsable.addEventListener("click", (e) => {
+  if (e.target === formEditarRegistroResponsable) {
+    cerrarModalEdicionRegistro();
+  }
+});
 function activarBotonesHistorialResponsable() {
   const botonesEditar = document.querySelectorAll(".btn-editar-responsable");
   const botonesEliminar = document.querySelectorAll(
@@ -2109,14 +2167,7 @@ function activarBotonesHistorialResponsable() {
 
   botonesEditar.forEach((boton) => {
     boton.addEventListener("click", () => {
-      registroResponsableEditandoId.value = boton.dataset.id;
-      editarFechaResponsable.value = boton.dataset.fecha;
-      editarEntradaResponsable.value = boton.dataset.entrada;
-      editarSalidaResponsable.value = boton.dataset.salida;
-      editarActividadResponsable.value = boton.dataset.actividad;
-
-      formEditarRegistroResponsable.classList.remove("hidden");
-      formEditarRegistroResponsable.scrollIntoView({ behavior: "smooth" });
+      abrirModalEdicionRegistro(boton);
     });
   });
 
@@ -2164,14 +2215,22 @@ async function guardarEdicionResponsable() {
     return;
   }
 
-  alert(resultado.mensaje);
-  limpiarFormularioEdicionResponsable();
-
   const prestadorId = prestadorResponsableEditandoId.value;
   const prestadorNombre = prestadorResponsableEditandoNombre.value;
 
-  await verHistorial(prestadorId, prestadorNombre);
+  const posicionAnterior = window.scrollY;
+
+  limpiarFormularioEdicionResponsable();
+
+  await verHistorial(prestadorId, prestadorNombre, false);
   await cargarResumenProfesor();
+
+  window.scrollTo({
+    top: posicionAnterior,
+    behavior: "instant"
+  });
+
+  alert(resultado.mensaje || "Registro actualizado correctamente.");
 }
 
 async function finalizarPrestador(id) {
@@ -2247,9 +2306,9 @@ async function activarPrestador(id) {
 async function archivarPrestador(id, nombre) {
   const confirmar = confirm(
     `¿Seguro que deseas archivar a ${nombre}?\n\n` +
-      "El prestador dejará de aparecer en la tabla principal del responsable.\n" +
-      "Sus registros e historial NO se eliminarán.\n\n" +
-      "Podrás consultarlo y restaurarlo después desde la sección Ver archivados.",
+    "El prestador dejará de aparecer en la tabla principal del responsable.\n" +
+    "Sus registros e historial NO se eliminarán.\n\n" +
+    "Podrás consultarlo y restaurarlo después desde la sección Ver archivados.",
   );
 
   if (!confirmar) {
@@ -2293,7 +2352,7 @@ async function archivarPrestador(id, nombre) {
 async function restaurarPrestadorArchivado(id) {
   const confirmar = confirm(
     "¿Seguro que deseas restaurar este prestador?\n\n" +
-      "Volverá a aparecer en la tabla principal del responsable con estado activo.",
+    "Volverá a aparecer en la tabla principal del responsable con estado activo.",
   );
 
   if (!confirmar) {
@@ -2333,12 +2392,7 @@ function ocultarHistorialResponsable() {
 }
 
 function limpiarFormularioEdicionResponsable() {
-  registroResponsableEditandoId.value = "";
-  editarFechaResponsable.value = "";
-  editarEntradaResponsable.value = "";
-  editarSalidaResponsable.value = "";
-  editarActividadResponsable.value = "";
-  formEditarRegistroResponsable.classList.add("hidden");
+  cerrarModalEdicionRegistro();
 }
 
 async function cerrarPeriodoActual() {
@@ -2349,7 +2403,7 @@ async function cerrarPeriodoActual() {
 
   const siguientePeriodo = prompt(
     "¿A qué periodo deseas pasar ahora?\n\n" +
-      "Opciones válidas: Primavera, Verano u Otoño",
+    "Opciones válidas: Primavera, Verano u Otoño",
     "Otoño",
   );
 
@@ -2375,10 +2429,10 @@ async function cerrarPeriodoActual() {
 
   const confirmar = confirm(
     `Vas a cerrar el periodo ${periodoActualGlobal.nombre} ${periodoActualGlobal.anio}.\n\n` +
-      "Esto archivará a todos los prestadores de ese periodo.\n" +
-      "Sus registros e historial NO se eliminarán.\n\n" +
-      `Después el periodo actual será: ${siguientePeriodo} ${siguienteAnio}.\n\n` +
-      "¿Deseas continuar?",
+    "Esto archivará a todos los prestadores de ese periodo.\n" +
+    "Sus registros e historial NO se eliminarán.\n\n" +
+    `Después el periodo actual será: ${siguientePeriodo} ${siguienteAnio}.\n\n` +
+    "¿Deseas continuar?",
   );
 
   if (!confirmar) {

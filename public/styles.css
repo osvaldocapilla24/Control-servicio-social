@@ -1357,3 +1357,128 @@ button:disabled:hover {
 .btn-eliminar-responsable:hover {
   background: #fee2e2;
 }
+
+/* ======================================
+   MODAL EDITAR REGISTRO - RESPONSABLE
+====================================== */
+
+.modal-edicion-registro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.62);
+  box-sizing: border-box;
+}
+
+.modal-edicion-registro.hidden {
+  display: none;
+}
+
+body.modal-registro-abierto {
+  overflow: hidden;
+}
+
+.modal-edicion-contenido {
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100dvh - 40px);
+
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 26px;
+
+  box-shadow: 0 24px 65px rgba(0, 0, 0, 0.24);
+}
+
+.modal-edicion-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.modal-edicion-encabezado h2 {
+  margin: 0 0 6px;
+  color: #0f2f6e;
+  font-size: 23px;
+}
+
+.modal-edicion-encabezado p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.modal-edicion-cerrar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: 36px;
+  height: 36px;
+  padding: 0;
+
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.modal-edicion-cerrar svg {
+  width: 19px;
+  height: 19px;
+}
+
+.modal-edicion-cerrar:hover {
+  background: #e2e8f0;
+}
+
+.modal-edicion-formulario {
+  width: 100%;
+}
+
+.modal-edicion-formulario input {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.modal-edicion-acciones {
+  margin-top: 22px;
+}
+
+@media (max-width: 600px) {
+  .modal-edicion-registro {
+    padding: 12px;
+  }
+
+  .modal-edicion-contenido {
+    max-height: calc(100dvh - 24px);
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .modal-edicion-encabezado h2 {
+    font-size: 20px;
+  }
+
+  .modal-edicion-acciones {
+    flex-direction: column;
+  }
+
+  .modal-edicion-acciones button {
+    width: 100%;
+  }
+}

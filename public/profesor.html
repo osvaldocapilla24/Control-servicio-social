@@ -102,37 +102,56 @@
         </table>
       </section>
 
-      <!-- FORMULARIO PARA EDITAR REGISTRO -->
-      <section id="formEditarRegistroResponsable" class="summary hidden">
-        <h2>Editar registro</h2>
-        <p>Corrige la fecha, horario o actividad del registro seleccionado.</p>
+      <!-- MODAL PARA EDITAR REGISTRO -->
+      <section id="formEditarRegistroResponsable" class="modal-edicion-registro hidden" role="dialog" aria-modal="true"
+        aria-labelledby="tituloModalEditarRegistro">
+        <div class="modal-edicion-contenido">
 
-        <input type="hidden" id="registroResponsableEditandoId">
-        <input type="hidden" id="prestadorResponsableEditandoId">
-        <input type="hidden" id="prestadorResponsableEditandoNombre">
-
-        <div class="form">
-          <label for="editarFechaResponsable">Fecha</label>
-          <input type="date" id="editarFechaResponsable">
-
-          <div class="horario-grid">
+          <div class="modal-edicion-encabezado">
             <div>
-              <label for="editarEntradaResponsable">Hora de entrada</label>
-              <input type="time" id="editarEntradaResponsable">
+              <h2 id="tituloModalEditarRegistro">Editar registro</h2>
+              <p>Modifica la información del registro seleccionado.</p>
             </div>
 
-            <div>
-              <label for="editarSalidaResponsable">Hora de salida</label>
-              <input type="time" id="editarSalidaResponsable">
-            </div>
+            <button id="btnCerrarModalEdicion" type="button" class="modal-edicion-cerrar" aria-label="Cerrar ventana">
+              <i data-lucide="x"></i>
+            </button>
           </div>
 
-          <label for="editarActividadResponsable">Actividad realizada</label>
-          <input type="text" id="editarActividadResponsable" placeholder="Ejemplo: Mantenimiento preventivo">
+          <input type="hidden" id="registroResponsableEditandoId">
+          <input type="hidden" id="prestadorResponsableEditandoId">
+          <input type="hidden" id="prestadorResponsableEditandoNombre">
 
-          <div class="buttons">
-            <button id="btnGuardarEdicionResponsable" type="button">Actualizar registro</button>
-            <button id="btnCancelarEdicionResponsable" type="button" class="danger">Cancelar</button>
+          <div class="form modal-edicion-formulario">
+
+            <label for="editarFechaResponsable">Fecha</label>
+            <input type="date" id="editarFechaResponsable">
+
+            <div class="horario-grid">
+              <div>
+                <label for="editarEntradaResponsable">Hora de entrada</label>
+                <input type="time" id="editarEntradaResponsable">
+              </div>
+
+              <div>
+                <label for="editarSalidaResponsable">Hora de salida</label>
+                <input type="time" id="editarSalidaResponsable">
+              </div>
+            </div>
+
+            <label for="editarActividadResponsable">Actividad realizada</label>
+            <input type="text" id="editarActividadResponsable" placeholder="Ejemplo: Mantenimiento preventivo">
+
+            <div class="buttons modal-edicion-acciones">
+              <button id="btnGuardarEdicionResponsable" type="button">
+                Actualizar registro
+              </button>
+
+              <button id="btnCancelarEdicionResponsable" type="button" class="secondary-btn">
+                Cancelar
+              </button>
+            </div>
+
           </div>
         </div>
       </section>
