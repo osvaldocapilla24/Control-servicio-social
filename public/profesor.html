@@ -42,7 +42,7 @@
     <!-- PANEL DEL RESPONSABLE -->
     <section id="panelResponsable" class="dashboard-responsable hidden">
       <!-- NAVEGACIÓN LATERAL DEL RESPONSABLE -->
-      <aside class="sidebar-responsable">
+      <aside class="sidebar-responsable" id="sidebarResponsable" aria-label="Menú del responsable">
 
         <div class="sidebar-marca">
           <i data-lucide="graduation-cap"></i>
@@ -58,18 +58,18 @@
 
         <nav class="sidebar-navegacion" aria-label="Navegación del responsable">
 
-          <a href="#panelResponsable" class="sidebar-enlace activo" data-vista="inicio">
+          <button type="button" class="sidebar-enlace activo" data-vista="inicio">
             <i data-lucide="layout-dashboard"></i>
             Inicio
-          </a>
+          </button>
 
-          <a href="#tablaProfesor" class="sidebar-enlace" data-vista="prestadores"> <i data-lucide="users"></i>
+          <button type="button" class="sidebar-enlace" data-vista="prestadores"> <i data-lucide="users"></i>
             Prestadores
-          </a>
+          </button>
 
-          <a href="#textoPeriodoActual" class="sidebar-enlace" data-vista="periodos"> <i data-lucide="calendar-days"></i>
+          <button type="button" class="sidebar-enlace" data-vista="periodos"> <i data-lucide="calendar-days"></i>
             Periodos
-          </a>
+          </button>
 
           <button type="button" class="sidebar-enlace" id="sidebarReportes" data-vista="reportes">
             <i data-lucide="file-chart-column"></i>
@@ -98,22 +98,16 @@
         </div>
 
       </aside>
+      <div id="fondoSidebarMovil" class="fondo-sidebar-movil hidden" aria-hidden="true"></div>
       <div class="dashboard-contenido">
+        <div class="barra-movil-responsable">
+          <strong>Servicio Social</strong>
+          <button type="button" id="btnAbrirSidebarMovil" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebarResponsable">
+            <i data-lucide="menu"></i>
+          </button>
+        </div>
 
         <div class="header header-responsable">
-          <div class="menu-responsable">
-            <button id="btnMenuResponsable" class="menu-responsable-btn" type="button" aria-label="Abrir menú"
-              title="Menú">
-              <i data-lucide="menu"></i>
-            </button>
-
-            <div id="menuResponsableOpciones" class="menu-responsable-opciones hidden">
-              <button id="btnMostrarReportes" type="button">Generar reportes</button>
-              <button id="btnMostrarArchivados" type="button">Ver archivados</button>
-              <button id="btnCerrarResponsable" type="button" class="menu-cerrar-sesion">Cerrar sesión</button>
-            </div>
-          </div>
-
           <div class="logo">BUAP</div>
           <h1>Panel del Responsable</h1>
           <p>Consulta el avance de horas de todos los prestadores.</p>

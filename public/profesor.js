@@ -3,7 +3,7 @@ const panelResponsable = document.getElementById("panelResponsable");
 const formPin = document.getElementById("formPin");
 const pinResponsable = document.getElementById("pinResponsable");
 const mensajePin = document.getElementById("mensajePin");
-const btnCerrarResponsable = document.getElementById("btnCerrarResponsable");
+const btnCerrarResponsable = document.getElementById("sidebarCerrarSesion");
 
 const tablaProfesor = document.getElementById("tablaProfesor");
 const detallePrestador = document.getElementById("detallePrestador");
@@ -50,12 +50,6 @@ const btnGuardarEdicionResponsable = document.getElementById(
 const btnCancelarEdicionResponsable = document.getElementById(
   "btnCancelarEdicionResponsable",
 );
-const btnMenuResponsable = document.getElementById("btnMenuResponsable");
-const menuResponsableOpciones = document.getElementById(
-  "menuResponsableOpciones",
-);
-const btnMostrarReportes = document.getElementById("btnMostrarReportes");
-const btnMostrarArchivados = document.getElementById("btnMostrarArchivados");
 const btnCerrarReportes = document.getElementById("btnCerrarReportes");
 const btnCerrarArchivados = document.getElementById("btnCerrarArchivados");
 const seccionReportesResponsable = document.getElementById(
@@ -84,7 +78,7 @@ async function mostrarPanelResponsable() {
 }
 
 function cerrarMenuResponsable() {
-  menuResponsableOpciones.classList.add("hidden");
+  cerrarSidebarMovil();
 }
 
 function ocultarSeccionesResponsable() {
@@ -2467,26 +2461,14 @@ periodoReporte.addEventListener("change", actualizarFormularioReportes);
 btnGenerarReportePDF.addEventListener("click", generarReportePDF);
 btnGenerarReporteExcel.addEventListener("click", generarReporteExcel);
 
-btnMenuResponsable.addEventListener("click", (e) => {
-  e.stopPropagation();
-  menuResponsableOpciones.classList.toggle("hidden");
-});
-
-document.addEventListener("click", (e) => {
-  const clickDentroDelMenu = e.target.closest(".menu-responsable");
-
-  if (!clickDentroDelMenu) {
-    cerrarMenuResponsable();
-  }
-});
-
-btnMostrarReportes.addEventListener("click", mostrarSeccionReportes);
-btnMostrarArchivados.addEventListener("click", mostrarSeccionArchivados);
 selectorPeriodoResponsable.addEventListener("change", async () => {
   periodoSeleccionadoId = selectorPeriodoResponsable.value;
 
-  ocultarSeccionesResponsable();
+  detallePrestador.classList.add("hidden");
   await cargarResumenProfesor();
+  const vistaActual = document.querySelector(".sidebar-navegacion [data-vista].activo")?.dataset.vista;
+  if (vistaActual === "archivados") await cargarPrestadoresArchivados();
+  if (vistaActual === "reportes") await cargarPrestadoresParaReportes();
 });
 btnCerrarPeriodoActual.addEventListener("click", cerrarPeriodoActual);
 
@@ -2617,14 +2599,52 @@ document.querySelectorAll(
   });
 });
 
-// Registrar prestador ya tiene su enlace HTML
-// Cerrar sesión reutiliza el botón existente
-const sidebarCerrarSesion = document.getElementById(
-  "sidebarCerrarSesion"
-);
+// TABLAS: desplazamiento horizontal limitado a su contenedor
+function prepararTablasResponsable() {
+  [vistaPrestadores, vistaArchivados, detallePrestador].forEach((seccion) => {
+    seccion.querySelectorAll("table").forEach((tabla) => {
+      if (tabla.parentElement.classList.contains("tabla-scroll-responsable")) return;
+      const envoltura = document.createElement("div");
+      envoltura.className = "tabla-scroll-responsable";
+      envoltura.tabIndex = 0;
+      envoltura.setAttribute("role", "region");
+      envoltura.setAttribute("aria-label", "Tabla desplazable horizontalmente");
+      tabla.parentNode.insertBefore(envoltura, tabla);
+      envoltura.appendChild(tabla);
+    });
+  });
+}
+prepararTablasResponsable();
 
-sidebarCerrarSesion.addEventListener("click", () => {
-  btnCerrarResponsable.click();
+// MENÚ MÓVIL
+const btnAbrirSidebarMovil = document.getElementById("btnAbrirSidebarMovil");
+const sidebarResponsable = document.getElementById("sidebarResponsable");
+const fondoSidebarMovil = document.getElementById("fondoSidebarMovil");
+
+function cerrarSidebarMovil() {
+  sidebarResponsable.classList.remove("abierto");
+  fondoSidebarMovil.classList.add("hidden");
+  btnAbrirSidebarMovil.setAttribute("aria-expanded", "false");
+  btnAbrirSidebarMovil.setAttribute("aria-label", "Abrir menú");
+  document.body.classList.remove("sidebar-movil-abierto");
+}
+
+btnAbrirSidebarMovil.addEventListener("click", () => {
+  const abrir = !sidebarResponsable.classList.contains("abierto");
+  if (!abrir) return cerrarSidebarMovil();
+  sidebarResponsable.classList.add("abierto");
+  fondoSidebarMovil.classList.remove("hidden");
+  btnAbrirSidebarMovil.setAttribute("aria-expanded", "true");
+  btnAbrirSidebarMovil.setAttribute("aria-label", "Cerrar menú");
+  document.body.classList.add("sidebar-movil-abierto");
+});
+
+fondoSidebarMovil.addEventListener("click", cerrarSidebarMovil);
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape") cerrarSidebarMovil();
+});
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 768) cerrarSidebarMovil();
 });
 
 // Pantalla inicial del dashboard
