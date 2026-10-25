@@ -4,7 +4,7 @@ const mensaje = document.getElementById("mensaje");
 const tituloRegistro = document.getElementById("tituloRegistro");
 const descripcionRegistro = document.getElementById("descripcionRegistro");
 const btnRegistrarPrestador = document.getElementById("btnRegistrarPrestador");
-const btnYaRegistrado = document.querySelector(".link-regresar-inicio");
+const btnYaRegistrado = document.getElementById("linkYaRegistrado");
 const btnVolverRegistro = document.getElementById("btnVolverRegistro");
 const periodoServicio = document.getElementById("periodoServicio");
 const anioPeriodoServicio = document.getElementById("anioPeriodoServicio");
@@ -70,7 +70,7 @@ if (origen === "responsable") {
   btnRegistrarPrestador.textContent = "Registrar prestador";
 
   if (btnYaRegistrado) {
-    btnYaRegistrado.classList.add("hidden");
+      btnYaRegistrado.style.display = "none";
   }
 
   btnVolverRegistro.textContent = "Regresar al panel";

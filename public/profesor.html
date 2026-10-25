@@ -42,7 +42,7 @@
     <!-- PANEL DEL RESPONSABLE -->
     <section id="panelResponsable" class="dashboard-responsable hidden">
       <!-- NAVEGACIÓN LATERAL DEL RESPONSABLE -->
-      <aside class="sidebar-responsable" id="sidebarResponsable" aria-label="Menú del responsable">
+      <aside id="sidebarResponsable" class="sidebar-responsable">
 
         <div class="sidebar-marca">
           <i data-lucide="graduation-cap"></i>
@@ -58,18 +58,19 @@
 
         <nav class="sidebar-navegacion" aria-label="Navegación del responsable">
 
-          <button type="button" class="sidebar-enlace activo" data-vista="inicio">
+          <a href="#panelResponsable" class="sidebar-enlace activo" data-vista="inicio">
             <i data-lucide="layout-dashboard"></i>
             Inicio
-          </button>
+          </a>
 
-          <button type="button" class="sidebar-enlace" data-vista="prestadores"> <i data-lucide="users"></i>
+          <a href="#tablaProfesor" class="sidebar-enlace" data-vista="prestadores"> <i data-lucide="users"></i>
             Prestadores
-          </button>
+          </a>
 
-          <button type="button" class="sidebar-enlace" data-vista="periodos"> <i data-lucide="calendar-days"></i>
+          <a href="#textoPeriodoActual" class="sidebar-enlace" data-vista="periodos"> <i
+              data-lucide="calendar-days"></i>
             Periodos
-          </button>
+          </a>
 
           <button type="button" class="sidebar-enlace" id="sidebarReportes" data-vista="reportes">
             <i data-lucide="file-chart-column"></i>
@@ -98,16 +99,22 @@
         </div>
 
       </aside>
-      <div id="fondoSidebarMovil" class="fondo-sidebar-movil hidden" aria-hidden="true"></div>
+
+      <button type="button" id="btnAbrirSidebarMovil" class="btn-sidebar-movil" aria-label="Abrir menú"
+        aria-controls="sidebarResponsable" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 6h16"></path>
+          <path d="M4 12h16"></path>
+          <path d="M4 18h16"></path>
+        </svg>
+      </button>
+
+      <div id="fondoSidebarMovil" class="fondo-sidebar-movil hidden"></div>
       <div class="dashboard-contenido">
-        <div class="barra-movil-responsable">
-          <strong>Servicio Social</strong>
-          <button type="button" id="btnAbrirSidebarMovil" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebarResponsable">
-            <i data-lucide="menu"></i>
-          </button>
-        </div>
 
         <div class="header header-responsable">
+
           <div class="logo">BUAP</div>
           <h1>Panel del Responsable</h1>
           <p>Consulta el avance de horas de todos los prestadores.</p>
@@ -255,10 +262,6 @@
               <h2>Generar reportes</h2>
               <p>Genera reportes generales o por prestador en PDF y Excel.</p>
             </div>
-
-            <button id="btnCerrarReportes" type="button" class="cerrar-seccion-texto">
-              Cerrar
-            </button>
           </div>
 
           <div class="reportes-grid">
@@ -309,10 +312,6 @@
               <h2>Prestadores archivados</h2>
               <p>Consulta prestadores ocultos de la tabla principal y restáuralos si es necesario.</p>
             </div>
-
-            <button id="btnCerrarArchivados" type="button" class="cerrar-seccion-texto">
-              Cerrar
-            </button>
           </div>
 
           <table>
@@ -358,6 +357,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
   <script src="vendor/lucide/lucide.min.js"></script>
+  <script src="js/responsable/reportes.js"></script>
   <script src="profesor.js"></script>
   <script src="js/responsable/navegacion.js"></script>
   <script src="calendario.js"></script>

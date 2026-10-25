@@ -131,24 +131,42 @@ const sidebarResponsable = document.getElementById("sidebarResponsable");
 const fondoSidebarMovil = document.getElementById("fondoSidebarMovil");
 
 function cerrarSidebarMovil() {
-  sidebarResponsable.classList.remove("abierto");
-  fondoSidebarMovil.classList.add("hidden");
-  btnAbrirSidebarMovil.setAttribute("aria-expanded", "false");
-  btnAbrirSidebarMovil.setAttribute("aria-label", "Abrir menú");
+  if (sidebarResponsable) {
+    sidebarResponsable.classList.remove("abierto");
+  }
+
+  if (fondoSidebarMovil) {
+    fondoSidebarMovil.classList.add("hidden");
+  }
+
+  if (btnAbrirSidebarMovil) {
+    btnAbrirSidebarMovil.setAttribute("aria-expanded", "false");
+    btnAbrirSidebarMovil.setAttribute("aria-label", "Abrir menú");
+  }
+
   document.body.classList.remove("sidebar-movil-abierto");
 }
 
-btnAbrirSidebarMovil.addEventListener("click", () => {
-  const abrir = !sidebarResponsable.classList.contains("abierto");
-  if (!abrir) return cerrarSidebarMovil();
-  sidebarResponsable.classList.add("abierto");
-  fondoSidebarMovil.classList.remove("hidden");
-  btnAbrirSidebarMovil.setAttribute("aria-expanded", "true");
-  btnAbrirSidebarMovil.setAttribute("aria-label", "Cerrar menú");
-  document.body.classList.add("sidebar-movil-abierto");
-});
+if (btnAbrirSidebarMovil && sidebarResponsable && fondoSidebarMovil) {
+  btnAbrirSidebarMovil.addEventListener("click", () => {
+    const abrir = !sidebarResponsable.classList.contains("abierto");
 
-fondoSidebarMovil.addEventListener("click", cerrarSidebarMovil);
+    if (!abrir) {
+      cerrarSidebarMovil();
+      return;
+    }
+
+    sidebarResponsable.classList.add("abierto");
+    fondoSidebarMovil.classList.remove("hidden");
+    btnAbrirSidebarMovil.setAttribute("aria-expanded", "true");
+    btnAbrirSidebarMovil.setAttribute("aria-label", "Cerrar menú");
+    document.body.classList.add("sidebar-movil-abierto");
+  });
+}
+
+if (fondoSidebarMovil) {
+  fondoSidebarMovil.addEventListener("click", cerrarSidebarMovil);
+}
 document.addEventListener("keydown", (evento) => {
   if (evento.key === "Escape") cerrarSidebarMovil();
 });
