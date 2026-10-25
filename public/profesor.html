@@ -40,188 +40,304 @@
     </section>
 
     <!-- PANEL DEL RESPONSABLE -->
-    <section id="panelResponsable" class="card wide hidden">
+    <section id="panelResponsable" class="dashboard-responsable hidden">
+      <!-- NAVEGACIÓN LATERAL DEL RESPONSABLE -->
+      <aside class="sidebar-responsable">
 
-      <div class="header header-responsable">
-        <div class="menu-responsable">
-          <button id="btnMenuResponsable" class="menu-responsable-btn" type="button" aria-label="Abrir menú"
-            title="Menú">
-            <i data-lucide="menu"></i>
-          </button>
-
-          <div id="menuResponsableOpciones" class="menu-responsable-opciones hidden">
-            <button id="btnMostrarReportes" type="button">Generar reportes</button>
-            <button id="btnMostrarArchivados" type="button">Ver archivados</button>
-            <button id="btnCerrarResponsable" type="button" class="menu-cerrar-sesion">Cerrar sesión</button>
-          </div>
-        </div>
-
-        <div class="logo">BUAP</div>
-        <h1>Panel del Responsable</h1>
-        <p>Consulta el avance de horas de todos los prestadores.</p>
-      </div>
-
-      <!-- CONTROL DE PERIODO -->
-      <section class="periodo-card">
-        <div class="periodo-info">
-          <span>Periodo activo</span>
-          <strong id="textoPeriodoActual">Cargando periodo...</strong>
-        </div>
-
-        <div class="periodo-controles">
+        <div class="sidebar-marca">
+          <i data-lucide="graduation-cap"></i>
           <div>
-            <label for="selectorPeriodoResponsable">Consultando</label>
-            <select id="selectorPeriodoResponsable">
-              <option value="">Cargando periodos...</option>
-            </select>
+            <strong>SERVICIO SOCIAL</strong>
+            <span>ADMINISTRACIÓN</span>
+          </div>
+        </div>
+
+        <div class="sidebar-separador"></div>
+
+        <p class="sidebar-etiqueta">MENÚ PRINCIPAL</p>
+
+        <nav class="sidebar-navegacion" aria-label="Navegación del responsable">
+
+          <a href="#panelResponsable" class="sidebar-enlace activo" data-vista="inicio">
+            <i data-lucide="layout-dashboard"></i>
+            Inicio
+          </a>
+
+          <a href="#tablaProfesor" class="sidebar-enlace" data-vista="prestadores"> <i data-lucide="users"></i>
+            Prestadores
+          </a>
+
+          <a href="#textoPeriodoActual" class="sidebar-enlace" data-vista="periodos"> <i data-lucide="calendar-days"></i>
+            Periodos
+          </a>
+
+          <button type="button" class="sidebar-enlace" id="sidebarReportes" data-vista="reportes">
+            <i data-lucide="file-chart-column"></i>
+            Reportes
+          </button>
+
+          <button type="button" class="sidebar-enlace" id="sidebarArchivados" data-vista="archivados">
+            <i data-lucide="archive"></i>
+            Archivados
+          </button>
+
+        </nav>
+
+        <div class="sidebar-pie">
+
+          <a href="registro.html?origen=responsable" class="sidebar-enlace">
+            <i data-lucide="user-plus"></i>
+            Registrar prestador
+          </a>
+
+          <button type="button" class="sidebar-enlace" id="sidebarCerrarSesion">
+            <i data-lucide="log-out"></i>
+            Cerrar sesión
+          </button>
+
+        </div>
+
+      </aside>
+      <div class="dashboard-contenido">
+
+        <div class="header header-responsable">
+          <div class="menu-responsable">
+            <button id="btnMenuResponsable" class="menu-responsable-btn" type="button" aria-label="Abrir menú"
+              title="Menú">
+              <i data-lucide="menu"></i>
+            </button>
+
+            <div id="menuResponsableOpciones" class="menu-responsable-opciones hidden">
+              <button id="btnMostrarReportes" type="button">Generar reportes</button>
+              <button id="btnMostrarArchivados" type="button">Ver archivados</button>
+              <button id="btnCerrarResponsable" type="button" class="menu-cerrar-sesion">Cerrar sesión</button>
+            </div>
           </div>
 
-          <button id="btnCerrarPeriodoActual" type="button" class="danger small-action-btn">
-            Cerrar periodo
-          </button>
+          <div class="logo">BUAP</div>
+          <h1>Panel del Responsable</h1>
+          <p>Consulta el avance de horas de todos los prestadores.</p>
         </div>
-      </section>
 
-      <!-- HISTORIAL DEL PRESTADOR -->
-      <section id="detallePrestador" class="summary hidden">
-        <h2>Historial del prestador</h2>
-        <p id="nombreDetalle"></p>
+        <!-- VISTA DE INICIO -->
+        <section id="vistaInicioResponsable" class="vista-responsable">
 
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Entrada</th>
-              <th>Salida</th>
-              <th>Horas</th>
-              <th>Actividad</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="tablaHistorial"></tbody>
-        </table>
-      </section>
+          <div class="inicio-responsable">
+            <p class="inicio-etiqueta">PANEL ADMINISTRATIVO</p>
+            <h2>Bienvenido al control de servicio social</h2>
+            <p>
+              Administra prestadores, consulta sus horas,
+              genera reportes y gestiona los periodos de servicio.
+            </p>
+          </div>
 
-      <!-- MODAL PARA EDITAR REGISTRO -->
-      <section id="formEditarRegistroResponsable" class="modal-edicion-registro hidden" role="dialog" aria-modal="true"
-        aria-labelledby="tituloModalEditarRegistro">
-        <div class="modal-edicion-contenido">
+          <div class="inicio-accesos">
+            <button type="button" data-vista="prestadores">
+              <i data-lucide="users"></i>
+              <strong>Prestadores</strong>
+              <span>Consultar registros e historiales</span>
+            </button>
 
-          <div class="modal-edicion-encabezado">
-            <div>
-              <h2 id="tituloModalEditarRegistro">Editar registro</h2>
-              <p>Modifica la información del registro seleccionado.</p>
-            </div>
+            <button type="button" data-vista="periodos">
+              <i data-lucide="calendar-days"></i>
+              <strong>Periodos</strong>
+              <span>Consultar el periodo de servicio</span>
+            </button>
 
-            <button id="btnCerrarModalEdicion" type="button" class="modal-edicion-cerrar" aria-label="Cerrar ventana">
-              <i data-lucide="x"></i>
+            <button type="button" data-vista="reportes">
+              <i data-lucide="file-text"></i>
+              <strong>Reportes</strong>
+              <span>Generar PDF y Excel</span>
+            </button>
+
+            <button type="button" data-vista="archivados">
+              <i data-lucide="archive"></i>
+              <strong>Archivados</strong>
+              <span>Consultar y restaurar prestadores</span>
             </button>
           </div>
 
-          <input type="hidden" id="registroResponsableEditandoId">
-          <input type="hidden" id="prestadorResponsableEditandoId">
-          <input type="hidden" id="prestadorResponsableEditandoNombre">
+        </section>
 
-          <div class="form modal-edicion-formulario">
+        <!-- CONTROL DE PERIODO -->
+        <section class="periodo-card">
+          <div class="periodo-info">
+            <span>Periodo activo</span>
+            <strong id="textoPeriodoActual">Cargando periodo...</strong>
+          </div>
 
-            <label for="editarFechaResponsable">Fecha</label>
-            <input type="date" id="editarFechaResponsable">
-
-            <div class="horario-grid">
-              <div>
-                <label for="editarEntradaResponsable">Hora de entrada</label>
-                <input type="time" id="editarEntradaResponsable">
-              </div>
-
-              <div>
-                <label for="editarSalidaResponsable">Hora de salida</label>
-                <input type="time" id="editarSalidaResponsable">
-              </div>
+          <div class="periodo-controles">
+            <div>
+              <label for="selectorPeriodoResponsable">Consultando</label>
+              <select id="selectorPeriodoResponsable">
+                <option value="">Cargando periodos...</option>
+              </select>
             </div>
 
-            <label for="editarActividadResponsable">Actividad realizada</label>
-            <input type="text" id="editarActividadResponsable" placeholder="Ejemplo: Mantenimiento preventivo">
+            <button id="btnCerrarPeriodoActual" type="button" class="danger small-action-btn">
+              Cerrar periodo
+            </button>
+          </div>
+        </section>
 
-            <div class="buttons modal-edicion-acciones">
-              <button id="btnGuardarEdicionResponsable" type="button">
-                Actualizar registro
-              </button>
+        <!-- HISTORIAL DEL PRESTADOR -->
+        <section id="detallePrestador" class="summary hidden">
+          <h2>Historial del prestador</h2>
+          <p id="nombreDetalle"></p>
 
-              <button id="btnCancelarEdicionResponsable" type="button" class="secondary-btn">
-                Cancelar
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Horas</th>
+                <th>Actividad</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaHistorial"></tbody>
+          </table>
+        </section>
+
+        <!-- MODAL PARA EDITAR REGISTRO -->
+        <section id="formEditarRegistroResponsable" class="modal-edicion-registro hidden" role="dialog"
+          aria-modal="true" aria-labelledby="tituloModalEditarRegistro">
+          <div class="modal-edicion-contenido">
+
+            <div class="modal-edicion-encabezado">
+              <div>
+                <h2 id="tituloModalEditarRegistro">Editar registro</h2>
+                <p>Modifica la información del registro seleccionado.</p>
+              </div>
+
+              <button id="btnCerrarModalEdicion" type="button" class="modal-edicion-cerrar" aria-label="Cerrar ventana">
+                <i data-lucide="x"></i>
               </button>
             </div>
 
+            <input type="hidden" id="registroResponsableEditandoId">
+            <input type="hidden" id="prestadorResponsableEditandoId">
+            <input type="hidden" id="prestadorResponsableEditandoNombre">
+
+            <div class="form modal-edicion-formulario">
+
+              <label for="editarFechaResponsable">Fecha</label>
+              <input type="date" id="editarFechaResponsable">
+
+              <div class="horario-grid">
+                <div>
+                  <label for="editarEntradaResponsable">Hora de entrada</label>
+                  <input type="time" id="editarEntradaResponsable">
+                </div>
+
+                <div>
+                  <label for="editarSalidaResponsable">Hora de salida</label>
+                  <input type="time" id="editarSalidaResponsable">
+                </div>
+              </div>
+
+              <label for="editarActividadResponsable">Actividad realizada</label>
+              <input type="text" id="editarActividadResponsable" placeholder="Ejemplo: Mantenimiento preventivo">
+
+              <div class="buttons modal-edicion-acciones">
+                <button id="btnGuardarEdicionResponsable" type="button">
+                  Actualizar registro
+                </button>
+
+                <button id="btnCancelarEdicionResponsable" type="button" class="secondary-btn">
+                  Cancelar
+                </button>
+              </div>
+
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
 
-      <section id="seccionReportesResponsable" class="summary reporte-mensual-card hidden">
-        <div class="section-title-actions">
-          <div>
-            <h2>Generar reportes</h2>
-            <p>Genera reportes generales o por prestador en PDF y Excel.</p>
-          </div>
+        <section id="seccionReportesResponsable" class="summary reporte-mensual-card hidden">
+          <div class="section-title-actions">
+            <div>
+              <h2>Generar reportes</h2>
+              <p>Genera reportes generales o por prestador en PDF y Excel.</p>
+            </div>
 
-          <button id="btnCerrarReportes" type="button" class="cerrar-seccion-texto">
-            Cerrar
-          </button>
-        </div>
-
-        <div class="reportes-grid">
-          <div>
-            <label for="tipoReporte">Tipo de reporte</label>
-            <select id="tipoReporte">
-              <option value="general">General</option>
-              <option value="prestador">Por prestador</option>
-            </select>
-          </div>
-
-          <div id="campoPrestadorReporte" class="hidden">
-            <label for="prestadorReporte">Prestador</label>
-            <select id="prestadorReporte">
-              <option value="">Selecciona un prestador</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="periodoReporte">Periodo</label>
-            <select id="periodoReporte">
-              <option value="mensual">Mensual</option>
-              <option value="completo">Completo</option>
-            </select>
-          </div>
-
-          <div id="campoMesReporte">
-            <label for="mesReporteGeneral">Mes</label>
-            <input type="month" id="mesReporteGeneral">
-          </div>
-        </div>
-
-        <div class="buttons reporte-actions">
-          <button id="btnGenerarReportePDF" type="button" class="btn-reporte-pdf">
-            Exportar PDF
-          </button>
-
-          <button id="btnGenerarReporteExcel" type="button" class="btn-reporte-excel">
-            Exportar Excel
-          </button>
-        </div>
-      </section>
-
-      <!-- PRESTADORES ARCHIVADOS -->
-      <section id="seccionArchivadosResponsable" class="summary reporte-mensual-card hidden">
-        <div class="section-title-actions">
-          <div>
-            <h2>Prestadores archivados</h2>
-            <p>Consulta prestadores ocultos de la tabla principal y restáuralos si es necesario.</p>
+            <button id="btnCerrarReportes" type="button" class="cerrar-seccion-texto">
+              Cerrar
+            </button>
           </div>
 
-          <button id="btnCerrarArchivados" type="button" class="cerrar-seccion-texto">
-            Cerrar
-          </button>
-        </div>
+          <div class="reportes-grid">
+            <div>
+              <label for="tipoReporte">Tipo de reporte</label>
+              <select id="tipoReporte">
+                <option value="general">General</option>
+                <option value="prestador">Por prestador</option>
+              </select>
+            </div>
+
+            <div id="campoPrestadorReporte" class="hidden">
+              <label for="prestadorReporte">Prestador</label>
+              <select id="prestadorReporte">
+                <option value="">Selecciona un prestador</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="periodoReporte">Periodo</label>
+              <select id="periodoReporte">
+                <option value="mensual">Mensual</option>
+                <option value="completo">Completo</option>
+              </select>
+            </div>
+
+            <div id="campoMesReporte">
+              <label for="mesReporteGeneral">Mes</label>
+              <input type="month" id="mesReporteGeneral">
+            </div>
+          </div>
+
+          <div class="buttons reporte-actions">
+            <button id="btnGenerarReportePDF" type="button" class="btn-reporte-pdf">
+              Exportar PDF
+            </button>
+
+            <button id="btnGenerarReporteExcel" type="button" class="btn-reporte-excel">
+              Exportar Excel
+            </button>
+          </div>
+        </section>
+
+        <!-- PRESTADORES ARCHIVADOS -->
+        <section id="seccionArchivadosResponsable" class="summary reporte-mensual-card hidden">
+          <div class="section-title-actions">
+            <div>
+              <h2>Prestadores archivados</h2>
+              <p>Consulta prestadores ocultos de la tabla principal y restáuralos si es necesario.</p>
+            </div>
+
+            <button id="btnCerrarArchivados" type="button" class="cerrar-seccion-texto">
+              Cerrar
+            </button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Matrícula</th>
+                <th>Carrera</th>
+                <th>Horas acumuladas</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaArchivados"></tbody>
+          </table>
+        </section>
+
+
+        <!-- TABLA GENERAL DE PRESTADORES -->
 
         <table>
           <thead>
@@ -229,38 +345,17 @@
               <th>Nombre</th>
               <th>Matrícula</th>
               <th>Carrera</th>
+              <th>Horario</th>
               <th>Horas acumuladas</th>
+              <th>Horas faltantes</th>
               <th>Estado</th>
+              <th>Estado hoy</th>
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="tablaArchivados"></tbody>
+          <tbody id="tablaProfesor"></tbody>
         </table>
-      </section>
 
-
-      <!-- TABLA GENERAL DE PRESTADORES -->
-
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Matrícula</th>
-            <th>Carrera</th>
-            <th>Horario</th>
-            <th>Horas acumuladas</th>
-            <th>Horas faltantes</th>
-            <th>Estado</th>
-            <th>Estado hoy</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tablaProfesor"></tbody>
-      </table>
-
-      <!-- ACCIONES ABAJO DE LA TABLA -->
-      <div class="compact-actions">
-        <a href="registro.html?origen=responsable" class="link small-link">Registrar prestador</a>
       </div>
 
     </section>

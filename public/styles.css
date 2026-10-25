@@ -1482,3 +1482,454 @@ body.modal-registro-abierto {
     width: 100%;
   }
 }
+
+/* =====================================
+   SIDEBAR - PANEL DEL RESPONSABLE
+===================================== */
+
+.sidebar-responsable {
+  width: 240px;
+  min-height: 100vh;
+  background: #173b6b;
+  color: white;
+  padding: 24px 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  box-sizing: border-box;
+}
+
+.sidebar-marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+}
+
+.sidebar-marca svg {
+  width: 28px;
+  height: 28px;
+}
+
+.sidebar-marca strong {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-marca span {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #c4d6f3;
+}
+
+.sidebar-separador {
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+}
+
+.sidebar-etiqueta {
+  color: #c4d6f3;
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  padding-left: 10px;
+}
+
+.sidebar-navegacion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-enlace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+  padding: 12px;
+
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+
+  color: #ffffff;
+  text-decoration: none;
+  text-align: left;
+  font: inherit;
+  font-size: 14px;
+
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.sidebar-enlace svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+
+.sidebar-enlace:hover,
+.sidebar-enlace.activo {
+  background: rgba(255,255,255,0.16);
+  color: white;
+  transform: none;
+  box-shadow: none;
+}
+
+.sidebar-pie {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+@media (max-width: 768px) {
+  .sidebar-responsable {
+    width: 100%;
+    min-height: auto;
+    padding: 16px;
+  }
+}
+
+/* ======================================
+   DISTRIBUCIÓN DEL DASHBOARD RESPONSABLE
+====================================== */
+
+.dashboard-responsable {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.dashboard-responsable.hidden {
+  display: none;
+}
+
+.dashboard-responsable .sidebar-responsable {
+  flex: 0 0 240px;
+  width: 240px;
+  min-height: 100vh;
+}
+
+.dashboard-contenido {
+  flex: 1;
+  min-width: 0;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.dashboard-contenido > .header {
+  margin-bottom: 24px;
+}
+
+/* Pantallas pequeñas */
+
+@media (max-width: 768px) {
+  .dashboard-responsable {
+    flex-direction: column;
+  }
+
+  .dashboard-responsable .sidebar-responsable {
+    width: 100%;
+    min-height: auto;
+    flex-basis: auto;
+  }
+
+  .dashboard-contenido {
+    padding: 18px;
+  }
+}
+/* =========================================
+   CORRECCIÓN DEL DASHBOARD RESPONSABLE
+========================================= */
+
+/* Permitir que el dashboard ocupe el ancho disponible */
+body:has(.dashboard-responsable:not(.hidden)) .page {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Distribución: menú izquierdo y contenido derecho */
+.dashboard-responsable:not(.hidden) {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  align-items: stretch;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Menú lateral */
+.dashboard-responsable .sidebar-responsable {
+  width: 240px;
+  min-height: 100vh;
+}
+
+/* Todo el contenido debe quedar en una sola columna */
+.dashboard-responsable .dashboard-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+/* Evitar que el encabezado se comprima */
+.dashboard-contenido > .header {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ajustar las secciones principales */
+.dashboard-contenido > .periodo-card,
+.dashboard-contenido > .summary,
+.dashboard-contenido > table,
+.dashboard-contenido > .compact-actions {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Evitar que el contenido se desborde */
+.dashboard-contenido > table {
+  display: table;
+  table-layout: auto;
+}
+
+/* Adaptación para celulares */
+@media (max-width: 768px) {
+  .dashboard-responsable:not(.hidden) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dashboard-responsable .sidebar-responsable {
+    width: 100%;
+    min-height: auto;
+  }
+
+  .dashboard-responsable .dashboard-contenido {
+    padding: 20px 14px;
+  }
+}
+
+/* Acciones inferiores del menú lateral */
+
+.sidebar-pie {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* INICIO DEL DASHBOARD RESPONSABLE */
+
+.vista-responsable.hidden {
+  display: none !important;
+}
+
+.inicio-responsable {
+  background: #e8eef7;
+  border: 1px solid #d8e3f3;
+  border-radius: 14px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.inicio-etiqueta {
+  color: #47658f;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.inicio-responsable h2 {
+  color: #173b6b;
+  margin: 10px 0;
+  font-size: 24px;
+}
+
+.inicio-responsable > p:last-child {
+  color: #52647c;
+  line-height: 1.6;
+}
+
+.inicio-accesos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.inicio-accesos button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #dbe5f1;
+  border-radius: 14px;
+  text-align: left;
+  color: #173b6b;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.inicio-accesos button:hover {
+  background: #f2f6fc;
+  border-color: #b7cbed;
+  transform: none;
+  box-shadow: none;
+}
+
+.inicio-accesos svg {
+  width: 25px;
+  height: 25px;
+}
+
+.inicio-accesos strong {
+  font-size: 17px;
+}
+
+.inicio-accesos span {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+  .inicio-responsable {
+    padding: 20px;
+  }
+
+  .inicio-responsable h2 {
+    font-size: 20px;
+  }
+
+  .inicio-accesos {
+    grid-template-columns: 1fr;
+  }
+
+  .inicio-accesos button {
+    padding: 20px;
+  }
+}
+
+/* Ocultar el menú antiguo cuando se muestra el dashboard */
+
+.dashboard-responsable .menu-responsable {
+  display: none;
+}
+
+/* ==========================================
+   CORRECCIÓN RESPONSIVE - PANEL RESPONSABLE
+========================================== */
+
+@media screen and (max-width: 768px) {
+
+  body:has(.dashboard-responsable:not(.hidden)) .page {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
+  .dashboard-responsable:not(.hidden) {
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .dashboard-responsable .dashboard-contenido {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Menú lateral oculto inicialmente */
+
+  .dashboard-responsable .sidebar-responsable {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1100;
+
+    display: flex;
+    flex-direction: column;
+
+    width: min(280px, 85vw);
+    height: 100dvh;
+    min-height: 0;
+
+    margin: 0;
+    padding: 20px 14px;
+
+    overflow-y: auto;
+
+    transform: translateX(-110%);
+    transition: transform 0.25s ease;
+
+    box-sizing: border-box;
+  }
+
+  /* Menú abierto */
+
+  .dashboard-responsable .sidebar-responsable.abierto {
+    transform: translateX(0);
+    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Mostrar botón móvil */
+
+  .dashboard-responsable .barra-movil-responsable {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  /* Tarjetas en una columna */
+
+  .inicio-accesos {
+    grid-template-columns: 1fr;
+  }
+
+  .inicio-responsable {
+    padding: 20px;
+  }
+
+  .inicio-responsable h2 {
+    font-size: 20px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+

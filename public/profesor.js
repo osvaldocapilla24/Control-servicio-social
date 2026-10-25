@@ -174,38 +174,21 @@ async function cargarPeriodosResponsable() {
 }
 
 async function mostrarSeccionReportes() {
-  const estaVisible = !seccionReportesResponsable.classList.contains("hidden");
+  cambiarVistaResponsable("reportes");
 
-  ocultarSeccionesResponsable();
+  seccionReportesResponsable.classList.remove("hidden");
 
-  if (!estaVisible) {
-    await cargarPrestadoresParaReportes();
-
-    seccionReportesResponsable.classList.remove("hidden");
-    seccionReportesResponsable.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
+  await cargarPrestadoresParaReportes();
 
   cerrarMenuResponsable();
 }
 
 async function mostrarSeccionArchivados() {
-  const estaVisible =
-    !seccionArchivadosResponsable.classList.contains("hidden");
+  cambiarVistaResponsable("archivados");
 
-  ocultarSeccionesResponsable();
+  seccionArchivadosResponsable.classList.remove("hidden");
 
-  if (!estaVisible) {
-    await cargarPrestadoresArchivados();
-
-    seccionArchivadosResponsable.classList.remove("hidden");
-    seccionArchivadosResponsable.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
+  await cargarPrestadoresArchivados();
 
   cerrarMenuResponsable();
 }
@@ -2508,11 +2491,11 @@ selectorPeriodoResponsable.addEventListener("change", async () => {
 btnCerrarPeriodoActual.addEventListener("click", cerrarPeriodoActual);
 
 btnCerrarReportes.addEventListener("click", () => {
-  seccionReportesResponsable.classList.add("hidden");
+  cambiarVistaResponsable("inicio");
 });
 
 btnCerrarArchivados.addEventListener("click", () => {
-  seccionArchivadosResponsable.classList.add("hidden");
+  cambiarVistaResponsable("inicio");
 });
 
 if (sessionStorage.getItem("responsable_autorizado") === "true") {
@@ -2523,3 +2506,126 @@ if (sessionStorage.getItem("responsable_autorizado") === "true") {
 if (window.lucide) {
   lucide.createIcons();
 }
+
+// =====================================
+// NAVEGACIÓN DEL DASHBOARD RESPONSABLE
+// =====================================
+
+const contenidoResponsable = document.querySelector(".dashboard-contenido");
+
+const vistaInicio = document.getElementById("vistaInicioResponsable");
+
+// Crear contenedores de las vistas
+const vistaPrestadores = document.createElement("section");
+vistaPrestadores.id = "vistaPrestadoresResponsable";
+vistaPrestadores.className = "vista-responsable hidden";
+
+const vistaPeriodos = document.createElement("section");
+vistaPeriodos.id = "vistaPeriodosResponsable";
+vistaPeriodos.className = "vista-responsable hidden";
+
+const vistaReportes = document.createElement("section");
+vistaReportes.id = "vistaReportesResponsable";
+vistaReportes.className = "vista-responsable hidden";
+
+const vistaArchivados = document.createElement("section");
+vistaArchivados.id = "vistaArchivadosResponsable";
+vistaArchivados.className = "vista-responsable hidden";
+
+// Recuperar los elementos existentes
+const tarjetaPeriodo = contenidoResponsable.querySelector(".periodo-card");
+const tablaPrincipal = contenidoResponsable.querySelector(":scope > table");
+
+// Mover las secciones sin recrear sus elementos
+// ni perder sus eventos
+vistaPrestadores.appendChild(detallePrestador);
+vistaPrestadores.appendChild(tablaPrincipal);
+
+vistaPeriodos.appendChild(tarjetaPeriodo);
+
+vistaReportes.appendChild(seccionReportesResponsable);
+vistaArchivados.appendChild(seccionArchivadosResponsable);
+
+contenidoResponsable.append(
+  vistaPrestadores,
+  vistaPeriodos,
+  vistaReportes,
+  vistaArchivados
+);
+
+// Vistas disponibles
+const vistasResponsable = {
+  inicio: vistaInicio,
+  prestadores: vistaPrestadores,
+  periodos: vistaPeriodos,
+  reportes: vistaReportes,
+  archivados: vistaArchivados
+};
+
+// Cambiar la pantalla visible
+function cambiarVistaResponsable(nombreVista) {
+  if (!vistasResponsable[nombreVista]) {
+    return;
+  }
+
+  Object.values(vistasResponsable).forEach((vista) => {
+    vista.classList.add("hidden");
+  });
+
+  vistasResponsable[nombreVista].classList.remove("hidden");
+
+  // Actualizar opción activa del menú lateral
+  document.querySelectorAll(
+    ".sidebar-navegacion [data-vista]"
+  ).forEach((enlace) => {
+    enlace.classList.toggle(
+      "activo",
+      enlace.dataset.vista === nombreVista
+    );
+  });
+
+  cerrarMenuResponsable();
+}
+
+// Control único de navegación
+async function navegarResponsable(nombreVista) {
+  if (nombreVista === "reportes") {
+    await mostrarSeccionReportes();
+  } else if (nombreVista === "archivados") {
+    await mostrarSeccionArchivados();
+  } else {
+    cambiarVistaResponsable(nombreVista);
+  }
+}
+
+// Navegación lateral
+document.querySelectorAll(
+  ".sidebar-navegacion [data-vista]"
+).forEach((enlace) => {
+  enlace.addEventListener("click", (evento) => {
+    evento.preventDefault();
+    navegarResponsable(enlace.dataset.vista);
+  });
+});
+
+// Accesos rápidos del Inicio
+document.querySelectorAll(
+  ".inicio-accesos [data-vista]"
+).forEach((boton) => {
+  boton.addEventListener("click", () => {
+    navegarResponsable(boton.dataset.vista);
+  });
+});
+
+// Registrar prestador ya tiene su enlace HTML
+// Cerrar sesión reutiliza el botón existente
+const sidebarCerrarSesion = document.getElementById(
+  "sidebarCerrarSesion"
+);
+
+sidebarCerrarSesion.addEventListener("click", () => {
+  btnCerrarResponsable.click();
+});
+
+// Pantalla inicial del dashboard
+cambiarVistaResponsable("inicio");
