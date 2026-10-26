@@ -2241,3 +2241,47 @@ body:has(.dashboard-responsable:not(.hidden)) .page {
     text-align: center;
   }
 }
+
+/* Botón para regresar a la lista de prestadores */
+.btn-volver-prestadores {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 9px 14px;
+  border: 1px solid #d8e3f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #173b69;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-volver-prestadores:hover {
+  background: #edf3fa;
+}
+.btn-volver-prestadores svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .btn-volver-prestadores {
+    max-width: 100%;
+    margin-bottom: 12px;
+  }
+}
+
+.btn-cancelar-edicion {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #e11d48;
+  font-weight: 700;
+}
+
+.btn-cancelar-edicion:hover {
+  background: #ffe4e6;
+}

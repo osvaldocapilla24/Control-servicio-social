@@ -176,3 +176,8 @@ window.addEventListener("resize", () => {
 
 // Pantalla inicial del dashboard
 cambiarVistaResponsable("inicio");
+
+// Generar los iconos después de preparar la navegación
+if (window.lucide) {
+  lucide.createIcons();
+}
