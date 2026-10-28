@@ -4,9 +4,13 @@ const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
 const path = require("path");
+const session = require("express-session");
+const PgSession = require("connect-pg-simple")(session);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.set("trust proxy", 1);
 
 app.use(cors());
 app.use(express.json());
@@ -18,6 +22,32 @@ const pool = new Pool({
     rejectUnauthorized: false
   }
 });
+
+if (!process.env.SESSION_SECRET) {
+  throw new Error("Falta configurar SESSION_SECRET en el archivo .env");
+}
+
+const sessionStore = new PgSession({
+  pool: pool,
+  tableName: "session",
+  createTableIfMissing: true
+});
+
+app.use(
+  session({
+    store: sessionStore,
+    name: "servicio_social.sid",
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 8 * 60 * 60 * 1000
+    }
+  })
+);
 
 pool.connect()
   .then((client) => {
@@ -315,8 +345,68 @@ app.post("/api/responsable/login", (req, res) => {
     });
   }
 
-  res.json({
-    mensaje: "Acceso autorizado."
+  // Crear una nueva sesión después de validar la contraseña.
+  req.session.regenerate((error) => {
+    if (error) {
+      console.error("Error al crear la sesión:", error);
+
+      return res.status(500).json({
+        mensaje: "No se pudo iniciar la sesión."
+      });
+    }
+
+    // Marcar la sesión como autorizada.
+    req.session.responsableAutorizado = true;
+
+    // Guardar la sesión en PostgreSQL.
+    req.session.save((error) => {
+      if (error) {
+        console.error("Error al guardar la sesión:", error);
+
+        return res.status(500).json({
+          mensaje: "No se pudo guardar la sesión."
+        });
+      }
+
+      return res.json({
+        mensaje: "Acceso autorizado."
+      });
+    });
+  });
+});
+
+// Consultar si el responsable tiene una sesión activa.
+app.get("/api/responsable/sesion", (req, res) => {
+  if (req.session?.responsableAutorizado === true) {
+    return res.json({
+      autenticado: true
+    });
+  }
+
+  return res.status(401).json({
+    autenticado: false,
+    mensaje: "No hay una sesión activa."
+  });
+});
+
+// Cerrar la sesión del responsable.
+app.post("/api/responsable/logout", (req, res) => {
+  req.session.destroy((error) => {
+    if (error) {
+      console.error("Error al cerrar la sesión:", error);
+
+      return res.status(500).json({
+        mensaje: "No se pudo cerrar la sesión."
+      });
+    }
+
+    res.clearCookie("servicio_social.sid", {
+      path: "/"
+    });
+
+    return res.json({
+      mensaje: "Sesión cerrada correctamente."
+    });
   });
 });
 
