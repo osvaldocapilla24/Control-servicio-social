@@ -1265,8 +1265,6 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
   }
 });
 
-
-
 /* RESUMEN DEL RESPONSABLE */
 
 app.get("/api/profesor/resumen", verificarResponsable, async (req, res) => {
@@ -1362,7 +1360,7 @@ app.get("/api/profesor/resumen", verificarResponsable, async (req, res) => {
 
 /* PRESTADORES ARCHIVADOS */
 
-app.get("/api/profesor/archivados", async (req, res) => {
+app.get("/api/profesor/archivados", verificarResponsable, async (req, res) => {
   try {
     const { periodo_id } = req.query;
 
@@ -1436,7 +1434,7 @@ app.get("/api/profesor/archivados", async (req, res) => {
 
 /* HISTORIAL RESPONSABLE */
 
-app.get("/api/profesor/prestador/:id/registros", async (req, res) => {
+app.get("/api/profesor/prestador/:id/registros", verificarResponsable, async (req, res) => {
   try {
     const prestadorId = req.params.id;
 
