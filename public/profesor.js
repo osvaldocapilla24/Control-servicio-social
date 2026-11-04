@@ -224,9 +224,26 @@ formPin.addEventListener("submit", async (e) => {
   }
 });
 
-btnCerrarResponsable.addEventListener("click", () => {
-  sessionStorage.removeItem("responsable_autorizado");
-  window.location.href = "index.html";
+btnCerrarResponsable.addEventListener("click", async () => {
+  btnCerrarResponsable.disabled = true;
+
+  try {
+    const respuesta = await fetch("/api/responsable/logout", {
+      method: "POST"
+    });
+
+    if (!respuesta.ok) {
+      throw new Error("No se pudo cerrar la sesión.");
+    }
+
+    sessionStorage.removeItem("responsable_autorizado");
+
+    window.location.href = "index.html";
+
+  } catch (error) {
+    alert("No se pudo cerrar la sesión. Inténtalo nuevamente.");
+    btnCerrarResponsable.disabled = false;
+  }
 });
 
 async function cargarPrestadoresArchivados() {

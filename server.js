@@ -49,6 +49,16 @@ app.use(
   })
 );
 
+function verificarResponsable(req, res, next) {
+  if (req.session?.responsableAutorizado === true) {
+    return next();
+  }
+
+  return res.status(401).json({
+    mensaje: "No tienes autorización para realizar esta operación."
+  });
+}
+
 pool.connect()
   .then((client) => {
     console.log("Base de datos Supabase conectada correctamente.");
@@ -466,7 +476,7 @@ app.get("/api/periodos/actual", async (req, res) => {
   }
 });
 
-app.post("/api/periodos/obtener-o-crear", async (req, res) => {
+app.post("/api/periodos/obtener-o-crear", verificarResponsable, async (req, res) => {
   try {
     const { nombre, anio } = req.body;
 
@@ -491,7 +501,7 @@ app.post("/api/periodos/obtener-o-crear", async (req, res) => {
   }
 });
 
-app.patch("/api/periodos/:id/cerrar", async (req, res) => {
+app.patch("/api/periodos/:id/cerrar", verificarResponsable, async (req, res) => {
   const client = await pool.connect();
 
   try {
@@ -1259,7 +1269,7 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
 
 /* RESUMEN DEL RESPONSABLE */
 
-app.get("/api/profesor/resumen", async (req, res) => {
+app.get("/api/profesor/resumen", verificarResponsable, async (req, res) => {
   try {
     const fecha = obtenerFechaActual();
     const { periodo_id } = req.query;
