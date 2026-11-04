@@ -1605,7 +1605,7 @@ app.delete("/api/registros/:id", async (req, res) => {
 
 /* EDITAR DATOS DEL PRESTADOR */
 
-app.put("/api/prestadores/:id", async (req, res) => {
+app.put("/api/prestadores/:id", verificarResponsable, async (req, res) => {
   try {
     const prestadorId = req.params.id;
 
@@ -1738,7 +1738,7 @@ app.put("/api/prestadores/:id", async (req, res) => {
 
 /* FINALIZAR PRESTADOR */
 
-app.patch("/api/prestadores/:id/finalizar", async (req, res) => {
+app.patch("/api/prestadores/:id/finalizar", verificarResponsable, async (req, res) => {
   try {
     const prestadorId = req.params.id;
 
@@ -1788,7 +1788,7 @@ app.patch("/api/prestadores/:id/finalizar", async (req, res) => {
 
 /* REACTIVAR PRESTADOR */
 
-app.patch("/api/prestadores/:id/activar", async (req, res) => {
+app.patch("/api/prestadores/:id/activar", verificarResponsable, async (req, res) => {
   try {
     const prestadorId = req.params.id;
 
@@ -1838,7 +1838,7 @@ app.patch("/api/prestadores/:id/activar", async (req, res) => {
 
 /* ARCHIVAR PRESTADOR */
 
-app.patch("/api/prestadores/:id/archivar", async (req, res) => {
+app.patch("/api/prestadores/:id/archivar", verificarResponsable, async (req, res) => {
   try {
     const prestadorId = req.params.id;
 
@@ -1889,7 +1889,7 @@ app.patch("/api/prestadores/:id/archivar", async (req, res) => {
 
 /* PRESTADORES PARA REPORTES */
 
-app.get("/api/reportes/prestadores", async (req, res) => {
+app.get("/api/reportes/prestadores", verificarResponsable, async (req, res) => {
   try {
     const { periodo_id } = req.query;
 
@@ -1959,8 +1959,6 @@ app.get("/api/prueba", (req, res) => {
     mensaje: "Servidor funcionando correctamente"
   });
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
