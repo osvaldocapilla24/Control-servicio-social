@@ -1,7 +1,3 @@
-// =====================================
-// NAVEGACIÓN DEL DASHBOARD RESPONSABLE
-// =====================================
-
 const contenidoResponsable = document.querySelector(".dashboard-contenido");
 
 const vistaInicio = document.getElementById("vistaInicioResponsable");
@@ -25,6 +21,7 @@ vistaArchivados.className = "vista-responsable hidden";
 
 // Recuperar los elementos existentes
 const tarjetaPeriodo = contenidoResponsable.querySelector(".periodo-card");
+const tarjetaNuevoPeriodo = contenidoResponsable.querySelector(".nuevo-periodo-card");
 const tablaPrincipal = contenidoResponsable.querySelector(":scope > table");
 
 // Mover las secciones sin recrear sus elementos
@@ -33,6 +30,7 @@ vistaPrestadores.appendChild(detallePrestador);
 vistaPrestadores.appendChild(tablaPrincipal);
 
 vistaPeriodos.appendChild(tarjetaPeriodo);
+vistaPeriodos.appendChild(tarjetaNuevoPeriodo);
 
 vistaReportes.appendChild(seccionReportesResponsable);
 vistaArchivados.appendChild(seccionArchivadosResponsable);
