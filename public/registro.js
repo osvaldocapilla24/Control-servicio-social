@@ -7,52 +7,67 @@ const btnRegistrarPrestador = document.getElementById("btnRegistrarPrestador");
 const btnYaRegistrado = document.getElementById("linkYaRegistrado");
 const btnVolverRegistro = document.getElementById("btnVolverRegistro");
 const periodoServicio = document.getElementById("periodoServicio");
-const anioPeriodoServicio = document.getElementById("anioPeriodoServicio");
+
+let periodosDisponibles = [];
 
 const anioActual = new Date().getFullYear();
 const anioMinimo = 2020;
 const anioMaximo = anioActual + 30;
 
-if (anioPeriodoServicio) {
-  anioPeriodoServicio.min = anioMinimo;
-  anioPeriodoServicio.max = anioMaximo;
-  anioPeriodoServicio.value = anioActual;
-}
-
 async function cargarPeriodoActualEnRegistro() {
+  periodoServicio.innerHTML =
+    '<option value="">Cargando periodos disponibles...</option>';
+
+  periodoServicio.disabled = true;
+  periodosDisponibles = [];
+
   try {
-    const respuesta = await fetch("/api/periodos/actual");
-    const periodoActual = await respuesta.json();
+    const respuesta = await fetch("/api/periodos");
+    const periodos = await respuesta.json();
 
-    if (!respuesta.ok) {
-      if (periodoServicio) {
-        periodoServicio.value = "Verano";
-      }
+    if (!respuesta.ok || !Array.isArray(periodos)) {
+      throw new Error("No se pudieron cargar los periodos.");
+    }
 
-      if (anioPeriodoServicio) {
-        anioPeriodoServicio.value = anioActual;
-      }
+    periodosDisponibles = periodos.filter(
+      (periodo) => periodo.estatus === "activo",
+    );
 
+    periodoServicio.innerHTML = "";
+
+    if (periodosDisponibles.length === 0) {
+      periodoServicio.innerHTML =
+        '<option value="">No hay periodos disponibles</option>';
       return;
     }
 
-    if (periodoServicio) {
-      periodoServicio.value = periodoActual.nombre;
+    periodosDisponibles.forEach((periodo) => {
+      const opcion = document.createElement("option");
+
+      opcion.value = String(periodo.id);
+      opcion.textContent = `${periodo.nombre} ${periodo.anio}`;
+
+      if (periodo.es_actual) {
+        opcion.textContent += " · Actual";
+      }
+
+      periodoServicio.appendChild(opcion);
+    });
+
+    const periodoActual = periodosDisponibles.find(
+      (periodo) => periodo.es_actual,
+    );
+
+    if (periodoActual) {
+      periodoServicio.value = String(periodoActual.id);
     }
 
-    if (anioPeriodoServicio) {
-      anioPeriodoServicio.value = periodoActual.anio;
-      anioPeriodoServicio.dispatchEvent(new Event("change"));
-    }
-
+    periodoServicio.disabled = false;
   } catch (error) {
-    if (periodoServicio) {
-      periodoServicio.value = "Verano";
-    }
-
-    if (anioPeriodoServicio) {
-      anioPeriodoServicio.value = anioActual;
-    }
+    periodoServicio.innerHTML =
+      '<option value="">Error al cargar periodos</option>';
+  } finally {
+    periodoServicio.dispatchEvent(new Event("change"));
   }
 }
 
@@ -70,7 +85,7 @@ if (origen === "responsable") {
   btnRegistrarPrestador.textContent = "Registrar prestador";
 
   if (btnYaRegistrado) {
-      btnYaRegistrado.style.display = "none";
+    btnYaRegistrado.style.display = "none";
   }
 
   btnVolverRegistro.textContent = "Regresar al panel";
@@ -103,7 +118,7 @@ function unirDias(dias) {
     "Jueves",
     "Viernes",
     "Sábado",
-    "Domingo"
+    "Domingo",
   ];
 
   const indices = dias
@@ -160,8 +175,8 @@ function validarRegistroPrestador(datos) {
   }
 
   if (!datos.periodo) {
-  return "El periodo de servicio social es obligatorio.";
-}
+    return "El periodo de servicio social es obligatorio.";
+  }
 
   if (!datos.anio_periodo) {
     return "El año del periodo es obligatorio.";
@@ -186,11 +201,14 @@ formRegistro.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const diasSeleccionados = Array.from(
-    document.querySelectorAll("input[name='diasServicio']:checked")
+    document.querySelectorAll("input[name='diasServicio']:checked"),
   ).map((dia) => dia.value);
 
-  const horaEntradaServicio = document.getElementById("horaEntradaServicio").value;
-  const horaSalidaServicio = document.getElementById("horaSalidaServicio").value;
+  const horaEntradaServicio = document.getElementById(
+    "horaEntradaServicio",
+  ).value;
+  const horaSalidaServicio =
+    document.getElementById("horaSalidaServicio").value;
 
   if (diasSeleccionados.length === 0) {
     mostrarMensaje("Selecciona al menos un día de servicio.", "error");
@@ -208,24 +226,36 @@ formRegistro.addEventListener("submit", async (e) => {
   }
 
   if (horaSalidaServicio <= horaEntradaServicio) {
-    mostrarMensaje("La hora de salida debe ser mayor que la hora de entrada.", "error");
+    mostrarMensaje(
+      "La hora de salida debe ser mayor que la hora de entrada.",
+      "error",
+    );
     return;
   }
 
   const horarioArmado = armarHorario(
     diasSeleccionados,
     horaEntradaServicio,
-    horaSalidaServicio
+    horaSalidaServicio,
   );
+
+  const periodoSeleccionado = periodosDisponibles.find(
+    (periodo) => String(periodo.id) === periodoServicio.value,
+  );
+
+  if (!periodoSeleccionado) {
+    mostrarMensaje("Debes seleccionar un periodo disponible.", "error");
+    return;
+  }
 
   const datos = {
     nombre: document.getElementById("nombre").value.trim(),
     matricula: document.getElementById("matricula").value.trim(),
     carrera: document.getElementById("carrera").value.trim(),
     horario: horarioArmado,
-    periodo: periodoServicio ? periodoServicio.value : "Verano",
-    anio_periodo: anioPeriodoServicio ? Number(anioPeriodoServicio.value) : anioActual,
-    horas_requeridas: Number(document.getElementById("horas_requeridas").value)
+    periodo: periodoSeleccionado.nombre,
+    anio_periodo: Number(periodoSeleccionado.anio),
+    horas_requeridas: Number(document.getElementById("horas_requeridas").value),
   };
 
   const errorValidacion = validarRegistroPrestador(datos);
@@ -239,9 +269,9 @@ formRegistro.addEventListener("submit", async (e) => {
     const respuesta = await fetch("/api/prestadores", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(datos)
+      body: JSON.stringify(datos),
     });
 
     const resultado = await respuesta.json();
@@ -269,9 +299,7 @@ formRegistro.addEventListener("submit", async (e) => {
         window.location.href = "index.html";
       }
     }, 1500);
-
   } catch (error) {
     mostrarMensaje("Error al conectar con el servidor.", "error");
   }
 });
-
