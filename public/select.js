@@ -31,19 +31,37 @@
     const boton = document.createElement("button");
     boton.type = "button";
     boton.className = "select-personalizado";
-    boton.textContent = obtenerTextoSeleccionado(select);
 
     select.classList.add("select-original-oculto");
     select.insertAdjacentElement("afterend", boton);
 
+    function actualizarBoton() {
+      boton.textContent = obtenerTextoSeleccionado(select);
+      boton.disabled = select.disabled;
+    }
+
     boton.addEventListener("click", (event) => {
       event.preventDefault();
+
+      if (select.disabled) {
+        return;
+      }
+
       abrirModal(select, boton);
     });
 
-    select.addEventListener("change", () => {
-      boton.textContent = obtenerTextoSeleccionado(select);
+    select.addEventListener("change", actualizarBoton);
+
+    // Actualizar el botón cuando cambien las opciones.
+    const observador = new MutationObserver(actualizarBoton);
+
+    observador.observe(select, {
+      childList: true,
+      subtree: true,
+      characterData: true,
     });
+
+    actualizarBoton();
 
     return boton;
   }

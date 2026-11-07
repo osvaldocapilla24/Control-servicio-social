@@ -19,8 +19,8 @@ app.use(express.static(path.join(__dirname, "public")));
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 if (!process.env.SESSION_SECRET) {
@@ -30,7 +30,7 @@ if (!process.env.SESSION_SECRET) {
 const sessionStore = new PgSession({
   pool: pool,
   tableName: "session",
-  createTableIfMissing: true
+  createTableIfMissing: true,
 });
 
 app.use(
@@ -44,9 +44,9 @@ app.use(
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 8 * 60 * 60 * 1000
-    }
-  })
+      maxAge: 8 * 60 * 60 * 1000,
+    },
+  }),
 );
 
 function verificarResponsable(req, res, next) {
@@ -55,11 +55,12 @@ function verificarResponsable(req, res, next) {
   }
 
   return res.status(401).json({
-    mensaje: "No tienes autorización para realizar esta operación."
+    mensaje: "No tienes autorización para realizar esta operación.",
   });
 }
 
-pool.connect()
+pool
+  .connect()
   .then((client) => {
     console.log("Base de datos Supabase conectada correctamente.");
     client.release();
@@ -70,7 +71,7 @@ pool.connect()
 
 function obtenerFechaActual() {
   return new Date().toLocaleDateString("en-CA", {
-    timeZone: "America/Mexico_City"
+    timeZone: "America/Mexico_City",
   });
 }
 
@@ -79,7 +80,7 @@ function obtenerHoraActual() {
     timeZone: "America/Mexico_City",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false
+    hour12: false,
   });
 }
 
@@ -158,7 +159,7 @@ function obtenerRangoHorasHorario(horario) {
 
   return {
     horaEntradaOficial,
-    horaSalidaOficial
+    horaSalidaOficial,
   };
 }
 
@@ -216,7 +217,7 @@ function normalizarNombrePeriodo(nombre) {
   const periodosValidos = ["Primavera", "Verano", "Otoño"];
 
   const periodoEncontrado = periodosValidos.find(
-    (periodo) => periodo.toLowerCase() === nombreLimpio.toLowerCase()
+    (periodo) => periodo.toLowerCase() === nombreLimpio.toLowerCase(),
   );
 
   return periodoEncontrado || "";
@@ -253,7 +254,7 @@ async function obtenerOCrearPeriodo(nombre, anio) {
     AND anio = $2
     LIMIT 1
     `,
-    [nombrePeriodo, anioPeriodo]
+    [nombrePeriodo, anioPeriodo],
   );
 
   if (periodoExistente.rows.length > 0) {
@@ -266,7 +267,7 @@ async function obtenerOCrearPeriodo(nombre, anio) {
     VALUES ($1, $2, 'activo', false)
     RETURNING id, nombre, anio, estatus, es_actual
     `,
-    [nombrePeriodo, anioPeriodo]
+    [nombrePeriodo, anioPeriodo],
   );
 
   return nuevoPeriodo.rows[0];
@@ -289,14 +290,14 @@ async function validarPrestadorParaRegistroHoras(prestadorId) {
     WHERE p.id = $1
     LIMIT 1
     `,
-    [prestadorId]
+    [prestadorId],
   );
 
   if (resultado.rows.length === 0) {
     return {
       puedeRegistrar: false,
       status: 404,
-      mensaje: "Prestador no encontrado."
+      mensaje: "Prestador no encontrado.",
     };
   }
 
@@ -306,7 +307,8 @@ async function validarPrestadorParaRegistroHoras(prestadorId) {
     return {
       puedeRegistrar: false,
       status: 403,
-      mensaje: "No puedes registrar horas porque este prestador ya no se encuentra activo."
+      mensaje:
+        "No puedes registrar horas porque este prestador ya no se encuentra activo.",
     };
   }
 
@@ -314,7 +316,7 @@ async function validarPrestadorParaRegistroHoras(prestadorId) {
     return {
       puedeRegistrar: false,
       status: 409,
-      mensaje: "Este prestador no tiene un periodo asignado."
+      mensaje: "Este prestador no tiene un periodo asignado.",
     };
   }
 
@@ -322,13 +324,14 @@ async function validarPrestadorParaRegistroHoras(prestadorId) {
     return {
       puedeRegistrar: false,
       status: 403,
-      mensaje: "Este periodo ya fue cerrado. Solo puedes consultar tu historial."
+      mensaje:
+        "Este periodo ya fue cerrado. Solo puedes consultar tu historial.",
     };
   }
 
   return {
     puedeRegistrar: true,
-    prestador
+    prestador,
   };
 }
 
@@ -339,19 +342,19 @@ app.post("/api/responsable/login", (req, res) => {
 
   if (!pin) {
     return res.status(400).json({
-      mensaje: "Debes ingresar la contraseña."
+      mensaje: "Debes ingresar la contraseña.",
     });
   }
 
   if (!process.env.PIN_RESPONSABLE) {
     return res.status(500).json({
-      mensaje: "No hay contraseña del responsable configurada en el servidor."
+      mensaje: "No hay contraseña del responsable configurada en el servidor.",
     });
   }
 
   if (pin !== process.env.PIN_RESPONSABLE) {
     return res.status(401).json({
-      mensaje: "Contraseña incorrecta. Inténtalo nuevamente."
+      mensaje: "Contraseña incorrecta. Inténtalo nuevamente.",
     });
   }
 
@@ -361,7 +364,7 @@ app.post("/api/responsable/login", (req, res) => {
       console.error("Error al crear la sesión:", error);
 
       return res.status(500).json({
-        mensaje: "No se pudo iniciar la sesión."
+        mensaje: "No se pudo iniciar la sesión.",
       });
     }
 
@@ -374,12 +377,12 @@ app.post("/api/responsable/login", (req, res) => {
         console.error("Error al guardar la sesión:", error);
 
         return res.status(500).json({
-          mensaje: "No se pudo guardar la sesión."
+          mensaje: "No se pudo guardar la sesión.",
         });
       }
 
       return res.json({
-        mensaje: "Acceso autorizado."
+        mensaje: "Acceso autorizado.",
       });
     });
   });
@@ -389,13 +392,13 @@ app.post("/api/responsable/login", (req, res) => {
 app.get("/api/responsable/sesion", (req, res) => {
   if (req.session?.responsableAutorizado === true) {
     return res.json({
-      autenticado: true
+      autenticado: true,
     });
   }
 
   return res.status(401).json({
     autenticado: false,
-    mensaje: "No hay una sesión activa."
+    mensaje: "No hay una sesión activa.",
   });
 });
 
@@ -406,20 +409,19 @@ app.post("/api/responsable/logout", (req, res) => {
       console.error("Error al cerrar la sesión:", error);
 
       return res.status(500).json({
-        mensaje: "No se pudo cerrar la sesión."
+        mensaje: "No se pudo cerrar la sesión.",
       });
     }
 
     res.clearCookie("servicio_social.sid", {
-      path: "/"
+      path: "/",
     });
 
     return res.json({
-      mensaje: "Sesión cerrada correctamente."
+      mensaje: "Sesión cerrada correctamente.",
     });
   });
 });
-
 
 /* PERIODOS */
 
@@ -436,15 +438,14 @@ app.get("/api/periodos", async (req, res) => {
           WHEN 'Otoño' THEN 3
           ELSE 4
         END
-      `
+      `,
     );
 
     res.json(resultado.rows);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al obtener periodos."
+      mensaje: "Error al obtener periodos.",
     });
   }
 });
@@ -457,198 +458,204 @@ app.get("/api/periodos/actual", async (req, res) => {
       FROM periodos
       WHERE es_actual = true
       LIMIT 1
-      `
+      `,
     );
 
     if (resultado.rows.length === 0) {
       return res.status(404).json({
-        mensaje: "No hay un periodo actual configurado."
+        mensaje: "No hay un periodo actual configurado.",
       });
     }
 
     res.json(resultado.rows[0]);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al obtener el periodo actual."
+      mensaje: "Error al obtener el periodo actual.",
     });
   }
 });
 
-app.post("/api/periodos/obtener-o-crear", verificarResponsable, async (req, res) => {
-  try {
-    const { nombre, anio } = req.body;
+app.post(
+  "/api/periodos/obtener-o-crear",
+  verificarResponsable,
+  async (req, res) => {
+    try {
+      const { nombre, anio } = req.body;
 
-    const periodo = await obtenerOCrearPeriodo(nombre, anio);
+      const periodo = await obtenerOCrearPeriodo(nombre, anio);
 
-    if (!periodo) {
-      return res.status(400).json({
-        mensaje: "Periodo o año inválido."
+      if (!periodo) {
+        return res.status(400).json({
+          mensaje: "Periodo o año inválido.",
+        });
+      }
+
+      res.json({
+        mensaje: "Periodo listo.",
+        periodo,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        mensaje: "Error al obtener o crear periodo.",
       });
     }
+  },
+);
 
-    res.json({
-      mensaje: "Periodo listo.",
-      periodo
-    });
+app.patch(
+  "/api/periodos/:id/cerrar",
+  verificarResponsable,
+  async (req, res) => {
+    const client = await pool.connect();
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      mensaje: "Error al obtener o crear periodo."
-    });
-  }
-});
+    try {
+      const periodoId = Number(req.params.id);
+      let { siguiente_periodo, siguiente_anio } = req.body;
 
-app.patch("/api/periodos/:id/cerrar", verificarResponsable, async (req, res) => {
-  const client = await pool.connect();
+      if (!Number.isInteger(periodoId) || periodoId <= 0) {
+        return res.status(400).json({
+          mensaje: "El periodo seleccionado no es válido.",
+        });
+      }
 
-  try {
-    const periodoId = Number(req.params.id);
-    let { siguiente_periodo, siguiente_anio } = req.body;
+      siguiente_periodo = siguiente_periodo ? siguiente_periodo.trim() : "";
+      siguiente_anio = siguiente_anio || null;
 
-    if (!Number.isInteger(periodoId) || periodoId <= 0) {
-      return res.status(400).json({
-        mensaje: "El periodo seleccionado no es válido."
-      });
-    }
+      const nombreSiguientePeriodo = normalizarNombrePeriodo(siguiente_periodo);
+      const anioSiguientePeriodo = validarAnioPeriodo(siguiente_anio);
 
-    siguiente_periodo = siguiente_periodo ? siguiente_periodo.trim() : "";
-    siguiente_anio = siguiente_anio || null;
+      if (!nombreSiguientePeriodo || !anioSiguientePeriodo) {
+        return res.status(400).json({
+          mensaje: "Debes seleccionar un periodo y año válido para continuar.",
+        });
+      }
 
-    const nombreSiguientePeriodo = normalizarNombrePeriodo(siguiente_periodo);
-    const anioSiguientePeriodo = validarAnioPeriodo(siguiente_anio);
+      await client.query("BEGIN");
 
-    if (!nombreSiguientePeriodo || !anioSiguientePeriodo) {
-      return res.status(400).json({
-        mensaje: "Debes seleccionar un periodo y año válido para continuar."
-      });
-    }
-
-    await client.query("BEGIN");
-
-    const periodoActualResultado = await client.query(
-      `
+      const periodoActualResultado = await client.query(
+        `
       SELECT id, nombre, anio, estatus, es_actual
       FROM periodos
       WHERE id = $1
       LIMIT 1
       `,
-      [periodoId]
-    );
+        [periodoId],
+      );
 
-    if (periodoActualResultado.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return res.status(404).json({
-        mensaje: "Periodo no encontrado."
-      });
-    }
+      if (periodoActualResultado.rows.length === 0) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({
+          mensaje: "Periodo no encontrado.",
+        });
+      }
 
-    const periodoActual = periodoActualResultado.rows[0];
+      const periodoActual = periodoActualResultado.rows[0];
 
-    if (periodoActual.estatus === "archivado") {
-      await client.query("ROLLBACK");
-      return res.status(409).json({
-        mensaje: "Este periodo ya se encuentra archivado."
-      });
-    }
+      if (periodoActual.estatus === "archivado") {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          mensaje: "Este periodo ya se encuentra archivado.",
+        });
+      }
 
-    let siguientePeriodoResultado = await client.query(
-      `
+      let siguientePeriodoResultado = await client.query(
+        `
       SELECT id, nombre, anio, estatus, es_actual
       FROM periodos
       WHERE nombre = $1
       AND anio = $2
       LIMIT 1
       `,
-      [nombreSiguientePeriodo, anioSiguientePeriodo]
-    );
+        [nombreSiguientePeriodo, anioSiguientePeriodo],
+      );
 
-    let siguientePeriodo;
+      let siguientePeriodo;
 
-    if (siguientePeriodoResultado.rows.length === 0) {
-      const nuevoPeriodoResultado = await client.query(
-        `
+      if (siguientePeriodoResultado.rows.length === 0) {
+        const nuevoPeriodoResultado = await client.query(
+          `
         INSERT INTO periodos (nombre, anio, estatus, es_actual)
         VALUES ($1, $2, 'activo', false)
         RETURNING id, nombre, anio, estatus, es_actual
         `,
-        [nombreSiguientePeriodo, anioSiguientePeriodo]
-      );
+          [nombreSiguientePeriodo, anioSiguientePeriodo],
+        );
 
-      siguientePeriodo = nuevoPeriodoResultado.rows[0];
-    } else {
-      siguientePeriodo = siguientePeriodoResultado.rows[0];
-    }
+        siguientePeriodo = nuevoPeriodoResultado.rows[0];
+      } else {
+        siguientePeriodo = siguientePeriodoResultado.rows[0];
+      }
 
-    if (siguientePeriodo.id === periodoActual.id) {
-      await client.query("ROLLBACK");
-      return res.status(400).json({
-        mensaje: "El siguiente periodo no puede ser el mismo que estás cerrando."
-      });
-    }
+      if (siguientePeriodo.id === periodoActual.id) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({
+          mensaje:
+            "El siguiente periodo no puede ser el mismo que estás cerrando.",
+        });
+      }
 
-    await client.query(
-      `
+      await client.query(
+        `
       UPDATE prestadores
       SET estatus = 'archivado'
       WHERE periodo_id = $1
       `,
-      [periodoActual.id]
-    );
+        [periodoActual.id],
+      );
 
-    await client.query(
-      `
+      await client.query(
+        `
       UPDATE periodos
       SET estatus = 'archivado',
           es_actual = false
       WHERE id = $1
       `,
-      [periodoActual.id]
-    );
+        [periodoActual.id],
+      );
 
-    await client.query(
-      `
+      await client.query(
+        `
       UPDATE periodos
       SET es_actual = false
-      `
-    );
+      `,
+      );
 
-    await client.query(
-      `
+      await client.query(
+        `
       UPDATE periodos
       SET estatus = 'activo',
           es_actual = true
       WHERE id = $1
       `,
-      [siguientePeriodo.id]
-    );
+        [siguientePeriodo.id],
+      );
 
-    await client.query("COMMIT");
+      await client.query("COMMIT");
 
-    res.json({
-      mensaje: `Periodo ${periodoActual.nombre} ${periodoActual.anio} cerrado y archivado correctamente.`,
-      periodo_cerrado: periodoActual,
-      periodo_actual: {
-        id: siguientePeriodo.id,
-        nombre: nombreSiguientePeriodo,
-        anio: anioSiguientePeriodo,
-        estatus: "activo",
-        es_actual: true
-      }
-    });
-
-  } catch (error) {
-    await client.query("ROLLBACK");
-    console.error(error);
-    res.status(500).json({
-      mensaje: "Error al cerrar y archivar periodo."
-    });
-  } finally {
-    client.release();
-  }
-});
+      res.json({
+        mensaje: `Periodo ${periodoActual.nombre} ${periodoActual.anio} cerrado y archivado correctamente.`,
+        periodo_cerrado: periodoActual,
+        periodo_actual: {
+          id: siguientePeriodo.id,
+          nombre: nombreSiguientePeriodo,
+          anio: anioSiguientePeriodo,
+          estatus: "activo",
+          es_actual: true,
+        },
+      });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error(error);
+      res.status(500).json({
+        mensaje: "Error al cerrar y archivar periodo.",
+      });
+    } finally {
+      client.release();
+    }
+  },
+);
 
 /* REGISTRAR PRESTADOR */
 
@@ -661,7 +668,7 @@ app.post("/api/prestadores", async (req, res) => {
       horario,
       horas_requeridas,
       periodo,
-      anio_periodo
+      anio_periodo,
     } = req.body;
 
     nombre = nombre ? nombre.trim() : "";
@@ -690,17 +697,30 @@ app.post("/api/prestadores", async (req, res) => {
 
     if (!horas_requeridas || horas_requeridas <= 0) {
       return res.status(400).json({
-        mensaje: "Las horas requeridas deben ser mayor a 0."
+        mensaje: "Las horas requeridas deben ser mayor a 0.",
       });
     }
 
-    const periodoSeleccionado = await obtenerOCrearPeriodo(periodo, anio_periodo);
+    // Buscar únicamente periodos que ya existen y están activos.
+    const resultadoPeriodo = await pool.query(
+    `
+      SELECT id, nombre, anio
+      FROM periodos
+      WHERE nombre = $1
+        AND anio = $2
+        AND estatus = 'activo'
+      LIMIT 1
+      `,
+      [periodo, anio_periodo],
+    );
 
-    if (!periodoSeleccionado) {
+    if (resultadoPeriodo.rows.length === 0) {
       return res.status(400).json({
-        mensaje: "El periodo seleccionado no es válido."
+        mensaje: "El periodo seleccionado no existe o está cerrado.",
       });
     }
+
+    const periodoSeleccionado = resultadoPeriodo.rows[0];
 
     const fechaRegistro = obtenerFechaActual();
 
@@ -719,25 +739,24 @@ app.post("/api/prestadores", async (req, res) => {
         horas_requeridas,
         fechaRegistro,
         "activo",
-        periodoSeleccionado.id
-      ]
+        periodoSeleccionado.id,
+      ],
     );
 
     res.json({
       mensaje: "Prestador registrado correctamente.",
-      id: resultado.rows[0].id
+      id: resultado.rows[0].id,
     });
-
   } catch (error) {
     if (error.code === "23505") {
       return res.status(409).json({
-        mensaje: "Ya existe un prestador registrado con esa matrícula."
+        mensaje: "Ya existe un prestador registrado con esa matrícula.",
       });
     }
 
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al registrar prestador."
+      mensaje: "Error al registrar prestador.",
     });
   }
 });
@@ -751,15 +770,14 @@ app.get("/api/prestadores", async (req, res) => {
       SELECT id, nombre, matricula, carrera, horario, horas_requeridas, estatus
       FROM prestadores
       ORDER BY nombre ASC
-      `
+      `,
     );
 
     res.json(resultado.rows);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al obtener prestadores."
+      mensaje: "Error al obtener prestadores.",
     });
   }
 });
@@ -772,7 +790,7 @@ app.get("/api/prestadores/buscar/:texto", async (req, res) => {
 
     if (!texto) {
       return res.status(400).json({
-        mensaje: "Debes escribir un nombre o matrícula."
+        mensaje: "Debes escribir un nombre o matrícula.",
       });
     }
 
@@ -784,24 +802,23 @@ app.get("/api/prestadores/buscar/:texto", async (req, res) => {
       OR nombre ILIKE $2
       LIMIT 1
       `,
-      [texto, `%${texto}%`]
+      [texto, `%${texto}%`],
     );
 
     if (resultado.rows.length === 0) {
       return res.status(404).json({
-        mensaje: "No se encontró ningún prestador con ese nombre o matrícula."
+        mensaje: "No se encontró ningún prestador con ese nombre o matrícula.",
       });
     }
 
     res.json({
       mensaje: "Prestador encontrado.",
-      prestador: resultado.rows[0]
+      prestador: resultado.rows[0],
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al buscar prestador."
+      mensaje: "Error al buscar prestador.",
     });
   }
 });
@@ -814,18 +831,19 @@ app.post("/api/entrada", async (req, res) => {
 
     if (!prestador_id) {
       return res.status(400).json({
-        mensaje: "Debes seleccionar un prestador."
+        mensaje: "Debes seleccionar un prestador.",
       });
     }
 
     const fecha = obtenerFechaActual();
     const horaEntradaReal = obtenerHoraActual();
 
-    const validacionPrestador = await validarPrestadorParaRegistroHoras(prestador_id);
+    const validacionPrestador =
+      await validarPrestadorParaRegistroHoras(prestador_id);
 
     if (!validacionPrestador.puedeRegistrar) {
       return res.status(validacionPrestador.status).json({
-        mensaje: validacionPrestador.mensaje
+        mensaje: validacionPrestador.mensaje,
       });
     }
 
@@ -833,7 +851,7 @@ app.post("/api/entrada", async (req, res) => {
 
     const horaEntrada = ajustarHoraEntradaPorHorario(
       horaEntradaReal,
-      prestador.horario
+      prestador.horario,
     );
 
     const abiertoResultado = await pool.query(
@@ -845,12 +863,12 @@ app.post("/api/entrada", async (req, res) => {
       ORDER BY id DESC
       LIMIT 1
       `,
-      [prestador_id]
+      [prestador_id],
     );
 
     if (abiertoResultado.rows.length > 0) {
       return res.status(409).json({
-        mensaje: "Ya tienes una entrada abierta. Primero debes marcar salida."
+        mensaje: "Ya tienes una entrada abierta. Primero debes marcar salida.",
       });
     }
 
@@ -860,18 +878,17 @@ app.post("/api/entrada", async (req, res) => {
       (prestador_id, fecha, hora_entrada, actividad)
       VALUES ($1, $2, $3, $4)
       `,
-      [prestador_id, fecha, horaEntrada, actividad || ""]
+      [prestador_id, fecha, horaEntrada, actividad || ""],
     );
 
     res.json({
       mensaje: "Entrada registrada correctamente.",
-      hora_entrada: horaEntrada
+      hora_entrada: horaEntrada,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al registrar entrada."
+      mensaje: "Error al registrar entrada.",
     });
   }
 });
@@ -884,17 +901,18 @@ app.post("/api/salida", async (req, res) => {
 
     if (!prestador_id) {
       return res.status(400).json({
-        mensaje: "Debes seleccionar un prestador."
+        mensaje: "Debes seleccionar un prestador.",
       });
     }
 
     const horaSalidaReal = obtenerHoraActual();
 
-    const validacionPrestador = await validarPrestadorParaRegistroHoras(prestador_id);
+    const validacionPrestador =
+      await validarPrestadorParaRegistroHoras(prestador_id);
 
     if (!validacionPrestador.puedeRegistrar) {
       return res.status(validacionPrestador.status).json({
-        mensaje: validacionPrestador.mensaje
+        mensaje: validacionPrestador.mensaje,
       });
     }
 
@@ -902,7 +920,7 @@ app.post("/api/salida", async (req, res) => {
 
     const horaSalida = ajustarHoraSalidaPorHorario(
       horaSalidaReal,
-      prestador.horario
+      prestador.horario,
     );
 
     const registroResultado = await pool.query(
@@ -914,12 +932,12 @@ app.post("/api/salida", async (req, res) => {
       ORDER BY id DESC
       LIMIT 1
       `,
-      [prestador_id]
+      [prestador_id],
     );
 
     if (registroResultado.rows.length === 0) {
       return res.status(404).json({
-        mensaje: "No tienes una entrada abierta para registrar salida."
+        mensaje: "No tienes una entrada abierta para registrar salida.",
       });
     }
 
@@ -939,7 +957,7 @@ app.post("/api/salida", async (req, res) => {
 
     if (horas <= 0) {
       return res.status(400).json({
-        mensaje: "La hora de salida debe ser mayor que la hora de entrada."
+        mensaje: "La hora de salida debe ser mayor que la hora de entrada.",
       });
     }
 
@@ -951,19 +969,18 @@ app.post("/api/salida", async (req, res) => {
           actividad = $3
       WHERE id = $4
       `,
-      [horaSalida, horas, actividadFinal, registro.id]
+      [horaSalida, horas, actividadFinal, registro.id],
     );
 
     res.json({
       mensaje: "Salida registrada correctamente.",
       hora_salida: horaSalida,
-      horas
+      horas,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al registrar salida."
+      mensaje: "Error al registrar salida.",
     });
   }
 });
@@ -972,29 +989,30 @@ app.post("/api/salida", async (req, res) => {
 
 app.post("/api/registro-manual", async (req, res) => {
   try {
-    const { prestador_id, fecha, hora_entrada, hora_salida, actividad } = req.body;
+    const { prestador_id, fecha, hora_entrada, hora_salida, actividad } =
+      req.body;
 
     if (!prestador_id) {
       return res.status(400).json({
-        mensaje: "Debes seleccionar un prestador."
+        mensaje: "Debes seleccionar un prestador.",
       });
     }
 
     if (!fecha) {
       return res.status(400).json({
-        mensaje: "Debes seleccionar una fecha."
+        mensaje: "Debes seleccionar una fecha.",
       });
     }
 
     if (fechaEsFutura(fecha)) {
       return res.status(400).json({
-        mensaje: "No puedes registrar horas en una fecha futura."
+        mensaje: "No puedes registrar horas en una fecha futura.",
       });
     }
 
     if (!hora_entrada || !hora_salida) {
       return res.status(400).json({
-        mensaje: "Debes seleccionar hora de entrada y hora de salida."
+        mensaje: "Debes seleccionar hora de entrada y hora de salida.",
       });
     }
 
@@ -1002,15 +1020,16 @@ app.post("/api/registro-manual", async (req, res) => {
 
     if (horas <= 0) {
       return res.status(400).json({
-        mensaje: "La hora de salida debe ser mayor que la hora de entrada."
+        mensaje: "La hora de salida debe ser mayor que la hora de entrada.",
       });
     }
 
-    const validacionPrestador = await validarPrestadorParaRegistroHoras(prestador_id);
+    const validacionPrestador =
+      await validarPrestadorParaRegistroHoras(prestador_id);
 
     if (!validacionPrestador.puedeRegistrar) {
       return res.status(validacionPrestador.status).json({
-        mensaje: validacionPrestador.mensaje
+        mensaje: validacionPrestador.mensaje,
       });
     }
 
@@ -1024,12 +1043,12 @@ app.post("/api/registro-manual", async (req, res) => {
       AND hora_salida > $4
       LIMIT 1
       `,
-      [prestador_id, fecha, hora_salida, hora_entrada]
+      [prestador_id, fecha, hora_salida, hora_entrada],
     );
 
     if (cruceResultado.rows.length > 0) {
       return res.status(409).json({
-        mensaje: "Ya existe un registro que se cruza con ese horario."
+        mensaje: "Ya existe un registro que se cruza con ese horario.",
       });
     }
 
@@ -1039,18 +1058,17 @@ app.post("/api/registro-manual", async (req, res) => {
       (prestador_id, fecha, hora_entrada, hora_salida, horas, actividad)
       VALUES ($1, $2, $3, $4, $5, $6)
       `,
-      [prestador_id, fecha, hora_entrada, hora_salida, horas, actividad || ""]
+      [prestador_id, fecha, hora_entrada, hora_salida, horas, actividad || ""],
     );
 
     res.json({
       mensaje: "Registro manual guardado correctamente.",
-      horas
+      horas,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al guardar el registro manual."
+      mensaje: "Error al guardar el registro manual.",
     });
   }
 });
@@ -1078,12 +1096,12 @@ app.get("/api/resumen/:id", async (req, res) => {
       WHERE p.id = $1
       GROUP BY p.id
       `,
-      [prestadorId]
+      [prestadorId],
     );
 
     if (resumenResultado.rows.length === 0) {
       return res.status(404).json({
-        mensaje: "Prestador no encontrado."
+        mensaje: "Prestador no encontrado.",
       });
     }
 
@@ -1101,18 +1119,17 @@ app.get("/api/resumen/:id", async (req, res) => {
       ORDER BY fecha DESC, id DESC
       LIMIT 10
       `,
-      [prestadorId]
+      [prestadorId],
     );
 
     res.json({
       resumen: resumenResultado.rows[0],
-      registros: registrosResultado.rows
+      registros: registrosResultado.rows,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al obtener resumen."
+      mensaje: "Error al obtener resumen.",
     });
   }
 });
@@ -1129,12 +1146,12 @@ app.get("/api/prestadores/:id/registros", async (req, res) => {
       FROM prestadores
       WHERE id = $1
       `,
-      [prestadorId]
+      [prestadorId],
     );
 
     if (prestadorResultado.rows.length === 0) {
       return res.status(404).json({
-        mensaje: "Prestador no encontrado."
+        mensaje: "Prestador no encontrado.",
       });
     }
 
@@ -1151,15 +1168,14 @@ app.get("/api/prestadores/:id/registros", async (req, res) => {
       WHERE prestador_id = $1
       ORDER BY fecha DESC, id DESC
       `,
-      [prestadorId]
+      [prestadorId],
     );
 
     res.json(resultado.rows);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al obtener historial completo del prestador."
+      mensaje: "Error al obtener historial completo del prestador.",
     });
   }
 });
@@ -1172,7 +1188,7 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
 
     if (!mes) {
       return res.status(400).json({
-        mensaje: "El mes del reporte es obligatorio."
+        mensaje: "El mes del reporte es obligatorio.",
       });
     }
 
@@ -1180,7 +1196,7 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
 
     if (periodo_id && (!Number.isInteger(periodoId) || periodoId <= 0)) {
       return res.status(400).json({
-        mensaje: "El periodo seleccionado no es válido."
+        mensaje: "El periodo seleccionado no es válido.",
       });
     }
 
@@ -1191,12 +1207,12 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
         FROM periodos
         WHERE es_actual = true
         LIMIT 1
-        `
+        `,
       );
 
       if (periodoActualResultado.rows.length === 0) {
         return res.status(404).json({
-          mensaje: "No hay un periodo actual configurado."
+          mensaje: "No hay un periodo actual configurado.",
         });
       }
 
@@ -1237,7 +1253,7 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
         per.anio
       ORDER BY p.nombre ASC
       `,
-      [fechaInicio, periodoId]
+      [fechaInicio, periodoId],
     );
 
     const reporte = resultado.rows.map((prestador) => {
@@ -1248,19 +1264,18 @@ app.get("/api/reportes/mensual-general", async (req, res) => {
         ...prestador,
         horas_mes: Number(prestador.horas_mes || 0),
         horas_acumuladas: horasAcumuladas,
-        horas_faltantes: Math.max(horasRequeridas - horasAcumuladas, 0)
+        horas_faltantes: Math.max(horasRequeridas - horasAcumuladas, 0),
       };
     });
 
     res.json({
       periodo_id: periodoId,
-      reporte
+      reporte,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al generar el reporte mensual general."
+      mensaje: "Error al generar el reporte mensual general.",
     });
   }
 });
@@ -1276,7 +1291,7 @@ app.get("/api/profesor/resumen", verificarResponsable, async (req, res) => {
 
     if (periodo_id && (!Number.isInteger(periodoId) || periodoId <= 0)) {
       return res.status(400).json({
-        mensaje: "El periodo seleccionado no es válido."
+        mensaje: "El periodo seleccionado no es válido.",
       });
     }
 
@@ -1287,12 +1302,12 @@ app.get("/api/profesor/resumen", verificarResponsable, async (req, res) => {
         FROM periodos
         WHERE es_actual = true
         LIMIT 1
-        `
+        `,
       );
 
       if (periodoActualResultado.rows.length === 0) {
         return res.status(404).json({
-          mensaje: "No hay un periodo actual configurado."
+          mensaje: "No hay un periodo actual configurado.",
         });
       }
 
@@ -1337,23 +1352,22 @@ app.get("/api/profesor/resumen", verificarResponsable, async (req, res) => {
         per.anio
       ORDER BY p.nombre ASC
       `,
-      [fecha, periodoId]
+      [fecha, periodoId],
     );
 
     const filas = resultado.rows.map((item) => ({
       ...item,
-      estado_hoy: item.estado_hoy || "Sin registro hoy"
+      estado_hoy: item.estado_hoy || "Sin registro hoy",
     }));
 
     res.json({
       periodo_id: periodoId,
-      prestadores: filas
+      prestadores: filas,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al obtener resumen del profesor."
+      mensaje: "Error al obtener resumen del profesor.",
     });
   }
 });
@@ -1368,7 +1382,7 @@ app.get("/api/profesor/archivados", verificarResponsable, async (req, res) => {
 
     if (periodo_id && (!Number.isInteger(periodoId) || periodoId <= 0)) {
       return res.status(400).json({
-        mensaje: "El periodo seleccionado no es válido."
+        mensaje: "El periodo seleccionado no es válido.",
       });
     }
 
@@ -1379,12 +1393,12 @@ app.get("/api/profesor/archivados", verificarResponsable, async (req, res) => {
         FROM periodos
         WHERE es_actual = true
         LIMIT 1
-        `
+        `,
       );
 
       if (periodoActualResultado.rows.length === 0) {
         return res.status(404).json({
-          mensaje: "No hay un periodo actual configurado."
+          mensaje: "No hay un periodo actual configurado.",
         });
       }
 
@@ -1416,30 +1430,32 @@ app.get("/api/profesor/archivados", verificarResponsable, async (req, res) => {
         per.anio
       ORDER BY p.nombre ASC
       `,
-      [periodoId]
+      [periodoId],
     );
 
     res.json({
       periodo_id: periodoId,
-      prestadores: resultado.rows
+      prestadores: resultado.rows,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al obtener prestadores archivados."
+      mensaje: "Error al obtener prestadores archivados.",
     });
   }
 });
 
 /* HISTORIAL RESPONSABLE */
 
-app.get("/api/profesor/prestador/:id/registros", verificarResponsable, async (req, res) => {
-  try {
-    const prestadorId = req.params.id;
+app.get(
+  "/api/profesor/prestador/:id/registros",
+  verificarResponsable,
+  async (req, res) => {
+    try {
+      const prestadorId = req.params.id;
 
-    const resultado = await pool.query(
-      `
+      const resultado = await pool.query(
+        `
       SELECT
         id,
         TO_CHAR(fecha, 'YYYY-MM-DD') AS fecha,
@@ -1451,18 +1467,18 @@ app.get("/api/profesor/prestador/:id/registros", verificarResponsable, async (re
       WHERE prestador_id = $1
       ORDER BY fecha DESC, id DESC
       `,
-      [prestadorId]
-    );
+        [prestadorId],
+      );
 
-    res.json(resultado.rows);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      mensaje: "Error al obtener historial del prestador."
-    });
-  }
-});
+      res.json(resultado.rows);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        mensaje: "Error al obtener historial del prestador.",
+      });
+    }
+  },
+);
 
 /* EDITAR REGISTRO */
 
@@ -1473,19 +1489,19 @@ app.put("/api/registros/:id", async (req, res) => {
 
     if (!fecha) {
       return res.status(400).json({
-        mensaje: "Debes seleccionar una fecha."
+        mensaje: "Debes seleccionar una fecha.",
       });
     }
 
     if (fechaEsFutura(fecha)) {
       return res.status(400).json({
-        mensaje: "No puedes usar una fecha futura."
+        mensaje: "No puedes usar una fecha futura.",
       });
     }
 
     if (!hora_entrada || !hora_salida) {
       return res.status(400).json({
-        mensaje: "Debes seleccionar hora de entrada y hora de salida."
+        mensaje: "Debes seleccionar hora de entrada y hora de salida.",
       });
     }
 
@@ -1493,7 +1509,7 @@ app.put("/api/registros/:id", async (req, res) => {
 
     if (horas <= 0) {
       return res.status(400).json({
-        mensaje: "La hora de salida debe ser mayor que la hora de entrada."
+        mensaje: "La hora de salida debe ser mayor que la hora de entrada.",
       });
     }
 
@@ -1503,12 +1519,12 @@ app.put("/api/registros/:id", async (req, res) => {
       FROM registros
       WHERE id = $1
       `,
-      [registroId]
+      [registroId],
     );
 
     if (registroActualResultado.rows.length === 0) {
       return res.status(404).json({
-        mensaje: "Registro no encontrado."
+        mensaje: "Registro no encontrado.",
       });
     }
 
@@ -1530,13 +1546,13 @@ app.put("/api/registros/:id", async (req, res) => {
         fecha,
         hora_salida,
         hora_entrada,
-        registroId
-      ]
+        registroId,
+      ],
     );
 
     if (cruceResultado.rows.length > 0) {
       return res.status(409).json({
-        mensaje: "Ya existe otro registro que se cruza con ese horario."
+        mensaje: "Ya existe otro registro que se cruza con ese horario.",
       });
     }
 
@@ -1546,18 +1562,17 @@ app.put("/api/registros/:id", async (req, res) => {
       SET fecha = $1, hora_entrada = $2, hora_salida = $3, horas = $4, actividad = $5
       WHERE id = $6
       `,
-      [fecha, hora_entrada, hora_salida, horas, actividad || "", registroId]
+      [fecha, hora_entrada, hora_salida, horas, actividad || "", registroId],
     );
 
     res.json({
       mensaje: "Registro actualizado correctamente.",
-      horas
+      horas,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al actualizar el registro."
+      mensaje: "Error al actualizar el registro.",
     });
   }
 });
@@ -1574,12 +1589,12 @@ app.delete("/api/registros/:id", async (req, res) => {
       FROM registros
       WHERE id = $1
       `,
-      [registroId]
+      [registroId],
     );
 
     if (registroResultado.rows.length === 0) {
       return res.status(404).json({
-        mensaje: "Registro no encontrado."
+        mensaje: "Registro no encontrado.",
       });
     }
 
@@ -1588,17 +1603,16 @@ app.delete("/api/registros/:id", async (req, res) => {
       DELETE FROM registros
       WHERE id = $1
       `,
-      [registroId]
+      [registroId],
     );
 
     res.json({
-      mensaje: "Registro eliminado correctamente."
+      mensaje: "Registro eliminado correctamente.",
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al eliminar el registro."
+      mensaje: "Error al eliminar el registro.",
     });
   }
 });
@@ -1616,7 +1630,7 @@ app.put("/api/prestadores/:id", verificarResponsable, async (req, res) => {
       horario,
       horas_requeridas,
       periodo,
-      anio_periodo
+      anio_periodo,
     } = req.body;
 
     nombre = nombre ? nombre.trim() : "";
@@ -1646,7 +1660,7 @@ app.put("/api/prestadores/:id", verificarResponsable, async (req, res) => {
 
     if (!horas_requeridas || horas_requeridas <= 0) {
       return res.status(400).json({
-        mensaje: "Las horas requeridas deben ser mayor a 0."
+        mensaje: "Las horas requeridas deben ser mayor a 0.",
       });
     }
 
@@ -1656,12 +1670,12 @@ app.put("/api/prestadores/:id", verificarResponsable, async (req, res) => {
       FROM prestadores
       WHERE id = $1
       `,
-      [prestadorId]
+      [prestadorId],
     );
 
     if (prestadorResultado.rows.length === 0) {
       return res.status(404).json({
-        mensaje: "Prestador no encontrado."
+        mensaje: "Prestador no encontrado.",
       });
     }
 
@@ -1672,12 +1686,12 @@ app.put("/api/prestadores/:id", verificarResponsable, async (req, res) => {
       WHERE matricula = $1
       AND id != $2
       `,
-      [matricula, prestadorId]
+      [matricula, prestadorId],
     );
 
     if (matriculaResultado.rows.length > 0) {
       return res.status(409).json({
-        mensaje: "Ya existe otro prestador con esa matrícula."
+        mensaje: "Ya existe otro prestador con esa matrícula.",
       });
     }
 
@@ -1688,7 +1702,7 @@ app.put("/api/prestadores/:id", verificarResponsable, async (req, res) => {
 
       if (!periodoSeleccionado) {
         return res.status(400).json({
-          mensaje: "El periodo seleccionado no es válido."
+          mensaje: "El periodo seleccionado no es válido.",
         });
       }
     }
@@ -1711,181 +1725,189 @@ app.put("/api/prestadores/:id", verificarResponsable, async (req, res) => {
         horario,
         horas_requeridas,
         periodoSeleccionado ? periodoSeleccionado.id : null,
-        prestadorId
-      ]
+        prestadorId,
+      ],
     );
 
     res.json({
       mensaje: "Datos del prestador actualizados correctamente.",
       periodo: periodoSeleccionado
         ? `${periodoSeleccionado.nombre} ${periodoSeleccionado.anio}`
-        : null
+        : null,
     });
-
   } catch (error) {
     if (error.code === "23505") {
       return res.status(409).json({
-        mensaje: "Ya existe otro prestador con esa matrícula."
+        mensaje: "Ya existe otro prestador con esa matrícula.",
       });
     }
 
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al actualizar los datos del prestador."
+      mensaje: "Error al actualizar los datos del prestador.",
     });
   }
 });
 
 /* FINALIZAR PRESTADOR */
 
-app.patch("/api/prestadores/:id/finalizar", verificarResponsable, async (req, res) => {
-  try {
-    const prestadorId = req.params.id;
+app.patch(
+  "/api/prestadores/:id/finalizar",
+  verificarResponsable,
+  async (req, res) => {
+    try {
+      const prestadorId = req.params.id;
 
-    const prestadorResultado = await pool.query(
-      `
+      const prestadorResultado = await pool.query(
+        `
       SELECT id, nombre, estatus
       FROM prestadores
       WHERE id = $1
       `,
-      [prestadorId]
-    );
+        [prestadorId],
+      );
 
-    if (prestadorResultado.rows.length === 0) {
-      return res.status(404).json({
-        mensaje: "Prestador no encontrado."
-      });
-    }
+      if (prestadorResultado.rows.length === 0) {
+        return res.status(404).json({
+          mensaje: "Prestador no encontrado.",
+        });
+      }
 
-    const prestador = prestadorResultado.rows[0];
+      const prestador = prestadorResultado.rows[0];
 
-    if (prestador.estatus === "finalizado") {
-      return res.status(409).json({
-        mensaje: "Este prestador ya está marcado como finalizado."
-      });
-    }
+      if (prestador.estatus === "finalizado") {
+        return res.status(409).json({
+          mensaje: "Este prestador ya está marcado como finalizado.",
+        });
+      }
 
-    await pool.query(
-      `
+      await pool.query(
+        `
       UPDATE prestadores
       SET estatus = 'finalizado'
       WHERE id = $1
       `,
-      [prestadorId]
-    );
+        [prestadorId],
+      );
 
-    res.json({
-      mensaje: "Prestador marcado como finalizado correctamente."
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      mensaje: "Error al finalizar prestador."
-    });
-  }
-});
+      res.json({
+        mensaje: "Prestador marcado como finalizado correctamente.",
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        mensaje: "Error al finalizar prestador.",
+      });
+    }
+  },
+);
 
 /* REACTIVAR PRESTADOR */
 
-app.patch("/api/prestadores/:id/activar", verificarResponsable, async (req, res) => {
-  try {
-    const prestadorId = req.params.id;
+app.patch(
+  "/api/prestadores/:id/activar",
+  verificarResponsable,
+  async (req, res) => {
+    try {
+      const prestadorId = req.params.id;
 
-    const prestadorResultado = await pool.query(
-      `
+      const prestadorResultado = await pool.query(
+        `
       SELECT id, nombre, estatus
       FROM prestadores
       WHERE id = $1
       `,
-      [prestadorId]
-    );
+        [prestadorId],
+      );
 
-    if (prestadorResultado.rows.length === 0) {
-      return res.status(404).json({
-        mensaje: "Prestador no encontrado."
-      });
-    }
+      if (prestadorResultado.rows.length === 0) {
+        return res.status(404).json({
+          mensaje: "Prestador no encontrado.",
+        });
+      }
 
-    const prestador = prestadorResultado.rows[0];
+      const prestador = prestadorResultado.rows[0];
 
-    if (prestador.estatus === "activo") {
-      return res.status(409).json({
-        mensaje: "Este prestador ya se encuentra activo."
-      });
-    }
+      if (prestador.estatus === "activo") {
+        return res.status(409).json({
+          mensaje: "Este prestador ya se encuentra activo.",
+        });
+      }
 
-    await pool.query(
-      `
+      await pool.query(
+        `
       UPDATE prestadores
       SET estatus = 'activo'
       WHERE id = $1
       `,
-      [prestadorId]
-    );
+        [prestadorId],
+      );
 
-    res.json({
-      mensaje: "Prestador reactivado correctamente."
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      mensaje: "Error al reactivar prestador."
-    });
-  }
-});
+      res.json({
+        mensaje: "Prestador reactivado correctamente.",
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        mensaje: "Error al reactivar prestador.",
+      });
+    }
+  },
+);
 
 /* ARCHIVAR PRESTADOR */
 
-app.patch("/api/prestadores/:id/archivar", verificarResponsable, async (req, res) => {
-  try {
-    const prestadorId = req.params.id;
+app.patch(
+  "/api/prestadores/:id/archivar",
+  verificarResponsable,
+  async (req, res) => {
+    try {
+      const prestadorId = req.params.id;
 
-    const prestadorResultado = await pool.query(
-      `
+      const prestadorResultado = await pool.query(
+        `
       SELECT id, nombre, estatus
       FROM prestadores
       WHERE id = $1
       `,
-      [prestadorId]
-    );
+        [prestadorId],
+      );
 
-    if (prestadorResultado.rows.length === 0) {
-      return res.status(404).json({
-        mensaje: "Prestador no encontrado."
-      });
-    }
+      if (prestadorResultado.rows.length === 0) {
+        return res.status(404).json({
+          mensaje: "Prestador no encontrado.",
+        });
+      }
 
-    const prestador = prestadorResultado.rows[0];
+      const prestador = prestadorResultado.rows[0];
 
-    if (prestador.estatus === "archivado") {
-      return res.status(409).json({
-        mensaje: "Este prestador ya se encuentra archivado."
-      });
-    }
+      if (prestador.estatus === "archivado") {
+        return res.status(409).json({
+          mensaje: "Este prestador ya se encuentra archivado.",
+        });
+      }
 
-    await pool.query(
-      `
+      await pool.query(
+        `
       UPDATE prestadores
       SET estatus = 'archivado'
       WHERE id = $1
       `,
-      [prestadorId]
-    );
+        [prestadorId],
+      );
 
-    res.json({
-      mensaje: "Prestador archivado correctamente. Ya no aparecerá en la tabla principal."
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      mensaje: "Error al archivar prestador."
-    });
-  }
-});
-
+      res.json({
+        mensaje:
+          "Prestador archivado correctamente. Ya no aparecerá en la tabla principal.",
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        mensaje: "Error al archivar prestador.",
+      });
+    }
+  },
+);
 
 /* PRESTADORES PARA REPORTES */
 
@@ -1897,7 +1919,7 @@ app.get("/api/reportes/prestadores", verificarResponsable, async (req, res) => {
 
     if (periodo_id && (!Number.isInteger(periodoId) || periodoId <= 0)) {
       return res.status(400).json({
-        mensaje: "El periodo seleccionado no es válido."
+        mensaje: "El periodo seleccionado no es válido.",
       });
     }
 
@@ -1908,12 +1930,12 @@ app.get("/api/reportes/prestadores", verificarResponsable, async (req, res) => {
         FROM periodos
         WHERE es_actual = true
         LIMIT 1
-        `
+        `,
       );
 
       if (periodoActualResultado.rows.length === 0) {
         return res.status(404).json({
-          mensaje: "No hay un periodo actual configurado."
+          mensaje: "No hay un periodo actual configurado.",
         });
       }
 
@@ -1936,18 +1958,17 @@ app.get("/api/reportes/prestadores", verificarResponsable, async (req, res) => {
       AND p.periodo_id = $1
       ORDER BY p.nombre ASC
       `,
-      [periodoId]
+      [periodoId],
     );
 
     res.json({
       periodo_id: periodoId,
-      prestadores: resultado.rows
+      prestadores: resultado.rows,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      mensaje: "Error al obtener prestadores para reportes."
+      mensaje: "Error al obtener prestadores para reportes.",
     });
   }
 });
@@ -1956,7 +1977,7 @@ app.get("/api/reportes/prestadores", verificarResponsable, async (req, res) => {
 
 app.get("/api/prueba", (req, res) => {
   res.json({
-    mensaje: "Servidor funcionando correctamente"
+    mensaje: "Servidor funcionando correctamente",
   });
 });
 
